@@ -71,6 +71,21 @@ export class App {
     this.menuAberto.set(false);
   }
 
+  /**
+   * Click em item da catbar.
+   * Mobile (< 920px): primeiro toque abre o mega-menu sem navegar; segundo toque navega e fecha.
+   * Desktop: fecha o mega imediatamente e deixa o routerLink navegar normalmente.
+   */
+  onClickCatbarItem(i: number, event: MouseEvent): void {
+    if (window.innerWidth < 920 && this.megaIdx() !== i) {
+      event.preventDefault();
+      if (this.timerMega) clearTimeout(this.timerMega);
+      this.megaIdx.set(i);
+    } else {
+      this.fecharMegaImediato();
+    }
+  }
+
   manterMega(): void {
     if (this.timerMega) clearTimeout(this.timerMega);
   }
@@ -81,6 +96,11 @@ export class App {
 
   fecharMenu(): void {
     this.menuAberto.set(false);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.megaIdx() !== null) this.megaIdx.set(null);
   }
 
   @HostListener('document:keydown.escape')
