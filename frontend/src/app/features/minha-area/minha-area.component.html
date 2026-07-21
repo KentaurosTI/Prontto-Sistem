@@ -388,6 +388,7 @@
 
         <div class="pf-grid"
           [class.arrastando]="arrastando()"
+          (dragenter)="onArrastarEntrar($event)"
           (dragover)="onArrastarSobre($event)"
           (dragleave)="onArrastarSair($event)"
           (drop)="onSoltarArquivo($event)">

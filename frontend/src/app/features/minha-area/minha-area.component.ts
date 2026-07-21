@@ -411,14 +411,21 @@ export class MinhaAreaComponent implements OnInit {
   // ── Drag & drop ──────────────────────────────────────────────
   readonly arrastando = signal(false);
 
+  onArrastarEntrar(evento: DragEvent): void {
+    evento.preventDefault();
+    this.arrastando.set(true);
+  }
+
   onArrastarSobre(evento: DragEvent): void {
     evento.preventDefault();
     this.arrastando.set(true);
   }
 
   onArrastarSair(evento: DragEvent): void {
-    evento.preventDefault();
-    this.arrastando.set(false);
+    const zona = evento.currentTarget as HTMLElement;
+    if (!zona.contains(evento.relatedTarget as Node)) {
+      this.arrastando.set(false);
+    }
   }
 
   onSoltarArquivo(evento: DragEvent): void {
