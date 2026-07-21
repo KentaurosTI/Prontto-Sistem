@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { signal } from '@angular/core';
 import { MinhaAreaComponent } from './minha-area.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { BankingService } from '../../core/api/banking.service';
 import { PerfilPrestadorService } from '../../core/api/perfil-prestador.service';
 import { of, throwError } from 'rxjs';
 
@@ -170,5 +171,72 @@ describe('MinhaAreaComponent — aba portfólio', () => {
     spyOn(componente, 'carregarImagens');
     componente.mudarAba('portfolio');
     expect(componente.carregarImagens).toHaveBeenCalled();
+  });
+});
+
+describe('MinhaAreaComponent — banking erro em vermelho (SCRUM-9)', () => {
+  let componente: MinhaAreaComponent;
+  let fixture: ComponentFixture<MinhaAreaComponent>;
+  let bankingService: jasmine.SpyObj<BankingService>;
+
+  beforeEach(async () => {
+    const bankingSpy = jasmine.createSpyObj('BankingService', ['obterDadosBancarios', 'salvarDadosBancarios']);
+    bankingSpy.obterDadosBancarios.and.returnValue(of({ banking: null }));
+
+    const perfilSpy = jasmine.createSpyObj('PerfilPrestadorService', [
+      'listarCategorias', 'listarCidades', 'obterPerfilPublico',
+    ]);
+    perfilSpy.listarCategorias.and.returnValue(of([]));
+    perfilSpy.listarCidades.and.returnValue(of([]));
+    perfilSpy.obterPerfilPublico.and.returnValue(
+      of({ id: '1', nome: 'T', imagensPortfolio: [], mediaAvaliacoes: 0, totalAvaliacoes: 0, categorias: [], cidades: [] })
+    );
+
+    const authSpy = jasmine.createSpyObj('AuthService', ['sair'], {
+      usuario: signal({
+        id: '1', nome: 'T', email: 't@t.com', tipoConta: 'prestador',
+        papel: 'usuario', mediaAvaliacoes: 0, totalAvaliacoes: 0,
+        criadoEm: '2024-01-01', slug: 'slug-t',
+      }),
+      estaAutenticado: signal(true),
+      ehAdmin: signal(false),
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [MinhaAreaComponent, ReactiveFormsModule, HttpClientTestingModule, RouterTestingModule],
+      providers: [
+        { provide: AuthService, useValue: authSpy },
+        { provide: BankingService, useValue: bankingSpy },
+        { provide: PerfilPrestadorService, useValue: perfilSpy },
+      ],
+    }).compileComponents();
+
+    bankingService = TestBed.inject(BankingService) as jasmine.SpyObj<BankingService>;
+    fixture = TestBed.createComponent(MinhaAreaComponent);
+    componente = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('deve iniciar erroBanking como null', () => {
+    expect(componente.erroBanking()).toBeNull();
+  });
+
+  it('deve definir mensagem de sucesso e limpar erroBanking ao salvar com sucesso', () => {
+    const banking = { id: '1', usuarioId: '1', tipoChavePix: 'cpf', chavePix: '123', nomeCompleto: 'T', cpfCnpj: '11111111111', criadoEm: '', atualizadoEm: '' } as any;
+    bankingService.salvarDadosBancarios.and.returnValue(of({ banking }));
+
+    componente.salvarBanking();
+
+    expect(componente.mensagem()).toBe('Dados bancários salvos com sucesso!');
+    expect(componente.erroBanking()).toBeNull();
+  });
+
+  it('deve definir erroBanking em vermelho e limpar mensagem ao salvar com erro', () => {
+    bankingService.salvarDadosBancarios.and.returnValue(throwError(() => ({ status: 400, error: { error: 'CPF inválido' } })));
+
+    componente.salvarBanking();
+
+    expect(componente.erroBanking()).toContain('CPF inválido');
+    expect(componente.mensagem()).toBeNull();
   });
 });
