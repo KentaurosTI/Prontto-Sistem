@@ -11,8 +11,10 @@
     <div class="notif__painel" role="menu">
       <div class="notif__cabecalho">
         <strong>Notificações</strong>
-        @if (naoLidas() > 0) {
-          <button class="notif__marcar" (click)="marcarTodas($event)">Marcar todas como lidas</button>
+        @if (notificacoes().length > 0) {
+          <button class="notif__marcar" [disabled]="naoLidas() === 0" (click)="marcarTodas($event)">
+            Marcar todas como lidas
+          </button>
         }
       </div>
 

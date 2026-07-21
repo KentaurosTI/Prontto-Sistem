@@ -67,7 +67,8 @@
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
-  &:hover { text-decoration: underline; }
+  &:hover:not(:disabled) { text-decoration: underline; }
+  &:disabled { color: var(--cor-texto-suave, #9ca3af); cursor: default; }
 }
 
 .notif__lista {
