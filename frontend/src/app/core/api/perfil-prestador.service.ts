@@ -18,6 +18,11 @@ export class PerfilPrestadorService {
   private readonly baseAuth = `${environment.apiUrl}/api/auth`;
   private readonly baseApi = environment.apiUrl;
 
+  /** Lista as imagens do portfólio do prestador autenticado (rota autenticada). */
+  obterMinhasImagens(): Observable<{ imagens: ImagemPortfolio[] }> {
+    return this.http.get<{ imagens: ImagemPortfolio[] }>(`${this.baseAuth}/portfolio`);
+  }
+
   /**
    * Obtém o perfil público de um prestador pelo slug.
    * Rota: GET /{cidadeSlug}/{categoriaSlug}/{slug}
