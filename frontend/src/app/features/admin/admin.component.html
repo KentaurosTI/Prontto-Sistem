@@ -177,13 +177,6 @@
                       </button>
                       @if (menuAberto() === servico.id) {
                         <div class="acao-menu__lista" (click)="$event.stopPropagation()">
-                          @if (servico.status === 'em_negociacao') {
-                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'em_andamento'); menuAberto.set(null)"><i class="ri-play-line"></i> Iniciar</button>
-                          }
-                          @if (servico.status === 'em_andamento') {
-                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'concluido'); menuAberto.set(null)"><i class="ri-check-line"></i> Concluir</button>
-                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'cancelado'); menuAberto.set(null)"><i class="ri-close-line"></i> Cancelar</button>
-                          }
                           <button class="acao-menu__item" (click)="abrirEditarServico(servico)"><i class="ri-edit-line"></i> Editar</button>
                           <button class="acao-menu__item acao-menu__item--danger" (click)="excluirServico(servico)"><i class="ri-delete-bin-line"></i> Excluir</button>
                         </div>
