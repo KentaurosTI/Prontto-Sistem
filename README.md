@@ -3,9 +3,7 @@
 Plataforma que conecta **contratantes** a **prestadores** de serviços domésticos na Grande São Paulo.
 Monorepo com **backend .NET 9** (Clean Architecture + EF Core/MySQL) e **frontend Angular 21**.
 
-- Produção: https://prontto.org · API: https://api.prontto.org
-- Documentação de arquitetura: [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- Checklist de QA: [`deploy/QA-CHECKLIST.md`](deploy/QA-CHECKLIST.md)
+- Produção: https://prontto.org
 
 ## Estrutura
 
