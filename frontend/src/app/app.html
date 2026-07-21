@@ -34,7 +34,7 @@
 
 <!-- ── Barra de categorias + mega-menu ────────────── -->
 @if (rotaMarketing()) {
-  <div class="catbar" (mouseleave)="fecharMega()">
+  <div class="catbar" (mouseleave)="fecharMega()" (click)="$event.stopPropagation()">
     <div class="wrap">
       <div class="catbar__row">
         @for (cat of categorias; track cat.key; let i = $index) {
@@ -44,7 +44,7 @@
             [routerLink]="rota(cat.key)"
             (mouseenter)="abrirMega(i)"
             (focus)="abrirMega(i)"
-            (click)="fecharMegaImediato()"
+            (click)="onClickCatbarItem(i, $event)"
           >
             <i [class]="cat.icone"></i><span>{{ cat.label }}</span>
           </a>
