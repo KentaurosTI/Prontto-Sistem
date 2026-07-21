@@ -51,11 +51,13 @@ describe('MinhaAreaComponent — aba portfólio', () => {
       'uploadImagem',
       'removerImagem',
       'obterPerfilPublico',
+      'obterMinhasImagens',
       'listarCategorias',
       'listarCidades',
     ]);
     perfilSpy.listarCategorias.and.returnValue(of([]));
     perfilSpy.listarCidades.and.returnValue(of([]));
+    perfilSpy.obterMinhasImagens.and.returnValue(of({ imagens: [] }));
     perfilSpy.obterPerfilPublico.and.returnValue(
       of({ id: '1', nome: 'Test', imagensPortfolio: [], mediaAvaliacoes: 0, totalAvaliacoes: 0, categorias: [], cidades: [] })
     );

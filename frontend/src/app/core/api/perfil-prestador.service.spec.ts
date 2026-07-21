@@ -103,6 +103,17 @@ describe('PerfilPrestadorService', () => {
     req.flush(resultado);
   });
 
+  it('deve listar imagens do portfólio do usuário autenticado', () => {
+    const imagens = [{ id: 'img-1', url: '/uploads/2024/foto.jpg', ordem: 0 }];
+    service.obterMinhasImagens().subscribe((res) => {
+      expect(res.imagens).toEqual(imagens as any);
+    });
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/portfolio`);
+    expect(req.request.method).toBe('GET');
+    req.flush({ imagens });
+  });
+
   it('deve buscar prestadores por categoria e cidade', () => {
     const resultado: ResultadoPaginado<PrestadorBusca> = {
       items: [],

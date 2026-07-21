@@ -223,6 +223,25 @@ public class ControladorAuth(
     // ── Portfólio ──────────────────────────────────────────────────────────────
 
     /// <summary>
+    /// Lista as imagens do portfólio do prestador autenticado, ordenadas por Ordem.
+    /// Retorna apenas imagens aprovadas (não excluídas).
+    /// </summary>
+    [HttpGet("portfolio")]
+    [Authorize]
+    public async Task<IActionResult> ListarImagens()
+    {
+        var tipoConta = User.FindFirstValue("accountType");
+        if (tipoConta != "prestador")
+            return StatusCode(403, new { error = "Apenas prestadores têm portfólio" });
+
+        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var imagens = await repositorioPerfil.ListarImagensAprovadasAsync(idUsuario);
+
+        var resultado = imagens.Select(i => new { id = i.Id, url = i.Url, ordem = i.Ordem });
+        return Ok(new { imagens = resultado });
+    }
+
+    /// <summary>
     /// Faz upload de uma imagem de portfólio diretamente para o servidor (armazenamento local).
     /// Aceita arquivos jpg, jpeg, png e webp até 5 MB.
     /// </summary>

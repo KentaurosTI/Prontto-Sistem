@@ -344,9 +344,9 @@ export class MinhaAreaComponent implements OnInit {
 
   carregarImagens(): void {
     this.carregandoImagens.set(true);
-    this.perfilService.obterPerfilPublico(this.usuario()?.slug ?? '').subscribe({
-      next: (perfil) => {
-        this.imagens.set(perfil.imagensPortfolio ?? []);
+    this.perfilService.obterMinhasImagens().subscribe({
+      next: (res) => {
+        this.imagens.set(res.imagens ?? []);
         this.carregandoImagens.set(false);
       },
       error: () => {
