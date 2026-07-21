@@ -391,6 +391,11 @@
 
 // ── Buttons ───────────────────────────────────────────────────────────────────
 
+.btn-aceitar {
+  background: #16a34a !important;
+  &:hover:not(:disabled) { background: #15803d !important; }
+}
+
 .btn-primario {
   background: var(--cor-primaria);
   color: white;
