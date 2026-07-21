@@ -60,6 +60,16 @@ Estes arquivos são ignorados pelo git — cada dev/ambiente mantém o seu:
 - `.mcp.json` (token da Hostinger) → veja `.mcp.json.example`
 - Segredos de **produção** ficam no servidor em `/etc/prontto/api.env` (não no repo).
 
+## Fluxo de trabalho (branches, CI e deploy)
+1. Crie um **branch** a partir da `main` e abra um **Pull Request**.
+2. O **CI** (GitHub Actions — `.github/workflows/ci.yml`) roda automaticamente no PR: **build + testes do backend** (.NET 9) e **build do frontend** (Angular). O merge só deve ocorrer com o CI **verde**.
+3. Após o merge na `main`, o CI roda de novo como sanidade.
+4. **Deploy é manual**, feito pela equipe que guarda as chaves (SSH da VPS / FTP Hostinger) — o CI **não** faz deploy. Para publicar:
+   - Backend: `bash deploy/publish-backend.sh` (ou envie o pacote e rode `deploy/atualizar-backend.sh` na VPS — preserva uploads).
+   - Frontend: `npm run build` e suba `frontend/dist/prontto/browser/` para o `public_html` no File Manager da Hostinger.
+
+> Recomendado: em **Settings → Branches** do GitHub, proteger a `main` exigindo o CI verde e ao menos 1 review antes do merge.
+
 ## Convenções
 - Código e identificadores em **português** (padrão do projeto).
 - Backend: Clean Architecture; status de serviço serializado em `snake_case`.
