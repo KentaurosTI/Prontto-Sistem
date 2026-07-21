@@ -317,6 +317,11 @@
             <span aria-hidden="true">✓</span> {{ mensagem() }}
           </div>
         }
+        @if (erroBanking()) {
+          <div class="msg-erro" role="alert" aria-live="assertive">
+            <span aria-hidden="true">✕</span> {{ erroBanking() }}
+          </div>
+        }
 
         <form [formGroup]="formularioBanking" (ngSubmit)="salvarBanking()">
           <div class="campo">

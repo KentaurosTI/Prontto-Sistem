@@ -35,6 +35,7 @@ export class MinhaAreaComponent implements OnInit {
   readonly dadosBancarios = signal<DadosBancarios | null>(null);
   readonly salvando = signal(false);
   readonly mensagem = signal<string | null>(null);
+  readonly erroBanking = signal<string | null>(null);
 
   // Perfil do prestador
   readonly salvandoPerfil = signal(false);
@@ -265,14 +266,19 @@ export class MinhaAreaComponent implements OnInit {
 
   salvarBanking(): void {
     this.salvando.set(true);
+    this.mensagem.set(null);
+    this.erroBanking.set(null);
     this.bankingService.salvarDadosBancarios(this.formularioBanking.value as any).subscribe({
       next: (res) => {
         this.dadosBancarios.set(res.banking);
         this.mensagem.set('Dados bancários salvos com sucesso!');
         this.salvando.set(false);
       },
-      error: () => {
-        this.mensagem.set('Erro ao salvar dados bancários.');
+      error: (err) => {
+        const detail = err?.error?.error ?? null;
+        this.erroBanking.set(detail
+          ? `Erro ao salvar dados bancários: ${detail}`
+          : 'Erro ao salvar dados bancários. Verifique os dados e tente novamente.');
         this.salvando.set(false);
       },
     });
