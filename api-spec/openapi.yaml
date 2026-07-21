@@ -1,0 +1,740 @@
+openapi: 3.1.0
+info:
+  title: Prontto API
+  description: API do marketplace de serviços domésticos Prontto
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:5000
+    description: Desenvolvimento local
+
+security: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AccountType:
+      type: string
+      enum: [cliente, prestador]
+
+    Role:
+      type: string
+      enum: [user, admin]
+
+    ServiceStatus:
+      type: string
+      enum: [pending_approval, in_progress, completed, cancelled]
+
+    ChargeStatus:
+      type: string
+      enum: [pending, paid, refunded]
+
+    SenderRole:
+      type: string
+      enum: [client, provider, admin]
+
+    PixKeyType:
+      type: string
+      enum: [cpf, cnpj, email, phone, random]
+
+    User:
+      type: object
+      required: [id, name, email, accountType, role, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        role:
+          $ref: '#/components/schemas/Role'
+        specialty:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Banking:
+      type: object
+      required: [id, userId, pixKeyType, pixKey, fullName, cpfCnpj, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        pixKeyType:
+          $ref: '#/components/schemas/PixKeyType'
+        pixKey:
+          type: string
+        fullName:
+          type: string
+        cpfCnpj:
+          type: string
+        bankName:
+          type: string
+          nullable: true
+        agency:
+          type: string
+          nullable: true
+        accountNumber:
+          type: string
+          nullable: true
+        bankAccountType:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Service:
+      type: object
+      required: [id, title, category, price, adminFeeRate, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        category:
+          type: string
+        clientId:
+          type: string
+          format: uuid
+          nullable: true
+        providerId:
+          type: string
+          format: uuid
+          nullable: true
+        price:
+          type: string
+          description: Valor decimal como string (ex: "150.00")
+        adminFeeRate:
+          type: string
+          description: Taxa administrativa como string (ex: "0.2000")
+        status:
+          $ref: '#/components/schemas/ServiceStatus'
+        address:
+          type: string
+          nullable: true
+        scheduledAt:
+          type: string
+          format: date-time
+          nullable: true
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ServiceEnriched:
+      allOf:
+        - $ref: '#/components/schemas/Service'
+        - type: object
+          properties:
+            client:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+            provider:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+
+    ServiceMessage:
+      type: object
+      required: [id, serviceId, senderRole, content, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        senderId:
+          type: string
+          format: uuid
+          nullable: true
+        senderRole:
+          $ref: '#/components/schemas/SenderRole'
+        senderName:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    Charge:
+      type: object
+      required: [id, serviceId, totalAmount, adminFee, providerAmount, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        totalAmount:
+          type: string
+        adminFee:
+          type: string
+        providerAmount:
+          type: string
+        status:
+          $ref: '#/components/schemas/ChargeStatus'
+        paidAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        service:
+          type: object
+          nullable: true
+          properties:
+            title:
+              type: string
+            category:
+              type: string
+            clientId:
+              type: string
+              format: uuid
+              nullable: true
+            providerId:
+              type: string
+              format: uuid
+              nullable: true
+
+    AdminStats:
+      type: object
+      required: [users, services, revenue]
+      properties:
+        users:
+          type: object
+          required: [total, clients, providers]
+          properties:
+            total:
+              type: integer
+            clients:
+              type: integer
+            providers:
+              type: integer
+        services:
+          type: object
+          required: [total, pending, inProgress, completed]
+          properties:
+            total:
+              type: integer
+            pending:
+              type: integer
+            inProgress:
+              type: integer
+            completed:
+              type: integer
+        revenue:
+          type: object
+          required: [earned, pending, gmv]
+          properties:
+            earned:
+              type: number
+            pending:
+              type: number
+            gmv:
+              type: number
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      operationId: getHealth
+      tags: [System]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/auth/register:
+    post:
+      summary: Criar nova conta
+      operationId: register
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, accountType]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                password:
+                  type: string
+                  minLength: 8
+                accountType:
+                  $ref: '#/components/schemas/AccountType'
+                specialty:
+                  type: string
+                city:
+                  type: string
+      responses:
+        '201':
+          description: Conta criada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, user]
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: E-mail já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      summary: Login
+      operationId: login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login realizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, user]
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Dados obrigatórios ausentes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/me:
+    get:
+      summary: Perfil do usuário autenticado
+      operationId: getMe
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/banking:
+    get:
+      summary: Buscar dados bancários do usuário
+      operationId: getBanking
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dados bancários (null se não cadastrado)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [banking]
+                properties:
+                  banking:
+                    oneOf:
+                      - $ref: '#/components/schemas/Banking'
+                      - type: 'null'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Salvar dados bancários (apenas prestadores)
+      operationId: saveBanking
+      tags: [Auth]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pixKeyType, pixKey, fullName, cpfCnpj]
+              properties:
+                pixKeyType:
+                  $ref: '#/components/schemas/PixKeyType'
+                pixKey:
+                  type: string
+                fullName:
+                  type: string
+                cpfCnpj:
+                  type: string
+                bankName:
+                  type: string
+                agency:
+                  type: string
+                accountNumber:
+                  type: string
+                bankAccountType:
+                  type: string
+      responses:
+        '200':
+          description: Dados bancários salvos
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [banking]
+                properties:
+                  banking:
+                    $ref: '#/components/schemas/Banking'
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Apenas prestadores
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/stats:
+    get:
+      summary: Estatísticas gerais do painel admin
+      operationId: getAdminStats
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Estatísticas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminStats'
+        '403':
+          description: Acesso restrito ao administrador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/users:
+    get:
+      summary: Listar todos os usuários (exceto admins)
+      operationId: getAdminUsers
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [users]
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '403':
+          description: Acesso restrito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/services:
+    get:
+      summary: Listar todos os serviços com dados de cliente e prestador
+      operationId: getAdminServices
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de serviços
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [services]
+                properties:
+                  services:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceEnriched'
+        '403':
+          description: Acesso restrito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/services/{id}:
+    patch:
+      summary: Atualizar status de um serviço
+      operationId: updateServiceStatus
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: '#/components/schemas/ServiceStatus'
+      responses:
+        '200':
+          description: Serviço atualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [service]
+                properties:
+                  service:
+                    $ref: '#/components/schemas/Service'
+        '400':
+          description: Status inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Serviço não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/services/{id}/messages:
+    get:
+      summary: Listar mensagens do chat de um serviço
+      operationId: getServiceMessages
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de mensagens
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [messages]
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceMessage'
+        '403':
+          description: Acesso restrito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Enviar mensagem no chat de um serviço
+      operationId: postServiceMessage
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Mensagem enviada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    $ref: '#/components/schemas/ServiceMessage'
+        '400':
+          description: Mensagem vazia
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/admin/charges:
+    get:
+      summary: Listar todas as cobranças com dados do serviço
+      operationId: getAdminCharges
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de cobranças
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [charges]
+                properties:
+                  charges:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Charge'
+        '403':
+          description: Acesso restrito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

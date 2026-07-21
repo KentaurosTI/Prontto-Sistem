@@ -1,0 +1,257 @@
+/* Página Serviços (catálogo) — estilos .svc-* escopados ao componente.
+   Escopado de propósito: a Home usa .svc-card do design system global de forma
+   diferente (carrossel); aqui redefinimos para o catálogo sem afetá-la. */
+:host {
+  display: block;
+}
+
+.svc-head {
+  background:
+    radial-gradient(900px 420px at 82% -20%, var(--laranja-suave) 0%, transparent 60%),
+    linear-gradient(180deg, #fff, var(--fundo));
+  padding: 52px 0 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--borda);
+}
+.svc-head h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--navy-medio);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 10px 0 12px;
+}
+.svc-head > .wrap > p {
+  max-width: 620px;
+  margin: 0 auto;
+  color: var(--texto-suave);
+  font-size: 1.08rem;
+}
+.svc-jump {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 26px;
+}
+.svc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid var(--borda);
+  color: var(--texto);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: 0.15s;
+  cursor: pointer;
+}
+.svc-chip i {
+  color: var(--laranja);
+  font-size: 1.05rem;
+}
+.svc-chip:hover {
+  border-color: var(--laranja);
+  color: var(--laranja);
+  background: var(--laranja-suave);
+  transform: translateY(-1px);
+}
+
+.svc-cat {
+  padding: 48px 0 8px;
+  border-bottom: 1px solid var(--borda);
+}
+.svc-cat:last-of-type {
+  border-bottom: none;
+}
+.svc-cat__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.svc-cat__title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.svc-cat__ic {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--laranja-suave);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.svc-cat__ic i {
+  font-size: 1.7rem;
+  color: var(--laranja);
+}
+.svc-cat__title h2 {
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  font-weight: 800;
+  color: var(--navy-medio);
+  letter-spacing: -0.02em;
+}
+.svc-cat__count {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  padding: 7px 14px;
+  border-radius: 999px;
+}
+
+.svc-group {
+  margin-bottom: 14px;
+}
+.svc-group__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 22px 0 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--borda);
+}
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.svc-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--borda);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: 0.2s;
+}
+.svc-card:hover {
+  box-shadow: var(--sombra-lg);
+  transform: translateY(-4px);
+  border-color: #dfe2e6;
+}
+.svc-card__img {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: var(--fundo);
+  height: auto;
+}
+.svc-card__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: 0.4s;
+  position: static;
+}
+.svc-card:hover .svc-card__img img {
+  transform: scale(1.05);
+}
+.svc-card__img--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--laranja-suave), var(--laranja-suave-2));
+}
+.svc-card__img--ph i {
+  font-size: 2.6rem;
+  color: var(--laranja);
+}
+.svc-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 18px 18px 20px;
+  text-align: left;
+}
+.svc-card__title {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--navy-medio);
+  letter-spacing: -0.01em;
+  margin-bottom: 7px;
+}
+.svc-card__desc {
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+  line-height: 1.5;
+  margin-bottom: 16px;
+  flex: 1;
+}
+.svc-card__btn {
+  align-self: flex-start;
+  padding: 10px 18px;
+  font-size: 0.9rem;
+}
+
+.svc-cat__more {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 4px;
+}
+.svc-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.svc-toggle i {
+  transition: transform 0.2s;
+  font-size: 1.15rem;
+}
+.svc-toggle.is-open i {
+  transform: rotate(180deg);
+}
+
+.svc-cta {
+  background: linear-gradient(120deg, var(--navy) 0%, var(--navy-azulado) 100%);
+  color: #fff;
+  text-align: center;
+  padding: 60px 0;
+  position: relative;
+  overflow: hidden;
+}
+.svc-cta::before {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.22), transparent 65%);
+  top: -160px;
+  right: -100px;
+}
+.svc-cta > .wrap {
+  position: relative;
+}
+.svc-cta h2 {
+  color: #fff;
+  font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.svc-cta p {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 1.06rem;
+  margin: 12px auto 26px;
+  max-width: 520px;
+}
+
+@media (max-width: 560px) {
+  .svc-cat__head {
+    flex-wrap: wrap;
+  }
+  .svc-grid {
+    grid-template-columns: 1fr;
+  }
+}

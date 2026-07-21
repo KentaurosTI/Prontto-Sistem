@@ -1,0 +1,244 @@
+<!-- Estado: carregando -->
+@if (carregando()) {
+  <div class="estado-carregando" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Carregando perfil...</p>
+  </div>
+}
+
+<!-- Estado: erro -->
+@if (!carregando() && erro()) {
+  <div class="estado-erro">
+    <div class="estado-erro__icone" aria-hidden="true">😕</div>
+    <p class="erro-mensagem">{{ erro() }}</p>
+    <a routerLink="/" class="btn-voltar">Voltar ao início</a>
+  </div>
+}
+
+<!-- Perfil carregado -->
+@if (!carregando() && !erro() && perfil()) {
+  <main class="perfil-container">
+
+    <!-- Banner de capa -->
+    <div class="perfil-banner" aria-hidden="true">
+      <div class="perfil-banner__gradiente"></div>
+    </div>
+
+    <!-- Cabeçalho do perfil -->
+    <section class="perfil-cabecalho container">
+      <div class="perfil-cabecalho__avatar-wrap">
+        @if (perfil()!.fotoPerfilUrl) {
+          <img
+            [src]="urlImagem(perfil()!.fotoPerfilUrl)"
+            [alt]="'Foto de ' + perfil()!.nome"
+            class="foto-perfil"
+          />
+        } @else {
+          <div class="foto-placeholder" aria-hidden="true">
+            {{ perfil()!.nome.charAt(0).toUpperCase() }}
+          </div>
+        }
+      </div>
+
+      <div class="perfil-info">
+        <h1 class="prestador-nome">{{ perfil()!.nome }}</h1>
+
+        @if (perfil()!.especialidade) {
+          <p class="prestador-especialidade">{{ perfil()!.especialidade }}</p>
+        }
+
+        <!-- Avaliações -->
+        <div class="avaliacoes" [attr.aria-label]="'Avaliação: ' + perfil()!.mediaAvaliacoes + ' de 5'">
+          @for (i of estrelas; track i) {
+            <span class="estrela" [class.ativa]="estralaAtiva(i)" aria-hidden="true">★</span>
+          }
+          <span class="avaliacao-texto">
+            {{ perfil()!.mediaAvaliacoes | number:'1.1-1' }}
+            <span class="avaliacao-total">({{ perfil()!.totalAvaliacoes }} {{ perfil()!.totalAvaliacoes === 1 ? 'avaliação' : 'avaliações' }})</span>
+          </span>
+        </div>
+
+        <!-- Categorias -->
+        @if (perfil()!.categorias.length > 0) {
+          <div class="tags-lista" role="list" aria-label="Categorias de atuação">
+            @for (cat of perfil()!.categorias; track cat.id) {
+              <span class="tag tag-categoria" role="listitem">{{ cat.nome }}</span>
+            }
+          </div>
+        }
+
+        <!-- Cidades -->
+        @if (perfil()!.cidades.length > 0) {
+          <div class="tags-lista" role="list" aria-label="Cidades de atuação">
+            <span class="label-cidades" aria-hidden="true">📍 Atende em:</span>
+            @for (cid of perfil()!.cidades; track cid.id) {
+              <span class="tag tag-cidade" role="listitem">{{ cid.nome }}/{{ cid.estado }}</span>
+            }
+          </div>
+        }
+
+        <!-- Mensagem para prestadores tentando contratar -->
+        @if (mensagemContratacao()) {
+          <div class="aviso-contratacao" role="alert" aria-live="assertive">
+            <span aria-hidden="true">⚠</span> {{ mensagemContratacao() }}
+          </div>
+        }
+
+        <!-- Botão contratar (desktop) -->
+        <div class="perfil-acoes">
+          @if (ehPrestadorLogado()) {
+            <p class="perfil-acoes__info">
+              <span aria-hidden="true">ℹ️</span>
+              Você está logado como prestador. Para contratar um serviço, use uma conta de cliente.
+            </p>
+          } @else {
+            <button class="btn-contratar" (click)="contratar()">
+              Contratar serviço
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Conteúdo do perfil -->
+    <div class="perfil-conteudo container">
+
+      <!-- Sobre -->
+      @if (perfil()!.descricao) {
+        <section class="secao-card" aria-labelledby="titulo-sobre">
+          <h2 class="secao-titulo" id="titulo-sobre">Sobre o prestador</h2>
+          <p class="bio-texto">{{ perfil()!.descricao }}</p>
+        </section>
+      }
+
+      <!-- Portfólio -->
+      <section class="secao-card" aria-labelledby="titulo-portfolio">
+        <h2 class="secao-titulo" id="titulo-portfolio">Portfólio</h2>
+
+        @if (perfil()!.imagensPortfolio.length === 0) {
+          <div class="portfolio-vazio">
+            <span aria-hidden="true">🖼️</span>
+            <p>Nenhuma imagem no portfólio ainda.</p>
+          </div>
+        } @else {
+          <div class="portfolio-galeria" role="list" aria-label="Galeria de trabalhos">
+            @for (img of perfil()!.imagensPortfolio; track img.id) {
+              <div class="portfolio-item" role="listitem">
+                <img
+                  [src]="urlImagem(img.url)"
+                  [alt]="'Trabalho ' + img.ordem + ' de ' + perfil()!.nome"
+                  class="portfolio-imagem"
+                  loading="lazy"
+                />
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- ── Avaliações (RF-08) ──────────────────────────────────── -->
+      <section class="secao-card" aria-labelledby="titulo-avaliacoes">
+        <div class="avaliacoes-cabecalho">
+          <h2 class="secao-titulo" id="titulo-avaliacoes">Avaliações</h2>
+          @if (totalAvaliacoes() > 0) {
+            <span class="avaliacoes-total-badge">
+              {{ totalAvaliacoes() }} {{ totalAvaliacoes() === 1 ? 'avaliação' : 'avaliações' }}
+            </span>
+          }
+        </div>
+
+        <!-- Estado: carregando avaliações -->
+        @if (carregandoAvaliacoes() && avaliacoes().length === 0) {
+          <div class="avaliacoes-skeleton" aria-busy="true" aria-label="Carregando avaliações">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="card-avaliacao-skeleton">
+                <div class="skeleton skel-nome"></div>
+                <div class="skeleton skel-estrelas"></div>
+                <div class="skeleton skel-comentario"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Estado: sem avaliações -->
+        @if (!carregandoAvaliacoes() && avaliacoes().length === 0) {
+          <div class="avaliacoes-vazio">
+            <span class="avaliacoes-vazio__icone" aria-hidden="true">★</span>
+            <p>Ainda não há avaliações para este prestador.</p>
+          </div>
+        }
+
+        <!-- Lista de avaliações -->
+        @if (avaliacoes().length > 0) {
+          <ul class="lista-avaliacoes" role="list" aria-label="Lista de avaliações">
+            @for (aval of avaliacoes(); track aval.id) {
+              <li class="card-avaliacao" role="listitem">
+                <div class="card-avaliacao__cabecalho">
+                  <div class="card-avaliacao__avaliador">
+                    <div class="card-avaliacao__avatar" aria-hidden="true">
+                      {{ aval.nomeAvaliador.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="card-avaliacao__info">
+                      <span class="card-avaliacao__nome">{{ aval.nomeAvaliador }}</span>
+                      <time
+                        class="card-avaliacao__data"
+                        [attr.datetime]="aval.criadoEm"
+                      >
+                        {{ formatarData(aval.criadoEm) }}
+                      </time>
+                    </div>
+                  </div>
+                  <div
+                    class="card-avaliacao__estrelas"
+                    [attr.aria-label]="'Nota: ' + aval.nota + ' de 5'"
+                  >
+                    @for (i of estrelasAvaliacao(aval.nota); track i) {
+                      <span
+                        class="estrela-aval"
+                        [class.ativa]="estrelaAvaliacaoAtiva(i, aval.nota)"
+                        aria-hidden="true"
+                      >★</span>
+                    }
+                    <span class="nota-numero" aria-hidden="true">{{ aval.nota }}/5</span>
+                  </div>
+                </div>
+                @if (aval.comentario) {
+                  <p class="card-avaliacao__comentario">{{ aval.comentario }}</p>
+                }
+              </li>
+            }
+          </ul>
+
+          <!-- Paginação: Ver mais -->
+          @if (temMaisAvaliacoes()) {
+            <div class="avaliacoes-ver-mais">
+              <button
+                class="btn-ver-mais"
+                (click)="verMaisAvaliacoes()"
+                [disabled]="carregandoAvaliacoes()"
+              >
+                @if (carregandoAvaliacoes()) {
+                  <span class="spinner-sm" aria-hidden="true"></span>
+                  Carregando...
+                } @else {
+                  Ver mais avaliações
+                }
+              </button>
+            </div>
+          }
+        }
+      </section>
+
+    </div>
+
+    <!-- Botão flutuante "Contratar" (mobile) — oculto para prestadores -->
+    @if (!ehPrestadorLogado()) {
+      <div class="contratar-sticky" aria-hidden="false">
+        <button class="btn-contratar-sticky" (click)="contratar()">
+          Contratar {{ perfil()!.nome.split(' ')[0] }}
+        </button>
+      </div>
+    }
+
+  </main>
+}

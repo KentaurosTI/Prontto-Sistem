@@ -1,0 +1,611 @@
+<div class="minha-area">
+
+  <!-- ── Sidebar ───────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar__avatar" aria-hidden="true">
+      @if (usuario()?.fotoPerfilUrl) {
+        <img [src]="urlImagem(usuario()?.fotoPerfilUrl)" alt="Foto de perfil" />
+      } @else {
+        {{ (usuario()?.nome ?? 'U').charAt(0).toUpperCase() }}
+      }
+    </div>
+    <div class="sidebar__info">
+      <strong class="sidebar__nome">{{ usuario()?.nome }}</strong>
+      <span class="sidebar__email">{{ usuario()?.email }}</span>
+      <span class="sidebar__badge" [class.sidebar__badge--prestador]="usuario()?.tipoConta === 'prestador'">
+        {{ usuario()?.tipoConta === 'prestador' ? '👷 Prestador' : '👤 Cliente' }}
+      </span>
+    </div>
+
+    @if (usuario()?.slug) {
+      <a [routerLink]="['/prestador', usuario()!.slug]" class="sidebar__link-perfil">
+        Ver perfil público →
+      </a>
+    }
+
+    <nav class="sidebar__nav" aria-label="Navegação da minha área">
+      @if (usuario()?.tipoConta === 'cliente') {
+        <button
+          class="sidebar__nav-item"
+          [class.ativo]="abaAtiva() === 'cadastro'"
+          (click)="mudarAba('cadastro')"
+        >
+          <span aria-hidden="true">👤</span> Meu Perfil
+        </button>
+      }
+      @if (usuario()?.tipoConta === 'prestador') {
+        <button
+          class="sidebar__nav-item"
+          [class.ativo]="abaAtiva() === 'perfil'"
+          (click)="mudarAba('perfil')"
+        >
+          <span aria-hidden="true">👤</span> Perfil Público
+        </button>
+        <button
+          class="sidebar__nav-item"
+          [class.ativo]="abaAtiva() === 'banking'"
+          (click)="mudarAba('banking')"
+        >
+          <span aria-hidden="true">💳</span> Dados Bancários
+        </button>
+        <button
+          class="sidebar__nav-item"
+          [class.ativo]="abaAtiva() === 'portfolio'"
+          (click)="mudarAba('portfolio')"
+        >
+          <span aria-hidden="true">🖼️</span> Portfólio
+        </button>
+      }
+      <button
+        class="sidebar__nav-item"
+        [class.ativo]="abaAtiva() === 'servicos'"
+        (click)="mudarAba('servicos')"
+      >
+        <span aria-hidden="true">📋</span>
+        {{ usuario()?.tipoConta === 'prestador' ? 'Meus Serviços' : 'Meus Pedidos' }}
+      </button>
+    </nav>
+
+    <button class="sidebar__btn-sair" (click)="sair()">
+      <span aria-hidden="true">↩</span> Sair da conta
+    </button>
+  </aside>
+
+  <!-- ── Conteúdo principal ─────────────────────────────────── -->
+  <main class="area-conteudo">
+
+    <!-- Banner de alerta: completar perfil -->
+    @if (precisaCompletarPerfil) {
+      <div class="alerta-perfil" role="status">
+        <span class="alerta-perfil__icone" aria-hidden="true">💡</span>
+        <div>
+          <strong>Complete seu perfil público</strong>
+          <p>Clientes não conseguem te encontrar sem um perfil completo.</p>
+        </div>
+      </div>
+    }
+
+    <!-- Abas (mobile) -->
+    <div class="abas-mobile" role="tablist" aria-label="Seções">
+      @if (usuario()?.tipoConta === 'cliente') {
+        <button
+          role="tab"
+          [attr.aria-selected]="abaAtiva() === 'cadastro'"
+          class="aba-mobile"
+          [class.ativo]="abaAtiva() === 'cadastro'"
+          (click)="mudarAba('cadastro')"
+        >Perfil</button>
+      }
+      @if (usuario()?.tipoConta === 'prestador') {
+        <button
+          role="tab"
+          [attr.aria-selected]="abaAtiva() === 'perfil'"
+          class="aba-mobile"
+          [class.ativo]="abaAtiva() === 'perfil'"
+          (click)="mudarAba('perfil')"
+        >Perfil</button>
+        <button
+          role="tab"
+          [attr.aria-selected]="abaAtiva() === 'banking'"
+          class="aba-mobile"
+          [class.ativo]="abaAtiva() === 'banking'"
+          (click)="mudarAba('banking')"
+        >Bancário</button>
+        <button
+          role="tab"
+          [attr.aria-selected]="abaAtiva() === 'portfolio'"
+          class="aba-mobile"
+          [class.ativo]="abaAtiva() === 'portfolio'"
+          (click)="mudarAba('portfolio')"
+        >Portfólio</button>
+      }
+      <button
+        role="tab"
+        [attr.aria-selected]="abaAtiva() === 'servicos'"
+        class="aba-mobile"
+        [class.ativo]="abaAtiva() === 'servicos'"
+        (click)="mudarAba('servicos')"
+      >{{ usuario()?.tipoConta === 'prestador' ? 'Serviços' : 'Pedidos' }}</button>
+    </div>
+
+    <!-- ABA: Meu Perfil (cliente) -->
+    @if (abaAtiva() === 'cadastro' && usuario()?.tipoConta === 'cliente') {
+      <section class="secao-card" aria-labelledby="titulo-cadastro">
+        <div class="secao-card__header">
+          <h2 class="secao-card__titulo" id="titulo-cadastro">Meu Perfil</h2>
+          <p class="secao-card__desc">Mantenha seus dados atualizados para agilizar as solicitações.</p>
+        </div>
+
+        @if (mensagemCadastro()) {
+          <div class="msg-sucesso" role="status" aria-live="polite">
+            <span aria-hidden="true">✓</span> {{ mensagemCadastro() }}
+          </div>
+        }
+
+        <form [formGroup]="formularioCadastro" (ngSubmit)="salvarCadastro()">
+          <div class="campo">
+            <label class="campo__label" for="cad-nome">Nome completo</label>
+            <input id="cad-nome" type="text" class="campo__input" formControlName="nome"
+              placeholder="Seu nome completo" autocomplete="name" />
+            @if (formularioCadastro.get('nome')?.invalid && formularioCadastro.get('nome')?.touched) {
+              <span class="campo__erro">Informe seu nome.</span>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="cad-telefone">Telefone <span class="campo__opcional">(opcional)</span></label>
+            <input id="cad-telefone" type="tel" class="campo__input" formControlName="telefone"
+              placeholder="(11) 99999-9999" autocomplete="tel" />
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="cad-cidade">Cidade</label>
+            <select id="cad-cidade" class="campo__input" formControlName="cidadeId">
+              <option value="">Selecione sua cidade</option>
+              @for (cid of cidades(); track cid.id) {
+                <option [value]="cid.id">{{ cid.nome }}/{{ cid.estado }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="cad-endereco">Endereço</label>
+            <input id="cad-endereco" type="text" class="campo__input" formControlName="endereco"
+              placeholder="Rua, número, bairro" autocomplete="street-address" />
+            <span class="campo__dica">Usado para pré-preencher suas solicitações de serviço.</span>
+          </div>
+
+          <div class="form-acoes">
+            <button type="submit" class="btn-salvar" [disabled]="salvandoCadastro()">
+              @if (salvandoCadastro()) {
+                <span class="spinner" aria-hidden="true"></span> Salvando...
+              } @else { Salvar alterações }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ABA: Perfil Público (prestadores) -->
+    @if (abaAtiva() === 'perfil' && usuario()?.tipoConta === 'prestador') {
+      <section class="secao-card" aria-labelledby="titulo-perfil">
+        <div class="secao-card__header">
+          <h2 class="secao-card__titulo" id="titulo-perfil">
+            {{ precisaCompletarPerfil ? 'Completar Perfil' : 'Editar Perfil Público' }}
+          </h2>
+        </div>
+
+        @if (mensagemPerfil()) {
+          <div class="msg-sucesso" role="status" aria-live="polite">
+            <span aria-hidden="true">✓</span> {{ mensagemPerfil() }}
+          </div>
+        }
+
+        <form [formGroup]="formularioPerfil" (ngSubmit)="salvarPerfil()">
+          <div class="campo">
+            <label class="campo__label" for="descricao">Sobre você</label>
+            <textarea
+              id="descricao"
+              class="campo__textarea"
+              formControlName="descricao"
+              rows="4"
+              placeholder="Descreva sua experiência, diferenciais e o tipo de serviço que você oferece..."
+            ></textarea>
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="especialidade">Especialidade principal</label>
+            <input
+              id="especialidade"
+              type="text"
+              class="campo__input"
+              formControlName="especialidade"
+              placeholder="Ex: Eletricista residencial"
+            />
+          </div>
+
+          <div class="campo">
+            <span class="campo__label">Foto de perfil</span>
+            <div class="foto-upload">
+              <div class="foto-upload__preview" aria-hidden="true">
+                @if (formularioPerfil.get('fotoPerfilUrl')?.value) {
+                  <img [src]="urlImagem(formularioPerfil.get('fotoPerfilUrl')?.value)" alt="Foto de perfil" />
+                } @else {
+                  <i class="ri-user-3-line"></i>
+                }
+              </div>
+              <div class="foto-upload__acoes">
+                <label class="btn-upload" for="fotoPerfilArquivo">
+                  <i class="ri-upload-2-line"></i>
+                  {{ enviandoFoto() ? 'Enviando...' : 'Enviar foto' }}
+                </label>
+                <input id="fotoPerfilArquivo" type="file" accept="image/jpeg,image/png,image/webp"
+                  (change)="onFotoPerfilSelecionada($event)" hidden [disabled]="enviandoFoto()" />
+                @if (formularioPerfil.get('fotoPerfilUrl')?.value) {
+                  <button type="button" class="btn-remover-foto" (click)="removerFotoPerfil()">
+                    <i class="ri-delete-bin-line"></i> Remover
+                  </button>
+                }
+              </div>
+            </div>
+            @if (erroFoto()) {
+              <span class="campo__erro" role="alert">{{ erroFoto() }}</span>
+            }
+            <span class="campo__dica">JPG, PNG ou WebP, até 5 MB. A foto é hospedada na própria Prontto.</span>
+          </div>
+
+          @if (categorias().length > 0) {
+            <div class="campo">
+              <span class="campo__label" id="label-categorias">Categorias de atuação</span>
+              <div class="checkboxes-grid" role="group" aria-labelledby="label-categorias">
+                @for (cat of categorias(); track cat.id) {
+                  <label class="checkbox-item">
+                    <input
+                      type="checkbox"
+                      [checked]="categoriaEscolhida(cat.id)"
+                      (change)="toggleCategoria(cat.id)"
+                    />
+                    <span>{{ cat.nome }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+
+          @if (cidades().length > 0) {
+            <div class="campo">
+              <span class="campo__label" id="label-cidades">Cidades onde atende</span>
+              <div class="checkboxes-grid" role="group" aria-labelledby="label-cidades">
+                @for (cid of cidades(); track cid.id) {
+                  <label class="checkbox-item">
+                    <input
+                      type="checkbox"
+                      [checked]="cidadeEscolhida(cid.id)"
+                      (change)="toggleCidade(cid.id)"
+                    />
+                    <span>{{ cid.nome }}/{{ cid.estado }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="form-acoes">
+            <button type="submit" class="btn-salvar" [disabled]="salvandoPerfil()">
+              @if (salvandoPerfil()) {
+                <span class="spinner" aria-hidden="true"></span>
+                Salvando...
+              } @else {
+                {{ precisaCompletarPerfil ? 'Publicar perfil' : 'Salvar alterações' }}
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ABA: Dados Bancários (prestadores) -->
+    @if (abaAtiva() === 'banking' && usuario()?.tipoConta === 'prestador') {
+      <section class="secao-card" aria-labelledby="titulo-banking">
+        <div class="secao-card__header">
+          <h2 class="secao-card__titulo" id="titulo-banking">Dados Bancários (Pix)</h2>
+          <p class="secao-card__desc">Seus dados para receber pagamentos via Pix.</p>
+        </div>
+
+        @if (mensagem()) {
+          <div class="msg-sucesso" role="status" aria-live="polite">
+            <span aria-hidden="true">✓</span> {{ mensagem() }}
+          </div>
+        }
+
+        <form [formGroup]="formularioBanking" (ngSubmit)="salvarBanking()">
+          <div class="campo">
+            <label class="campo__label" for="tipoChavePix">Tipo de chave Pix</label>
+            <div class="pix-tipos">
+              @for (tipo of tiposPix; track tipo.valor) {
+                <button
+                  type="button"
+                  class="pix-tipo-btn"
+                  [class.ativo]="formularioBanking.get('tipoChavePix')?.value === tipo.valor"
+                  (click)="formularioBanking.patchValue({ tipoChavePix: tipo.valor })"
+                >
+                  <span aria-hidden="true">{{ tipo.icone }}</span>
+                  {{ tipo.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="campo">
+            <label class="campo__label" for="chavePix">Chave Pix</label>
+            <input id="chavePix" type="text" class="campo__input" formControlName="chavePix" />
+          </div>
+
+          <div class="campo-duplo">
+            <div class="campo">
+              <label class="campo__label" for="nomeCompleto">Nome completo</label>
+              <input id="nomeCompleto" type="text" class="campo__input" formControlName="nomeCompleto" />
+            </div>
+            <div class="campo">
+              <label class="campo__label" for="cpfCnpj">CPF / CNPJ</label>
+              <input id="cpfCnpj" type="text" class="campo__input" formControlName="cpfCnpj" />
+            </div>
+          </div>
+
+          <div class="form-acoes">
+            <button type="submit" class="btn-salvar" [disabled]="salvando()">
+              @if (salvando()) {
+                <span class="spinner" aria-hidden="true"></span>
+                Salvando...
+              } @else {
+                Salvar dados bancários
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ABA: Portfólio (prestadores) -->
+    @if (abaAtiva() === 'portfolio' && usuario()?.tipoConta === 'prestador') {
+      <section class="secao-card" aria-labelledby="titulo-portfolio">
+        <div class="secao-card__header">
+          <h2 class="secao-card__titulo" id="titulo-portfolio">Portfólio</h2>
+        </div>
+        <p class="campo__dica" style="margin-bottom:14px">
+          Mostre seus melhores trabalhos. As fotos são enviadas e hospedadas na própria Prontto
+          (JPG, PNG ou WebP, até 5 MB cada).
+        </p>
+
+        @if (erroUpload()) {
+          <p class="erro-upload" role="alert" aria-live="assertive">{{ erroUpload() }}</p>
+        }
+
+        <div class="pf-grid"
+          [class.arrastando]="arrastando()"
+          (dragover)="onArrastarSobre($event)"
+          (dragleave)="onArrastarSair($event)"
+          (drop)="onSoltarArquivo($event)">
+          @if (!carregandoImagens()) {
+            @for (imagem of imagens(); track imagem.id) {
+              <div class="pf-item">
+                <img [src]="urlImagem(imagem.url)" alt="Foto do portfólio" loading="lazy" />
+                <button class="pf-del" type="button" (click)="removerImagem(imagem.id)" aria-label="Remover foto">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            }
+          }
+          <label class="pf-add" for="pfInput">
+            @if (uploadEmAndamento()) {
+              <span class="spinner spinner--sm" aria-hidden="true"></span>
+              <span>Enviando...</span>
+            } @else {
+              <i class="ri-add-line" aria-hidden="true"></i>
+              <span>Adicionar foto</span>
+            }
+          </label>
+          <input id="pfInput" type="file" accept="image/jpeg,image/png,image/webp"
+            (change)="onArquivoSelecionado($event)" hidden [disabled]="uploadEmAndamento()" />
+        </div>
+      </section>
+    }
+
+    <!-- ABA: Serviços / Pedidos -->
+    @if (abaAtiva() === 'servicos') {
+      <section class="secao-card" aria-labelledby="titulo-servicos">
+        <div class="secao-card__header secao-card__header--com-acao">
+          <h2 class="secao-card__titulo" id="titulo-servicos">
+            {{ usuario()?.tipoConta === 'prestador' ? 'Meus Serviços' : 'Meus Pedidos' }}
+          </h2>
+          @if (usuario()?.tipoConta === 'cliente') {
+            <a routerLink="/servicos/novo" class="btn-novo-servico">
+              <span aria-hidden="true">+</span> Solicitar serviço
+            </a>
+          }
+        </div>
+
+        <!-- Estado: carregando -->
+        @if (carregandoServicos()) {
+          <div class="lista-servicos-skeleton" aria-busy="true" aria-label="Carregando serviços">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="card-servico-skeleton">
+                <div class="skeleton skeleton-titulo"></div>
+                <div class="skeleton skeleton-subtitulo"></div>
+                <div class="skeleton skeleton-badge"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Estado: erro -->
+        @if (!carregandoServicos() && erroServicos()) {
+          <div class="estado-erro" role="alert">
+            <div class="estado-erro__icone" aria-hidden="true">😕</div>
+            <p class="estado-erro__texto">{{ erroServicos() }}</p>
+            <button class="btn-retentar" (click)="carregarServicos()">Tentar novamente</button>
+          </div>
+        }
+
+        <!-- Estado: vazio -->
+        @if (!carregandoServicos() && !erroServicos() && servicos().length === 0) {
+          <div class="estado-vazio">
+            <div class="estado-vazio__icone" aria-hidden="true">📋</div>
+            <p class="estado-vazio__texto">
+              @if (usuario()?.tipoConta === 'prestador') {
+                Nenhum serviço ainda. Aguarde que clientes entrem em contato.
+              } @else {
+                Você ainda não solicitou nenhum serviço.
+              }
+            </p>
+            @if (usuario()?.tipoConta === 'cliente') {
+              <a routerLink="/servicos" class="btn-explorar">
+                Encontrar prestadores
+              </a>
+            }
+          </div>
+        }
+
+        <!-- Lista de serviços -->
+        @if (!carregandoServicos() && !erroServicos() && servicos().length > 0) {
+          <ul class="ms-lista" role="list" aria-label="Lista de serviços">
+            @for (servico of servicos(); track servico.id) {
+              <li role="listitem">
+                <div class="ms-item">
+                  <div>
+                    <strong>{{ servico.titulo }}</strong>
+                    <span class="ms-meta">
+                      @if (usuario()?.tipoConta === 'cliente' && servico.prestadorNome) {
+                        {{ servico.prestadorNome }} ·
+                      } @else if (usuario()?.tipoConta === 'prestador' && servico.clienteNome) {
+                        {{ servico.clienteNome }} ·
+                      }
+                      @if (servico.categoriaNome) { {{ servico.categoriaNome }} · }
+                      {{ servico.criadoEm | date:'dd/MM/yyyy' }}
+                      @if (servico.preco > 0) { · {{ servico.preco | currency:'BRL':'symbol':'1.2-2' }} }
+                    </span>
+                  </div>
+                  <div class="ms-item__acoes">
+                    <a
+                      [routerLink]="['/servico', servico.id]"
+                      class="ms-item__link"
+                      [attr.aria-label]="'Ver detalhes do serviço ' + servico.titulo"
+                    >Ver detalhes →</a>
+                    <span
+                      class="ms-badge"
+                      [class]="'ms-badge ms-badge--' + badgeStatus(servico.status).cor"
+                      aria-label="Status: {{ badgeStatus(servico.status).texto }}"
+                    >{{ badgeStatus(servico.status).texto }}</span>
+                  </div>
+                </div>
+
+                <!-- Avaliar: serviços concluídos de clientes -->
+                @if (servico.status === 'concluido' && usuario()?.tipoConta === 'cliente') {
+                  <div class="ms-item__avaliar">
+                    @if (jaAvaliou(servico.id)) {
+                      <span class="avaliacao-enviada" aria-label="Avaliação enviada">
+                        <span aria-hidden="true">★</span> Avaliado
+                      </span>
+                    } @else {
+                      <button
+                        class="btn-avaliar"
+                        (click)="abrirFormularioAvaliacao(servico.id)"
+                        [attr.aria-label]="'Avaliar serviço ' + servico.titulo"
+                        [attr.aria-expanded]="avaliacaoAberta() === servico.id"
+                      >
+                        <span aria-hidden="true">★</span> Avaliar
+                      </button>
+                    }
+                  </div>
+                }
+
+                <!-- Formulário inline de avaliação -->
+                @if (avaliacaoAberta() === servico.id) {
+                  <div class="form-avaliacao" role="region" aria-label="Formulário de avaliação">
+                    <div class="form-avaliacao__titulo">Como foi o serviço?</div>
+
+                    <!-- Seletor de estrelas -->
+                    <div
+                      class="estrelas-seletor"
+                      role="group"
+                      aria-label="Selecione uma nota de 1 a 5 estrelas"
+                    >
+                      @for (i of indicesEstrelas; track i) {
+                        <button
+                          type="button"
+                          class="estrela-btn"
+                          [class.ativa]="i <= notaEfetiva()"
+                          (click)="selecionarNota(i)"
+                          (mouseenter)="definirHoverNota(i)"
+                          (mouseleave)="limparHoverNota()"
+                          [attr.aria-label]="i + ' estrela' + (i > 1 ? 's' : '')"
+                          [attr.aria-pressed]="notaSelecionada() === i"
+                        >★</button>
+                      }
+                      @if (notaEfetiva() > 0) {
+                        <span class="estrelas-label" aria-live="polite">
+                          {{ notaEfetiva() }}/5
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Comentário -->
+                    <div class="campo">
+                      <label class="campo__label" [for]="'comentario-' + servico.id">
+                        Comentário <span class="campo__opcional">(opcional)</span>
+                      </label>
+                      <textarea
+                        [id]="'comentario-' + servico.id"
+                        class="campo__textarea campo__textarea--sm"
+                        rows="3"
+                        placeholder="Descreva sua experiência com este serviço..."
+                        [value]="comentarioTexto()"
+                        (input)="comentarioTexto.set($any($event.target).value)"
+                        maxlength="1000"
+                      ></textarea>
+                    </div>
+
+                    <!-- Erro -->
+                    @if (erroAvaliacao()) {
+                      <div class="avaliacao-erro" role="alert" aria-live="assertive">
+                        <span aria-hidden="true">⚠</span> {{ erroAvaliacao() }}
+                      </div>
+                    }
+
+                    <!-- Ações -->
+                    <div class="form-avaliacao__acoes">
+                      <button
+                        type="button"
+                        class="btn-cancelar-avaliacao"
+                        (click)="fecharFormularioAvaliacao()"
+                        [disabled]="enviandoAvaliacao()"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-enviar-avaliacao"
+                        (click)="enviarAvaliacao(servico.id)"
+                        [disabled]="enviandoAvaliacao() || notaSelecionada() === 0"
+                      >
+                        @if (enviandoAvaliacao()) {
+                          <span class="spinner spinner--sm" aria-hidden="true"></span>
+                          Enviando...
+                        } @else {
+                          Enviar avaliação
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+
+              </li>
+            }
+          </ul>
+        }
+
+      </section>
+    }
+
+  </main>
+</div>

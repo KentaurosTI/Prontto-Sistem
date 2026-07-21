@@ -1,0 +1,112 @@
+<div class="pagina-auth">
+  <!-- Painel promocional (desktop) -->
+  <aside class="auth-painel" aria-hidden="true">
+    <div class="auth-painel__inner">
+      <a routerLink="/" class="auth-painel__logo"><span class="logo-pront">PRONT</span><span class="logo-to">TO</span></a>
+      <h2 class="auth-painel__titulo">Junte-se ao Prontto hoje mesmo</h2>
+      <p class="auth-painel__subtitulo">Crie sua conta grátis e acesse serviços profissionais de qualidade.</p>
+      <ul class="auth-painel__lista" role="list">
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Cadastro 100% gratuito</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Profissionais verificados</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Pagamento seguro após conclusão</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Suporte humanizado</li>
+      </ul>
+      <div class="auth-painel__orb" aria-hidden="true"></div>
+    </div>
+  </aside>
+
+  <!-- Formulário -->
+  <div class="auth-form-wrapper">
+    <div class="auth-form-inner">
+      <a routerLink="/" class="auth-logo-mobile"><span class="logo-pront">PRONT</span><span class="logo-to">TO</span></a>
+      <h1 class="auth-titulo">Criar conta grátis</h1>
+      <p class="auth-subtitulo">Leva menos de 2 minutos. Sem cartão de crédito.</p>
+
+      @if (erro()) {
+        <div class="auth-erro" role="alert" aria-live="assertive">
+          <span class="auth-erro__icone" aria-hidden="true">⚠</span> {{ erro() }}
+        </div>
+      }
+
+      <form class="auth-form" [formGroup]="formulario" (ngSubmit)="cadastrar()" novalidate>
+        <div class="tipo-conta-grupo" role="group" aria-label="Tipo de conta">
+          <p class="tipo-conta-label">Sou um:</p>
+          <div class="tipo-conta-cards">
+            <button type="button" class="card-tipo" [class.selecionado]="tipoSelecionado() === 'cliente'"
+              (click)="selecionarTipoConta('cliente')">
+              <span class="card-tipo__icone" aria-hidden="true">🏠</span>
+              <strong class="card-tipo__titulo">Cliente</strong>
+              <span class="card-tipo__desc">Quero contratar serviços</span>
+            </button>
+            <button type="button" class="card-tipo" [class.selecionado]="tipoSelecionado() === 'prestador'"
+              (click)="selecionarTipoConta('prestador')">
+              <span class="card-tipo__icone" aria-hidden="true">🔧</span>
+              <strong class="card-tipo__titulo">Prestador</strong>
+              <span class="card-tipo__desc">Quero oferecer serviços</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="campo" [class.campo--erro]="formulario.get('nome')?.invalid && formulario.get('nome')?.touched">
+          <label class="campo__label" for="nome">Nome completo</label>
+          <div class="campo__wrapper">
+            <input id="nome" type="text" formControlName="nome" placeholder="Seu nome" class="campo__input" autocomplete="name">
+          </div>
+          @if (formulario.get('nome')?.invalid && formulario.get('nome')?.touched) {
+            <span class="campo__erro-msg" role="alert">Informe seu nome</span>
+          }
+        </div>
+
+        <div class="campo" [class.campo--erro]="formulario.get('email')?.invalid && formulario.get('email')?.touched">
+          <label class="campo__label" for="email">E-mail</label>
+          <div class="campo__wrapper">
+            <input id="email" type="email" formControlName="email" placeholder="seu@email.com" class="campo__input" autocomplete="email">
+          </div>
+          @if (formulario.get('email')?.invalid && formulario.get('email')?.touched) {
+            <span class="campo__erro-msg" role="alert">Informe um e-mail válido</span>
+          }
+        </div>
+
+        <div class="campo" [class.campo--erro]="formulario.get('senha')?.invalid && formulario.get('senha')?.touched">
+          <label class="campo__label" for="senha">Senha</label>
+          <div class="campo-senha">
+            <input id="senha" [type]="senhaVisivel() ? 'text' : 'password'" formControlName="senha"
+              placeholder="Mínimo 8 caracteres" class="campo__input" autocomplete="new-password">
+            <button type="button" class="btn-toggle-senha" (click)="senhaVisivel.set(!senhaVisivel())"
+              [attr.aria-label]="senhaVisivel() ? 'Ocultar senha' : 'Mostrar senha'">
+              <i [class]="senhaVisivel() ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+            </button>
+          </div>
+          @if (formulario.get('senha')?.hasError('minlength') && formulario.get('senha')?.touched) {
+            <span class="campo__erro-msg" role="alert">Mínimo 8 caracteres</span>
+          }
+        </div>
+
+        @if (ehPrestador()) {
+          <div class="campo">
+            <label class="campo__label" for="especialidade">Especialidade principal</label>
+            <div class="campo__wrapper">
+              <input id="especialidade" type="text" formControlName="especialidade"
+                placeholder="Ex: Eletricista residencial" class="campo__input">
+            </div>
+          </div>
+        }
+
+        <div class="campo">
+          <label class="campo__label" for="telefone">Telefone <span class="campo__opcional">(opcional)</span></label>
+          <div class="campo__wrapper">
+            <input id="telefone" type="tel" formControlName="telefone" placeholder="(11) 99999-9999" class="campo__input" autocomplete="tel">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="formulario.invalid || carregando()">
+          @if (carregando()) { <span class="spinner" aria-hidden="true"></span> Criando conta... }
+          @else { Criar conta grátis }
+        </button>
+      </form>
+
+      <div class="auth-separator" aria-hidden="true"><span>ou</span></div>
+      <p class="auth-link">Já tem conta? <a routerLink="/entrar">Entrar</a></p>
+    </div>
+  </div>
+</div>

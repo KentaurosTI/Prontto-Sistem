@@ -1,0 +1,96 @@
+<!-- ── Hero ── -->
+<section class="golpe-hero">
+  <div class="wrap">
+    <div class="golpe-hero__ic" aria-hidden="true"><i class="ri-alert-line"></i></div>
+    <h1>Caiu em um golpe? Veja o que fazer</h1>
+    <p>
+      Mantenha a calma. Agir rápido aumenta as chances de reverter o prejuízo e ajuda a proteger outras
+      pessoas. Siga os passos abaixo e nos comunique — estamos aqui para ajudar.
+    </p>
+  </div>
+</section>
+
+<!-- ── Passos ── -->
+<section class="sec">
+  <div class="wrap golpe__wrap">
+    <div class="golpe-passos">
+      <div class="golpe-passo">
+        <span class="golpe-passo__n">1</span>
+        <div>
+          <h3>Bloqueie seu cartão</h3>
+          <p>Entre em contato com a operadora do cartão imediatamente para impedir novas transações indevidas.</p>
+        </div>
+      </div>
+      <div class="golpe-passo">
+        <span class="golpe-passo__n">2</span>
+        <div>
+          <h3>Fale com seu banco</h3>
+          <p>Informe o ocorrido, peça orientações sobre estorno (MED, no caso do Pix) e anote o número do protocolo.</p>
+        </div>
+      </div>
+      <div class="golpe-passo">
+        <span class="golpe-passo__n">3</span>
+        <div>
+          <h3>Registre um Boletim de Ocorrência (B.O.)</h3>
+          <p>O B.O. pode ser feito online, na delegacia eletrônica, e é essencial para colaborar com as autoridades.</p>
+        </div>
+      </div>
+      <div class="golpe-passo">
+        <span class="golpe-passo__n">4</span>
+        <div>
+          <h3>Comunique o Prontto</h3>
+          <p>Preencha o formulário abaixo com os detalhes. Nossa equipe vai analisar, orientar você e tomar as medidas cabíveis contra o responsável.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Formulário de denúncia ── -->
+    <div class="golpe-form" id="denunciar">
+      <h2>Denunciar ao Prontto</h2>
+      <p class="golpe-form__sub">Conte o que aconteceu. Sua denúncia é enviada diretamente à nossa equipe.</p>
+
+      @if (enviado()) {
+        <div class="ajuda__ok" role="status">
+          <i class="ri-checkbox-circle-line"></i>
+          <div>
+            <b>Denúncia registrada!</b>
+            <p>Abrimos seu aplicativo de e-mail com a mensagem para <b>prontto.org&#64;gmail.com</b>. Se não abriu, escreva diretamente para esse endereço.</p>
+          </div>
+        </div>
+      }
+
+      <form (submit)="$event.preventDefault(); enviar()" novalidate>
+        <div class="cad-grid">
+          <div class="cad-fld">
+            <label for="g-nome">Nome</label>
+            <input id="g-nome" type="text" placeholder="Seu nome" [value]="nome()" (input)="nome.set($any($event.target).value)">
+          </div>
+          <div class="cad-fld">
+            <label for="g-email">E-mail</label>
+            <input id="g-email" type="email" placeholder="seu@email.com" [value]="email()" (input)="email.set($any($event.target).value)">
+          </div>
+          <div class="cad-fld">
+            <label for="g-tel">Telefone <span class="opt">(opcional)</span></label>
+            <input id="g-tel" type="tel" placeholder="11 99999-9999" [value]="telefone()" (input)="telefone.set($any($event.target).value)">
+          </div>
+          <div class="cad-fld cad-fld--full">
+            <label for="g-desc">Descrição do ocorrido</label>
+            <textarea id="g-desc" placeholder="Descreva o que aconteceu: com quem você negociou, valores, forma de pagamento, prints, etc." [value]="descricao()" (input)="descricao.set($any($event.target).value)"></textarea>
+          </div>
+        </div>
+        <div class="golpe-form__acoes">
+          <button type="submit" class="btn btn-laranja btn-lg" [disabled]="!formValido">Enviar denúncia</button>
+        </div>
+      </form>
+    </div>
+
+    <p class="golpe__nota">
+      Em caso de emergência ou crime em andamento, acione a polícia pelo <b>190</b>. Para denúncias de
+      crimes cibernéticos, procure a delegacia especializada da sua região.
+    </p>
+
+    <div class="golpe__voltar">
+      <a routerLink="/seguranca" class="btn btn-out">Ver dicas de segurança</a>
+    </div>
+  </div>
+</section>

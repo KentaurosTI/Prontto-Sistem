@@ -1,0 +1,62 @@
+<section class="sec">
+  <div class="wrap ajuda__wrap">
+    <div class="sec__head">
+      <span class="kick">Central de Ajuda</span>
+      <h2>Como podemos ajudar?</h2>
+      <p>Descreva seu problema ou sugestão. Nossa equipe responde o mais rápido possível.</p>
+    </div>
+
+    <!-- Formulário -->
+    <div class="ajuda__form">
+      @if (enviado()) {
+        <div class="ajuda__ok" role="status">
+          <i class="ri-checkbox-circle-line"></i>
+          <div>
+            <b>Tudo certo!</b>
+            <p>Abrimos seu aplicativo de e-mail com a mensagem para <b>prontto.org&#64;gmail.com</b>. Se não abriu, escreva diretamente para esse endereço.</p>
+          </div>
+        </div>
+      }
+
+      <form (submit)="$event.preventDefault(); enviar()" novalidate>
+        <div class="cad-grid">
+          <div class="cad-fld">
+            <label for="a-nome">Nome</label>
+            <input id="a-nome" type="text" placeholder="Seu nome" [value]="nome()" (input)="nome.set($any($event.target).value)">
+          </div>
+          <div class="cad-fld">
+            <label for="a-tel">Telefone</label>
+            <input id="a-tel" type="tel" placeholder="11 99999-9999" [value]="telefone()" (input)="telefone.set($any($event.target).value)">
+          </div>
+          <div class="cad-fld cad-fld--full">
+            <label for="a-desc">Descrição do problema / sugestão</label>
+            <textarea id="a-desc" placeholder="Conte com detalhes o que aconteceu ou o que você sugere..." [value]="descricao()" (input)="descricao.set($any($event.target).value)"></textarea>
+          </div>
+        </div>
+        <div class="ajuda__acoes">
+          <button type="submit" class="btn btn-laranja btn-lg" [disabled]="!formValido">Enviar mensagem</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- FAQ -->
+    <div class="ajuda__faq">
+      <div class="sec__head" style="margin-bottom:24px">
+        <h2>Perguntas frequentes</h2>
+        <p>Talvez sua dúvida já tenha resposta aqui.</p>
+      </div>
+      <div class="faq">
+        @for (f of faq; track f.pergunta; let i = $index) {
+          <div class="faq__item" [class.open]="faqAberto() === i">
+            <button class="faq__q" (click)="alternarFaq(i)" [attr.aria-expanded]="faqAberto() === i">
+              {{ f.pergunta }}<span class="mk">+</span>
+            </button>
+            <div class="faq__a" [style.max-height]="faqAberto() === i ? '400px' : '0'">
+              <div class="faq__a-in"><p>{{ f.resposta }}</p></div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

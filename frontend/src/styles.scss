@@ -1,0 +1,251 @@
+/* ============================================================
+   Prontto — Global Styles
+   ============================================================ */
+
+/* Google Fonts — Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ── Variáveis CSS ─────────────────────────────────────────── */
+:root {
+  --cor-primaria: #f97316;
+  --cor-primaria-hover: #ea580c;
+  --cor-navy: #0d1117;
+  --cor-navy-medio: #111827;
+  --cor-texto: #374151;
+  --cor-texto-suave: #6b7280;
+  --cor-borda: #e5e7eb;
+  --cor-fundo: #f9fafb;
+  --cor-branco: #ffffff;
+  --raio-borda: 0.5rem;
+  --raio-borda-lg: 0.75rem;
+  --transicao: 0.2s ease;
+  --transicao-suave: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  color: var(--cor-texto);
+  line-height: 1.6;
+  background-color: var(--cor-branco);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--cor-texto);
+}
+
+/* ── Scrollbar customizada ───────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cor-fundo);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cor-primaria);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-primaria-hover);
+}
+
+/* ── Utilitários globais ─────────────────────────────────────── */
+
+/* Container */
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+
+  @media (min-width: 640px) {
+    padding: 0 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 0 2rem;
+  }
+}
+
+/* Botão primário */
+.btn-primario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--cor-primaria);
+  color: var(--cor-branco);
+  border: none;
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transicao), transform var(--transicao), box-shadow var(--transicao);
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+
+  &:hover {
+    background: var(--cor-primaria-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Botão secundário (outline) */
+.btn-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: var(--cor-primaria);
+  border: 2px solid var(--cor-primaria);
+  border-radius: 9999px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transicao);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--cor-primaria);
+    color: var(--cor-branco);
+    transform: translateY(-2px);
+  }
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Label de seção */
+.secao-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--cor-primaria);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+/* Logo classes globais */
+.logo-pront {
+  color: var(--cor-navy-medio);
+}
+
+.logo-to {
+  color: var(--cor-primaria);
+}
+
+/* ── Skeleton Loading ────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--cor-borda) 25%,
+    #f3f4f6 50%,
+    var(--cor-borda) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--raio-borda);
+}
+
+/* ── Animações globais ───────────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 600px;
+  }
+}
+
+@keyframes pulso {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}

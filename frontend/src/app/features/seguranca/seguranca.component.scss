@@ -1,0 +1,23 @@
+/* Usa as classes globais (sg-, faq) do design system em src/styles/redesign.scss */
+:host {
+  display: block;
+}
+
+/* Espaço entre o botão "Ver dicas" e o link "Caiu em um golpe?" */
+.sg-hero__alt {
+  margin-left: 22px;
+}
+
+@media (max-width: 560px) {
+  /* no mobile, quebra em linhas separadas com respiro */
+  .sg-hero .btn-navy {
+    display: flex;
+    width: 100%;
+  }
+  .sg-hero__alt {
+    display: block;
+    margin-left: 0;
+    margin-top: 16px;
+  }
+}
+

@@ -1,0 +1,35 @@
+/* Como funciona — tela dedicada ao vídeo + copy (usa classes globais do redesign) */
+:host {
+  display: block;
+}
+
+.cf-wrap {
+  max-width: 860px;
+}
+
+.cf-video {
+  margin: 8px auto 32px;
+  width: 100%;
+}
+
+.cf-copy {
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 1.12rem;
+  line-height: 1.75;
+  max-width: 720px;
+  margin: 0 auto;
+
+  b {
+    color: var(--navy-medio);
+    font-weight: 700;
+  }
+}
+
+.cf-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 32px;
+}

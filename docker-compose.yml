@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: prontto_dev
+      MYSQL_USER: prontto
+      MYSQL_PASSWORD: prontto_dev
+      MYSQL_ROOT_PASSWORD: prontto_root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uprontto", "-pprontto_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: "Server=mysql;Database=prontto_dev;User=prontto;Password=prontto_dev;Port=3306;AllowPublicKeyRetrieval=true;SslMode=None;"
+      SESSION_SECRET: prontto-secret-dev-local-32chars!!
+    ports:
+      - "5259:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:

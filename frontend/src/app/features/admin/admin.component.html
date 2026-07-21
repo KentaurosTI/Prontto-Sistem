@@ -1,0 +1,333 @@
+<div class="painel-admin">
+
+  <!-- ── Sidebar Admin ─────────────────────────────────────── -->
+  <aside class="admin-sidebar">
+    <a routerLink="/" class="admin-sidebar__logo" aria-label="Voltar para a página inicial">
+      <span class="logo-pront">PRONT</span><span class="logo-to">TO</span>
+      <span class="admin-sidebar__tag">Admin</span>
+    </a>
+
+    <nav class="admin-sidebar__nav" aria-label="Navegação do painel">
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'stats'"
+        (click)="abaSelecionada.set('stats')"
+        aria-label="Estatísticas"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-bar-chart-2-line"></i></span>
+        <span class="admin-nav-item__label">Estatísticas</span>
+      </button>
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'servicos'"
+        (click)="abaSelecionada.set('servicos')"
+        aria-label="Serviços"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-tools-line"></i></span>
+        <span class="admin-nav-item__label">Serviços</span>
+      </button>
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'usuarios'"
+        (click)="abaSelecionada.set('usuarios')"
+        aria-label="Usuários"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-group-line"></i></span>
+        <span class="admin-nav-item__label">Usuários</span>
+      </button>
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'financeiro'"
+        (click)="abaSelecionada.set('financeiro')"
+        aria-label="Financeiro"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></span>
+        <span class="admin-nav-item__label">Financeiro</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- ── Conteúdo ──────────────────────────────────────────── -->
+  <div class="admin-conteudo">
+
+    <!-- Header mobile com abas -->
+    <div class="admin-abas-mobile" role="tablist" aria-label="Seções do admin">
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'stats'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'stats'" (click)="abaSelecionada.set('stats')">
+        <span aria-hidden="true"><i class="ri-bar-chart-2-line"></i></span>
+      </button>
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'servicos'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'servicos'" (click)="abaSelecionada.set('servicos')">
+        <span aria-hidden="true"><i class="ri-tools-line"></i></span>
+      </button>
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'usuarios'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'usuarios'" (click)="abaSelecionada.set('usuarios')">
+        <span aria-hidden="true"><i class="ri-group-line"></i></span>
+      </button>
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'financeiro'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'financeiro'" (click)="abaSelecionada.set('financeiro')">
+        <span aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></span>
+      </button>
+    </div>
+
+    <!-- ── ABA: Estatísticas ─────────────────────────────── -->
+    @if (abaSelecionada() === 'stats') {
+      <div class="admin-secao">
+        <h1 class="admin-titulo">Visão Geral</h1>
+
+        @if (estatisticas()) {
+          <div class="stats-grade">
+            <button type="button" class="card-stat card-stat--acao" (click)="abaSelecionada.set('usuarios')" title="Ver usuários">
+              <div class="card-stat__icone card-stat__icone--azul" aria-hidden="true"><i class="ri-group-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Total de Usuários</span>
+                <strong class="card-stat__valor">{{ estatisticas()!.usuarios.total }}</strong>
+                <span class="card-stat__detalhe">{{ estatisticas()!.usuarios.clientes }} clientes · {{ estatisticas()!.usuarios.prestadores }} prestadores</span>
+              </div>
+              <i class="ri-arrow-right-up-line card-stat__seta" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="card-stat card-stat--acao" (click)="abaSelecionada.set('servicos')" title="Ver serviços">
+              <div class="card-stat__icone card-stat__icone--laranja" aria-hidden="true"><i class="ri-tools-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Total de Serviços</span>
+                <strong class="card-stat__valor">{{ estatisticas()!.servicos.total }}</strong>
+                <span class="card-stat__detalhe">{{ estatisticas()!.servicos.pendentes }} pendentes · {{ estatisticas()!.servicos.concluidos }} concluídos</span>
+              </div>
+              <i class="ri-arrow-right-up-line card-stat__seta" aria-hidden="true"></i>
+            </button>
+
+            <button type="button" class="card-stat card-stat--acao" (click)="abaSelecionada.set('financeiro')" title="Ver financeiro">
+              <div class="card-stat__icone card-stat__icone--verde" aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Receita Total</span>
+                <strong class="card-stat__valor">R$ {{ estatisticas()!.receita.ganha | number:'1.2-2' }}</strong>
+                <span class="card-stat__detalhe">GMV: R$ {{ estatisticas()!.receita.gmv | number:'1.2-2' }}</span>
+              </div>
+              <i class="ri-arrow-right-up-line card-stat__seta" aria-hidden="true"></i>
+            </button>
+
+            <!-- KPIs adicionais -->
+            <div class="card-stat">
+              <div class="card-stat__icone card-stat__icone--azul" aria-hidden="true"><i class="ri-hammer-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Serviços em andamento</span>
+                <strong class="card-stat__valor">{{ estatisticas()!.servicos.emAndamento }}</strong>
+                <span class="card-stat__detalhe">{{ estatisticas()!.servicos.concluidos }} concluídos</span>
+              </div>
+            </div>
+
+            <div class="card-stat">
+              <div class="card-stat__icone card-stat__icone--laranja" aria-hidden="true"><i class="ri-user-star-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Prestadores ativos</span>
+                <strong class="card-stat__valor">{{ estatisticas()!.usuarios.prestadores }}</strong>
+                <span class="card-stat__detalhe">{{ estatisticas()!.usuarios.clientes }} clientes</span>
+              </div>
+            </div>
+
+            <div class="card-stat">
+              <div class="card-stat__icone card-stat__icone--verde" aria-hidden="true"><i class="ri-time-line"></i></div>
+              <div class="card-stat__corpo">
+                <span class="card-stat__label">Receita pendente</span>
+                <strong class="card-stat__valor">R$ {{ estatisticas()!.receita.pendente | number:'1.2-2' }}</strong>
+                <span class="card-stat__detalhe">a liberar / receber</span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <div class="stats-grade">
+            @for (i of [1,2,3,4,5,6]; track i) {
+              <div class="card-stat skeleton-card"></div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ── ABA: Serviços ──────────────────────────────────── -->
+    @if (abaSelecionada() === 'servicos') {
+      <div class="admin-secao">
+        <h1 class="admin-titulo">Serviços</h1>
+        <div class="tabela-wrapper">
+          <table class="tabela" aria-label="Lista de serviços">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (servicos().length === 0) {
+                <tr>
+                  <td colspan="5" class="tabela__vazio">Nenhum serviço encontrado.</td>
+                </tr>
+              }
+              @for (servico of servicos(); track servico.id) {
+                <tr>
+                  <td class="tabela__titulo">{{ servico.titulo }}</td>
+                  <td>{{ servico.categoriaId }}</td>
+                  <td>R$ {{ servico.preco }}</td>
+                  <td>
+                    <span class="badge badge-{{ servico.status }}">{{ rotularStatus(servico.status) }}</span>
+                  </td>
+                  <td class="tabela__acoes-col">
+                    <div class="acao-menu">
+                      <button class="acao-menu__btn" (click)="alternarMenu(servico.id, $event)" aria-label="Ações" [attr.aria-expanded]="menuAberto() === servico.id">
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+                      @if (menuAberto() === servico.id) {
+                        <div class="acao-menu__lista" (click)="$event.stopPropagation()">
+                          @if (servico.status === 'em_negociacao') {
+                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'em_andamento'); menuAberto.set(null)"><i class="ri-play-line"></i> Iniciar</button>
+                          }
+                          @if (servico.status === 'em_andamento') {
+                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'concluido'); menuAberto.set(null)"><i class="ri-check-line"></i> Concluir</button>
+                            <button class="acao-menu__item" (click)="atualizarStatus(servico.id, 'cancelado'); menuAberto.set(null)"><i class="ri-close-line"></i> Cancelar</button>
+                          }
+                          <button class="acao-menu__item" (click)="abrirEditarServico(servico)"><i class="ri-edit-line"></i> Editar</button>
+                          <button class="acao-menu__item acao-menu__item--danger" (click)="excluirServico(servico)"><i class="ri-delete-bin-line"></i> Excluir</button>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── ABA: Usuários ─────────────────────────────────── -->
+    @if (abaSelecionada() === 'usuarios') {
+      <div class="admin-secao">
+        <h1 class="admin-titulo">Usuários</h1>
+        <div class="tabela-wrapper">
+          <table class="tabela" aria-label="Lista de usuários">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Tipo</th>
+                <th>Cadastrado em</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (usuarios().length === 0) {
+                <tr>
+                  <td colspan="5" class="tabela__vazio">Nenhum usuário encontrado.</td>
+                </tr>
+              }
+              @for (usuario of usuarios(); track usuario.id) {
+                <tr>
+                  <td>
+                    <div class="usuario-cell">
+                      <div class="usuario-avatar" aria-hidden="true">
+                        {{ (usuario.nome ?? 'U').charAt(0).toUpperCase() }}
+                      </div>
+                      {{ usuario.nome }}
+                    </div>
+                  </td>
+                  <td class="tabela__email">{{ usuario.email }}</td>
+                  <td>
+                    <span class="badge" [class.badge-prestador]="usuario.tipoConta === 'prestador'" [class.badge-cliente]="usuario.tipoConta === 'cliente'">
+                      {{ usuario.tipoConta === 'prestador' ? '👷 Prestador' : '👤 Cliente' }}
+                    </span>
+                  </td>
+                  <td>{{ usuario.criadoEm | date:'dd/MM/yyyy' }}</td>
+                  <td class="tabela__acoes-col">
+                    <div class="acao-menu">
+                      <button class="acao-menu__btn" (click)="alternarMenu(usuario.id, $event)" aria-label="Ações" [attr.aria-expanded]="menuAberto() === usuario.id">
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+                      @if (menuAberto() === usuario.id) {
+                        <div class="acao-menu__lista" (click)="$event.stopPropagation()">
+                          <button class="acao-menu__item" (click)="abrirEditarUsuario(usuario)"><i class="ri-edit-line"></i> Editar</button>
+                          <button class="acao-menu__item acao-menu__item--danger" (click)="excluirUsuario(usuario)"><i class="ri-delete-bin-line"></i> Excluir</button>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── ABA: Financeiro ───────────────────────────────── -->
+    @if (abaSelecionada() === 'financeiro') {
+      <div class="admin-secao">
+        <h1 class="admin-titulo">Financeiro</h1>
+        <div class="tabela-wrapper">
+          <table class="tabela" aria-label="Lista de cobranças">
+            <thead>
+              <tr>
+                <th>Serviço</th>
+                <th>Valor Total</th>
+                <th>Taxa Admin</th>
+                <th>Prestador</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (listaCobrancas().length === 0) {
+                <tr>
+                  <td colspan="5" class="tabela__vazio">Nenhuma cobrança encontrada.</td>
+                </tr>
+              }
+              @for (cobranca of listaCobrancas(); track cobranca.id) {
+                <tr>
+                  <td class="tabela__titulo">{{ cobranca.servico?.titulo ?? '—' }}</td>
+                  <td><strong>R$ {{ cobranca.valorTotal }}</strong></td>
+                  <td class="tabela__taxa">R$ {{ cobranca.taxaAdmin }}</td>
+                  <td>R$ {{ cobranca.valorPrestador }}</td>
+                  <td>
+                    <span class="badge badge-{{ cobranca.status }}">{{ cobranca.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- ── Modal de edição ─────────────────────────────────────── -->
+@if (edicao(); as e) {
+  <div class="admin-modal" (click)="fecharEdicao()">
+    <div class="admin-modal__box" (click)="$event.stopPropagation()">
+      <h3 class="admin-modal__titulo">{{ e.tipo === 'usuario' ? 'Editar usuário' : 'Editar serviço' }}</h3>
+
+      @if (e.tipo === 'usuario') {
+        <label class="admin-modal__campo">
+          <span>Nome</span>
+          <input type="text" [value]="e.nome" (input)="atualizarCampoEdicao('nome', $any($event.target).value)">
+        </label>
+        <label class="admin-modal__campo">
+          <span>Telefone</span>
+          <input type="tel" [value]="e.telefone" (input)="atualizarCampoEdicao('telefone', $any($event.target).value)">
+        </label>
+      } @else {
+        <label class="admin-modal__campo">
+          <span>Título</span>
+          <input type="text" [value]="e.titulo" (input)="atualizarCampoEdicao('titulo', $any($event.target).value)">
+        </label>
+        <label class="admin-modal__campo">
+          <span>Preço (R$)</span>
+          <input type="number" step="0.01" min="0" [value]="e.preco" (input)="atualizarCampoEdicao('preco', $any($event.target).value)">
+        </label>
+      }
+
+      <div class="admin-modal__acoes">
+        <button type="button" class="btn-modal btn-modal--ghost" (click)="fecharEdicao()">Cancelar</button>
+        <button type="button" class="btn-modal btn-modal--primario" (click)="salvarEdicao()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}

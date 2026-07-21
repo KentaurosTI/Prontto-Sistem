@@ -1,0 +1,181 @@
+@if (encontrado()) {
+<!-- ── Breadcrumb ── -->
+<div class="wrap">
+  <nav class="crumb" aria-label="Você está em">
+    <a routerLink="/">Prontto</a><span>›</span>
+    <a [routerLink]="rota()">{{ cat().label }}</a>
+    @if (sub()) { <span>›</span><b>{{ sub() }}</b> }
+  </nav>
+</div>
+
+<!-- ── Hero ── -->
+<section class="cat-hero">
+  <div class="wrap">
+    <div class="cat-hero__in">
+      <div class="cat-hero__txt">
+        <h1>Precisando de {{ sub() ? 'serviços de ' + sub() : cat().label }}?</h1>
+        <p class="cat-hero__sub">Milhares de profissionais avaliados por clientes, permitindo você negociar apenas com os melhores.</p>
+        <ul class="cat-hero__pts">
+          <li><span class="ic ic--shield"><i class="ri-shield-check-line"></i></span> Até 4 orçamentos grátis e seguros</li>
+          <li><span class="ic ic--star"><i class="ri-user-star-line"></i></span> Profissionais avaliados</li>
+          <li><span class="ic ic--play"><i class="ri-play-circle-line"></i></span> Veja como funciona o Prontto</li>
+        </ul>
+        <a [routerLink]="['/prestadores', cat().key]" class="btn btn-laranja btn-lg cat-hero__cta">
+          Ver profissionais de {{ cat().label }}
+        </a>
+      </div>
+      <div class="cat-hero__art">
+        @if (heroImg()) {
+          <img [src]="heroImg()" [alt]="'Profissional de ' + foco()">
+        } @else {
+          <span class="ph-tag">foto · profissional de {{ cat().label }}</span>
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Lista de serviços + avaliações ── -->
+<section class="cat-pick">
+  <div class="wrap">
+    <div class="cat-pick__in">
+      <div class="cat-pick__panel">
+        <div class="cat-pick__card">
+          <h2>Qual serviço de {{ foco() }} está precisando?</h2>
+          <div class="cat-search">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.7" y2="16.7"/></svg>
+            <input type="text" placeholder="O que você precisa?">
+          </div>
+          <div class="svc-list">
+            @for (item of flat(); track item) {
+              <a class="svc-row" [routerLink]="rota(item)">{{ item }}<span class="chev">›</span></a>
+            }
+          </div>
+          <div class="cat-pick__note">Orçamentos em até 60 minutos</div>
+        </div>
+      </div>
+      <aside class="cat-side">
+        <div class="cat-rate">
+          <div class="cat-rate__num">4.86 <span>/ 5</span></div>
+          <div class="cat-rate__stars">★★★★★</div>
+          <div class="cat-rate__count">149 clientes avaliaram nossos profissionais</div>
+        </div>
+        <div class="cat-reviews">
+          <h3>Avaliações de quem contratou</h3>
+          @for (r of reviews; track r.nome) {
+            <div class="cat-review">
+              <div class="cat-review__by"><b>{{ r.nome }}</b> avaliou:</div>
+              <div class="cat-review__stars">★★★★★</div>
+              <p class="cat-review__text">{{ r.texto }}</p>
+              <div class="cat-review__for">para <b>{{ r.para }}</b> / {{ foco() }}</div>
+            </div>
+          }
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA especialista ── -->
+<section class="cat-spec">
+  <div class="wrap">
+    <h2>Você é especialista em {{ cat().label }}?</h2>
+    <p>O Prontto recebe milhares de pedidos por mês e pode ajudar a aumentar a sua renda.</p>
+    <a routerLink="/cadastrar" class="btn btn-laranja btn-lg">Quero me cadastrar</a>
+  </div>
+</section>
+
+<!-- ── Custos médios ── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head"><h2>Custos médios</h2><p>Conheça o custo estimado para alguns serviços</p></div>
+    <div class="costs">
+      @for (c of custos(); track $index) {
+        <div class="cost-card">
+          <div class="cost-card__label">Custo médio estimado</div>
+          <div class="cost-card__val">{{ c.valor }}</div>
+          <div class="cost-card__svc">{{ c.servico }}</div>
+          <div class="cost-card__range">
+            <div><span>Menor custo</span><b>{{ c.menor }}</b></div>
+            <div><span>Maior custo</span><b>{{ c.maior }}</b></div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Pedidos similares ── -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec__head"><h2>Veja alguns pedidos similares para {{ foco() }}</h2><p>Esses são os últimos pedidos para essa categoria</p></div>
+    <div class="reqs">
+      @for (p of pedidos(); track $index) {
+        <div class="req-card">
+          <div class="req-card__h"><b>{{ p.nome }}</b> contratou especialista em {{ focoBaixo() }}</div>
+          <div class="req-card__txt">{{ p.texto }}</div>
+          <div class="req-card__done"><span class="ck"><i class="ri-checkbox-circle-line"></i></span> Pedido atendido</div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head"><h2>Perguntas Frequentes</h2></div>
+    <div class="faq">
+      @for (f of faq(); track f.q; let i = $index) {
+        <div class="faq__item" [class.open]="faqAberto() === i">
+          <button class="faq__q" (click)="alternarFaq(i)" [attr.aria-expanded]="faqAberto() === i">
+            {{ f.q }}<span class="mk">+</span>
+          </button>
+          <div class="faq__a" [style.max-height]="faqAberto() === i ? '600px' : '0'">
+            <div class="faq__a-in">
+              @for (par of f.a; track $index) { <p>{{ par }}</p> }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Serviços similares ── -->
+<section class="sec">
+  <div class="wrap">
+    <div class="sec__head" style="text-align:left;max-width:none;margin-bottom:28px"><h2>Veja serviços similares em {{ cat().label }}</h2></div>
+    <div class="linkgrid">
+      @for (l of similares(); track l.texto) {
+        <a [routerLink]="l.rota">{{ l.texto }}</a>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Cidades ── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head" style="text-align:left;max-width:none;margin-bottom:28px"><h2>Encontre {{ foco() }} nas principais cidades</h2></div>
+    <div class="linkgrid">
+      @for (c of cidades(); track c) {
+        <a [routerLink]="rota()">{{ c }}</a>
+      }
+    </div>
+  </div>
+</section>
+} @else {
+<!-- ── Serviço não encontrado ── -->
+<main class="auth-wrap">
+  <div class="auth-box">
+    <div class="auth-ic" aria-hidden="true"><i class="ri-search-eye-line" style="font-size:42px;color:var(--laranja)"></i></div>
+    <h1>Serviço não encontrado</h1>
+    <p class="auth-box__sub">
+      Não encontramos serviços para <b>“{{ termoBuscado() }}”</b>. Tente outro termo ou navegue pelas categorias disponíveis.
+    </p>
+    <a routerLink="/servicos" class="btn btn-laranja">Ver todas as categorias</a>
+    <a routerLink="/" class="btn btn-out">Voltar ao início</a>
+  </div>
+</main>
+}

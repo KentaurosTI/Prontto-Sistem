@@ -1,0 +1,126 @@
+/* ============================================================
+   Not Found Component — Prontto (mobile-first)
+   ============================================================ */
+
+.nao-encontrado {
+  min-height: calc(100vh - 64px);
+  background: var(--cor-fundo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Número gigante como background */
+.nao-encontrado__bg-numero {
+  position: absolute;
+  font-size: clamp(10rem, 35vw, 22rem);
+  font-weight: 900;
+  color: var(--cor-primaria);
+  opacity: 0.05;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+.nao-encontrado__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  width: 100%;
+  animation: fadeInUp 0.5s ease;
+}
+
+.nao-encontrado__icone {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+
+  @media (min-width: 640px) {
+    font-size: 5rem;
+  }
+}
+
+.nao-encontrado__titulo {
+  font-size: 1.625rem;
+  font-weight: 800;
+  color: var(--cor-navy-medio);
+  margin-bottom: 0.875rem;
+
+  @media (min-width: 640px) {
+    font-size: 2rem;
+  }
+}
+
+.nao-encontrado__descricao {
+  font-size: 1rem;
+  color: var(--cor-texto-suave);
+  line-height: 1.75;
+  margin-bottom: 2rem;
+
+  @media (min-width: 640px) {
+    font-size: 1.0625rem;
+  }
+}
+
+.nao-encontrado__ctas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  align-items: center;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.875rem 2.25rem;
+  background: var(--cor-primaria);
+  color: var(--cor-branco);
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: background var(--transicao), transform var(--transicao), box-shadow var(--transicao);
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.35);
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--cor-primaria-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(249, 115, 22, 0.45);
+  }
+}
+
+.btn-servicos {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.875rem 2.25rem;
+  background: transparent;
+  color: var(--cor-texto);
+  border: 2px solid var(--cor-borda);
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all var(--transicao);
+  white-space: nowrap;
+
+  &:hover {
+    border-color: var(--cor-primaria);
+    color: var(--cor-primaria);
+  }
+}

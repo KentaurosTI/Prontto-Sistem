@@ -1,0 +1,67 @@
+<div class="prest-pagina">
+  <header class="prest-header">
+    <h1 class="prest-titulo">Profissionais de {{ categoriaNome() }}</h1>
+    <p class="prest-sub">Escolha um profissional e envie sua solicitação de serviço.</p>
+
+    <div class="prest-filtro">
+      <label for="cidade">Cidade</label>
+      <select id="cidade" (change)="aoTrocarCidade($any($event.target).value)">
+        <option value="" [selected]="cidadeSlug() === ''">Todas as cidades de SP</option>
+        @for (c of cidades(); track c.id) {
+          <option [value]="c.slug" [selected]="c.slug === cidadeSlug()">{{ c.nome }}/{{ c.estado }}</option>
+        }
+      </select>
+    </div>
+  </header>
+
+  @if (carregando()) {
+    <div class="prest-grid">
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="prest-card prest-card--skeleton"></div>
+      }
+    </div>
+  } @else if (prestadores().length === 0) {
+    <div class="prest-vazio">
+      <div class="prest-vazio__icone" aria-hidden="true">🔍</div>
+      <h2>Nenhum profissional encontrado</h2>
+      <p>Ainda não há profissionais de {{ categoriaNome() }} nesta região. Tente outra cidade.</p>
+    </div>
+  } @else {
+    <div class="prest-grid" role="list">
+      @for (p of prestadores(); track p.id) {
+        <a class="prest-card" role="listitem" [routerLink]="['/prestador', p.slug]">
+          <div class="prest-card__avatar">
+            @if (p.fotoPerfilUrl) {
+              <img [src]="urlImagem(p.fotoPerfilUrl)" [alt]="'Foto de ' + p.nome" loading="lazy" />
+            } @else {
+              {{ p.nome.charAt(0).toUpperCase() }}
+            }
+          </div>
+          <div class="prest-card__corpo">
+            <strong class="prest-card__nome">{{ p.nome }}</strong>
+            @if (p.categorias.length) {
+              <span class="prest-card__esp">{{ p.categorias[0].nome }}</span>
+            }
+            <div class="prest-card__aval">
+              <span class="prest-card__estrelas" aria-hidden="true">
+                @for (e of estrelas(p.mediaAvaliacoes); track $index) {
+                  <span [class.cheia]="e === 'cheia'">★</span>
+                }
+              </span>
+              <span class="prest-card__nota">
+                {{ p.mediaAvaliacoes | number:'1.1-1' }} ({{ p.totalAvaliacoes }})
+              </span>
+            </div>
+            @if (p.cidades.length) {
+              <span class="prest-card__cidades">
+                <i class="ri-map-pin-line" aria-hidden="true"></i>
+                {{ p.cidades[0].nome }}@if (p.cidades.length > 1) { <span> +{{ p.cidades.length - 1 }}</span> }
+              </span>
+            }
+          </div>
+          <span class="prest-card__cta">Ver perfil <i class="ri-arrow-right-line"></i></span>
+        </a>
+      }
+    </div>
+  }
+</div>

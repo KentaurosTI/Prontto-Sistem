@@ -1,0 +1,305 @@
+<!-- ── Hero ───────────────────────────────────────── -->
+<section class="hero">
+  <video class="hero__video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="/video/fundo-hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero__veil" aria-hidden="true"></div>
+  <div class="wrap hero__in">
+    <div class="hero__txt">
+      <h1>Para tudo que sua casa precisa, tem um profissional <em>prontto</em>.</h1>
+      <p class="hero__sub">Descreva o serviço, receba orçamentos de profissionais verificados e contrate com segurança. Tudo em poucos minutos.</p>
+
+      <form class="search" (submit)="$event.preventDefault(); buscar()">
+        <label class="search__field">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.7" y2="16.7"/></svg>
+          <input type="text" placeholder="Do que você precisa? Ex: eletricista" autocomplete="off"
+            [value]="termoBusca()" (input)="termoBusca.set($any($event.target).value)"
+            (focus)="focoTermo.set(true)" (blur)="fecharTermo()">
+          @if (sugestoesTermo().length) {
+            <ul class="ac" role="listbox">
+              @for (s of sugestoesTermo(); track s) {
+                <li><button type="button" class="ac__item" (mousedown)="$event.preventDefault(); selecionarTermo(s)">{{ s }}</button></li>
+              }
+            </ul>
+          }
+        </label>
+        <div class="search__sep"></div>
+        <label class="search__field">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input type="text" placeholder="Sua cidade" autocomplete="off"
+            [value]="cidadeBusca()" (input)="cidadeBusca.set($any($event.target).value)"
+            (focus)="focoCidade.set(true)" (blur)="fecharCidade()">
+          @if (sugestoesCidade().length) {
+            <ul class="ac" role="listbox">
+              @for (regiao of sugestoesCidade(); track regiao) {
+                <li><button type="button" class="ac__item" (mousedown)="$event.preventDefault(); selecionarCidade(regiao)">{{ regiao }}</button></li>
+              }
+            </ul>
+          }
+        </label>
+        <button class="btn btn-laranja" type="submit">Buscar profissionais</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust band ─────────────────────────────────── -->
+<section class="trust">
+  <div class="wrap trust__in">
+    <div class="trust__item"><b>500+</b><span>Profissionais ativos</span></div>
+    <div class="trust__item"><b>15+</b><span>Categorias de serviço</span></div>
+    <div class="trust__item"><b>4.8★</b><span>Avaliação média</span></div>
+    <div class="trust__item"><b>98%</b><span>Clientes satisfeitos</span></div>
+  </div>
+</section>
+
+<!-- ── Principais serviços pedidos ─────────────────── -->
+<section class="sec" id="categorias">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <span class="kick">Mais procurados</span>
+      <h2>Principais serviços pedidos</h2>
+      <p>Os serviços mais realizados de cada categoria — peça seu orçamento agora.</p>
+    </div>
+    <div class="svc__wrap reveal">
+      <button class="svc__arrow svc__arrow--prev" aria-label="Anterior" (click)="mover(svcTrack, -1)"><svg viewBox="0 0 24 24"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <div class="svc__track" #svcTrack>
+        @for (svc of servicosDestaque; track svc.titulo) {
+          <article class="svc-card">
+            <div class="svc-card__img"><img [src]="svc.img" [alt]="svc.titulo"></div>
+            <div class="svc-card__body">
+              <div class="svc-card__title">{{ svc.titulo }}</div>
+              <a class="svc-card__cta" routerLink="/cadastrar">Solicitar orçamento →</a>
+            </div>
+          </article>
+        }
+      </div>
+      <button class="svc__arrow svc__arrow--next" aria-label="Próximo" (click)="mover(svcTrack, 1)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+    <div class="cats__more"><a routerLink="/servicos" class="btn btn-out">Ver todas as categorias</a></div>
+  </div>
+</section>
+
+<!-- ── Faixa de confiança (laranja) ───────────────── -->
+<section class="assurance">
+  <div class="wrap assurance__in reveal">
+    <span class="assurance__kick">Confiança em primeiro lugar</span>
+    <h2>Profissionais verificados, atendimento humano e a sua segurança do início ao fim</h2>
+    <p>Cada profissional do Prontto passa por verificação de cadastro antes de aparecer para você. Combine tudo pela plataforma, acompanhe o serviço e conte com nosso suporte sempre que precisar — sem app para baixar, direto do seu navegador.</p>
+    <ul class="assurance__row">
+      <li><span class="ck"><i class="ri-checkbox-circle-line"></i></span> Cadastro verificado</li>
+      <li><span class="ck"><i class="ri-checkbox-circle-line"></i></span> Avaliações reais de clientes</li>
+      <li><span class="ck"><i class="ri-checkbox-circle-line"></i></span> Suporte humano de verdade</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── Depoimentos ────────────────────────────────── -->
+<section class="sec" id="profissionais">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <span class="kick">Depoimentos</span>
+      <h2>Quem contratou, recomenda</h2>
+      <p>Mais de 12 mil serviços concluídos, com nota média 4.8★.</p>
+    </div>
+    <div class="quotes reveal">
+      <div class="quote">
+        <span class="quote__mark">&#8220;</span>
+        <p class="quote__text">Fui muito bem atendido, o profissional foi educado e fez um trabalho de qualidade. Valeu a pena, orçamento grátis e preço justo.</p>
+        <div class="quote__head"><img class="quote__av" src="/img/edimar-ferreira.jpg" alt="Edimar Ferreira"><div><b>Edimar Ferreira</b><span>Contratou um Pedreiro em São Paulo, SP</span></div></div>
+      </div>
+      <div class="quote">
+        <span class="quote__mark">&#8220;</span>
+        <p class="quote__text">Os profissionais são pessoas dedicadas com seus serviços. Tudo o que foi pedido foi feito exatamente como combinado. Aprovado!</p>
+        <div class="quote__head"><img class="quote__av" src="/img/josefa-lindalva.jpg" alt="Josefa Lindalva"><div><b>Josefa Lindalva</b><span>Contratou uma Assistência em Curitiba, PR</span></div></div>
+      </div>
+      <div class="quote">
+        <span class="quote__mark">&#8220;</span>
+        <p class="quote__text">Uma excelente profissional, pontual e acima de tudo confiável. Foi bastante educada e atenciosa com o trabalho. Recomendo!</p>
+        <div class="quote__head"><img class="quote__av" src="/img/renata-figueiredo.jpg" alt="Renata Figueiredo"><div><b>Renata Figueiredo</b><span>Contratou uma Diarista no Rio de Janeiro, RJ</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Categoria em destaque ──────────────────────── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <span class="kick">Categoria em destaque</span>
+      <h2>Reformas e Reparos</h2>
+    </div>
+    <div class="feat reveal">
+      <div class="feat__media">
+        <img src="/img/edimar-ferreira.jpg" alt="Edimar Ferreira">
+        <div class="feat__person">
+          <b>Edimar Ferreira</b>
+          <small>Profissional <i>Prontto</i></small>
+          <small>desde 2018</small>
+          <div class="feat__rate"><b>4.8</b><span class="stars">★★★★★</span></div>
+        </div>
+      </div>
+      <div class="feat__body">
+        <div class="feat__ic"><i class="ri-hammer-line"></i></div>
+        <h3>Reformas e Reparos</h3>
+        <p>Serviços de reformas e reparos para a sua casa ou empresa, com os melhores profissionais verificados da sua região.</p>
+        <a routerLink="/servicos" fragment="cat-reformas" class="btn btn-laranja btn-lg">Ver serviços de reformas</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── O que é o Prontto ──────────────────────────── -->
+<section class="sec" id="o-que-e">
+  <div class="wrap">
+    <div class="sec__head reveal" style="margin-bottom:8px">
+      <h2>O que é o Prontto?</h2>
+    </div>
+    <p class="about__intro reveal">O Prontto conecta você aos melhores profissionais de serviços do Brasil. Pessoas que precisam resolver algo encontram profissionais verificados que atendem com qualidade, facilidade e rapidez — para todo tipo de necessidade.</p>
+    <div class="how reveal">
+      <div class="how__item">
+        <div class="how__ic"><i class="ri-draft-line"></i></div>
+        <h3>Faça o seu pedido</h3>
+        <p>Conte o que você precisa. É rápido e de graça!</p>
+      </div>
+      <div class="how__item">
+        <div class="how__ic"><i class="ri-chat-3-line"></i></div>
+        <h3>Receba orçamentos</h3>
+        <p>Profissionais avaliados entram em contato com você em instantes.</p>
+      </div>
+      <div class="how__item">
+        <div class="how__ic"><i class="ri-thumb-up-line"></i></div>
+        <h3>Escolha o melhor</h3>
+        <p>Negocie direto com eles. Fácil como nunca foi antes!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Categoria em destaque 2 (invertido) ────────── -->
+<section class="sec">
+  <div class="wrap">
+    <div class="feat feat--rev reveal">
+      <div class="feat__media">
+        <img src="/img/josefa-lindalva.jpg" alt="Josefa Lindalva">
+        <div class="feat__person">
+          <b>Josefa Lindalva</b>
+          <small>Profissional <i>Prontto</i></small>
+          <small>desde 2018</small>
+          <div class="feat__rate"><b>4.8</b><span class="stars">★★★★★</span></div>
+        </div>
+      </div>
+      <div class="feat__body">
+        <div class="feat__ic"><i class="ri-home-heart-line"></i></div>
+        <h3>Serviços Domésticos</h3>
+        <p>Serviços domésticos, diaristas e os melhores profissionais verificados para te atender com qualidade e confiança.</p>
+        <a routerLink="/servicos" fragment="cat-limpeza" class="btn btn-laranja btn-lg">Ver serviços domésticos</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pedidos mais frequentes ────────────────────── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <h2>Pedidos mais frequentes</h2>
+      <p>Mais de 10 mil pedidos realizados por dia</p>
+    </div>
+    <div class="svc__wrap reveal">
+      <button class="svc__arrow svc__arrow--prev" aria-label="Anterior" (click)="mover(freqTrack, -1, 24)"><svg viewBox="0 0 24 24"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <div class="freq__track" #freqTrack>
+        @for (p of pedidosFrequentes; track p.titulo) {
+          <article class="freq-card">
+            <div class="freq-card__ic"><i [class]="p.icone"></i></div>
+            <div class="freq-card__cat">{{ p.categoria }}</div>
+            <div class="freq-card__title">{{ p.titulo }}</div>
+            <div class="freq-card__lbl">Avaliação do cliente</div>
+            <div class="freq-card__rate"><b>{{ p.nota }}</b><span class="stars">★★★★★</span></div>
+            <div class="freq-card__date">{{ p.data }}</div>
+          </article>
+        }
+      </div>
+      <button class="svc__arrow svc__arrow--next" aria-label="Próximo" (click)="mover(freqTrack, 1, 24)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Números + cadastro de profissional ─────────── -->
+<section class="sec">
+  <div class="wrap">
+    <div class="bignums reveal">
+      <div class="bignum"><b>4.000.000</b><p>De serviços solicitados por ano na plataforma do Prontto.</p></div>
+      <div class="bignum"><b>165.000</b><p>Clientes felizes por mês, com serviços contratados pelo Prontto.</p></div>
+      <div class="bignum"><b>R$ 1.000.000.000</b><p>Em serviços realizados por ano, no bolso dos nossos profissionais.</p></div>
+    </div>
+    <div class="projoin reveal">
+      <h3 class="projoin__h">Cadastre-se como Profissional Prontto</h3>
+      <p class="projoin__sub">Preencha os campos abaixo:</p>
+      <form class="projoin__form" (submit)="$event.preventDefault(); cadastrarProfissional()">
+        <div class="projoin__field">
+          <label for="pj-email">E-mail</label>
+          <input id="pj-email" type="email" placeholder="Ex.: email@email.com.br" [value]="pjEmail()" (input)="pjEmail.set($any($event.target).value)">
+        </div>
+        <div class="projoin__field">
+          <label for="pj-tel">Celular</label>
+          <input id="pj-tel" type="tel" placeholder="Ex.: 11 99999-9999" [value]="pjTelefone()" (input)="pjTelefone.set($any($event.target).value)">
+        </div>
+        <button type="submit" class="btn btn-navy">Cadastre-se</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ── Como funciona para o profissional ──────────── -->
+<section class="sec sec--tint">
+  <div class="wrap">
+    <div class="sec__head reveal" style="margin-bottom:8px">
+      <h2>Como o Prontto funciona para o Profissional?</h2>
+    </div>
+    <div class="pro4 reveal">
+      <div class="pro4__item">
+        <div class="pro4__ic"><i class="ri-inbox-archive-line"></i></div>
+        <p>Pedidos de serviços chegando toda hora no seu e-mail.</p>
+      </div>
+      <div class="pro4__item">
+        <div class="pro4__ic"><i class="ri-file-search-line"></i></div>
+        <p>Veja todos os pedidos de graça e invista apenas nos que gostar.</p>
+      </div>
+      <div class="pro4__item">
+        <div class="pro4__ic"><i class="ri-contacts-book-line"></i></div>
+        <p>Compre moedas na plataforma para desbloquear os contatos dos clientes.</p>
+      </div>
+      <div class="pro4__item">
+        <div class="pro4__ic"><i class="ri-hand-coin-line"></i></div>
+        <p>100% do valor do serviço é seu. E sem mensalidade!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Dicas antes de contratar (blog) ────────────── -->
+<section class="sec" id="dicas">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <h2>Dicas antes de contratar</h2>
+      <p>Informações sobre diversos tipos de serviços e como são executados</p>
+    </div>
+    <div class="svc__wrap reveal">
+      <button class="svc__arrow svc__arrow--prev" aria-label="Anterior" (click)="mover(tipsTrack, -1, 24)"><svg viewBox="0 0 24 24"><polyline points="15 6 9 12 15 18"/></svg></button>
+      <div class="tips__track" #tipsTrack>
+        @for (t of dicas; track t.slug) {
+          <article class="tip-card">
+            <div class="tip-card__img"><img [src]="t.img" [alt]="t.titulo"></div>
+            <div class="tip-card__body">
+              <h3 class="tip-card__title">{{ t.titulo }}</h3>
+              <p class="tip-card__text">{{ t.resumo }}</p>
+              <a [routerLink]="['/dicas', t.slug]" class="tip-card__more">Leia mais →</a>
+            </div>
+          </article>
+        }
+      </div>
+      <button class="svc__arrow svc__arrow--next" aria-label="Próximo" (click)="mover(tipsTrack, 1, 24)"><svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+    </div>
+  </div>
+</section>

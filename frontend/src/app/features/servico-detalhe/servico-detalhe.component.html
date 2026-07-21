@@ -1,0 +1,284 @@
+<div class="detalhe-container">
+
+  <!-- Loading -->
+  <div *ngIf="carregando()" class="estado-loading">
+    <div class="spinner"></div>
+    <p>Carregando serviço...</p>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="erro() && !carregando()" class="estado-erro">
+    <p>{{ erro() }}</p>
+    <a routerLink="/minha-area" class="btn-primario">Voltar para Minha Área</a>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <ng-container *ngIf="servico() && !carregando()">
+    <div class="detalhe-header">
+      <a routerLink="/minha-area" class="btn-voltar">← Voltar</a>
+      <h1 class="detalhe-titulo">{{ servico()!.titulo }}</h1>
+      <span class="status-badge" [class]="corStatus(servico()!.status)">
+        {{ labelStatus(servico()!.status) }}
+      </span>
+    </div>
+
+    <!-- Feedback -->
+    <div *ngIf="mensagemFeedback()" class="feedback-msg">
+      {{ mensagemFeedback() }}
+    </div>
+
+    <!-- Informações do serviço -->
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Detalhes</h3>
+        <p *ngIf="servico()!.descricao" class="detalhe-desc">{{ servico()!.descricao }}</p>
+        <div class="info-linha">
+          <span class="info-label">Categoria</span>
+          <span>{{ servico()!.categoriaNome ?? '—' }}</span>
+        </div>
+        <div class="info-linha" *ngIf="servico()!.cidadeNome">
+          <span class="info-label">Cidade</span>
+          <span>{{ servico()!.cidadeNome }}</span>
+        </div>
+        <div class="info-linha" *ngIf="servico()!.endereco">
+          <span class="info-label">Endereço</span>
+          <span>{{ servico()!.endereco }}</span>
+        </div>
+        <div class="info-linha" *ngIf="!servico()!.endereco && ehPrestadorDoServico()">
+          <span class="info-label">Endereço</span>
+          <span class="info-oculto"><i class="ri-lock-line" aria-hidden="true"></i> Revelado após a aprovação do cliente</span>
+        </div>
+        <div class="info-linha" *ngIf="servico()!.agendadoEm">
+          <span class="info-label">Agendado para</span>
+          <span>{{ servico()!.agendadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-linha" *ngIf="!servico()!.agendadoEm && ehPrestadorDoServico()">
+          <span class="info-label">Agendado para</span>
+          <span class="info-oculto"><i class="ri-lock-line" aria-hidden="true"></i> Revelado após a aprovação</span>
+        </div>
+        <div class="info-linha">
+          <span class="info-label">Valor acordado</span>
+          <span class="valor-destaque">{{ servico()!.preco | currency:'BRL' }}</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Participantes</h3>
+        <div class="info-linha">
+          <span class="info-label">Cliente</span>
+          <span>{{ servico()!.clienteNome ?? '—' }}</span>
+        </div>
+        <div class="info-linha">
+          <span class="info-label">Prestador</span>
+          <span>{{ servico()!.prestadorNome ?? 'Aguardando vinculação' }}</span>
+        </div>
+        <div class="info-linha" *ngIf="servico()!.concluidoEm">
+          <span class="info-label">Concluído em</span>
+          <span>{{ servico()!.concluidoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção PIX (aguardando_pagamento) -->
+    <div *ngIf="servico()!.status === 'aguardando_pagamento' && cobranca()" class="pix-container">
+      <h3>Pagamento via PIX</h3>
+      <p class="pix-valor">Valor: <strong>{{ cobranca()!.valorTotal | currency:'BRL' }}</strong></p>
+      <p class="pix-expira" *ngIf="cobranca()!.pixExpiracaoEm">
+        Expira em: {{ cobranca()!.pixExpiracaoEm | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+      <div *ngIf="cobranca()!.pixQrCode" class="pix-qrcode">
+        <img [src]="cobranca()!.pixQrCode" alt="QR Code PIX" />
+      </div>
+      <div *ngIf="cobranca()!.pixCopiaCola" class="pix-copia-cola">
+        <label>Copia e Cola:</label>
+        <div class="pix-codigo">
+          <span>{{ cobranca()!.pixCopiaCola }}</span>
+          <button type="button" class="btn-copiar" (click)="copiarPix()">Copiar</button>
+        </div>
+      </div>
+      <p class="pix-instrucao">Abra o app do seu banco, escaneie o QR Code ou use o Copia e Cola.</p>
+    </div>
+
+    <!-- Ações disponíveis -->
+    <div class="acoes-container" *ngIf="servico()!.status !== 'cancelado' && servico()!.status !== 'concluido'">
+      <h3>Ações</h3>
+      <div class="acoes-grid">
+
+        <!-- Prestador: vincular -->
+        <button
+          *ngIf="podeVincular()"
+          class="btn-primario"
+          [disabled]="enviando()"
+          (click)="vincularPrestador()">
+          Vincular-me a este Serviço
+        </button>
+
+        <!-- Prestador: marcar concluído -->
+        <button
+          *ngIf="podeConcluir()"
+          class="btn-primario"
+          [disabled]="enviando()"
+          (click)="marcarConcluido()">
+          Marcar como Concluído
+        </button>
+
+        <!-- Cliente: confirmar conclusão -->
+        <button
+          *ngIf="podeConfirmar()"
+          class="btn-primario"
+          [disabled]="enviando()"
+          (click)="confirmarConclusao()">
+          Confirmar Conclusão
+        </button>
+
+        <!-- Cliente: abrir disputa -->
+        <button
+          *ngIf="podeAbrirDisputa()"
+          class="btn-secundario btn-disputa"
+          (click)="mostrarFormDisputa.set(true)">
+          Contestar Conclusão
+        </button>
+
+        <!-- Cancelar -->
+        <button
+          *ngIf="podeCancelar()"
+          class="btn-destrutivo"
+          (click)="mostrarFormCancelamento.set(true)">
+          Cancelar Serviço
+        </button>
+      </div>
+
+      <!-- Form Disputa -->
+      <div *ngIf="mostrarFormDisputa()" class="form-overlay">
+        <div class="form-card">
+          <h4>Contestar Conclusão</h4>
+          <p class="form-aviso">Explique o motivo da sua contestação. O Admin irá analisar e decidir.</p>
+          <input
+            [(ngModel)]="motivoDisputa"
+            class="input"
+            placeholder="Motivo (obrigatório)"
+            maxlength="200" />
+          <textarea
+            [(ngModel)]="descricaoDisputa"
+            class="textarea"
+            placeholder="Descrição detalhada (opcional)"
+            rows="4"></textarea>
+          <div class="form-acoes">
+            <button class="btn-destrutivo" [disabled]="enviando()" (click)="abrirDisputa()">
+              Confirmar Contestação
+            </button>
+            <button class="btn-outline" (click)="mostrarFormDisputa.set(false)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Cancelamento -->
+      <div *ngIf="mostrarFormCancelamento()" class="form-overlay">
+        <div class="form-card">
+          <h4>Cancelar Serviço</h4>
+          <textarea
+            [(ngModel)]="motivoCancelamento"
+            class="textarea"
+            placeholder="Motivo do cancelamento (obrigatório)"
+            rows="3"></textarea>
+          <div class="form-acoes">
+            <button class="btn-destrutivo" [disabled]="enviando()" (click)="cancelar()">
+              Confirmar Cancelamento
+            </button>
+            <button class="btn-outline" (click)="mostrarFormCancelamento.set(false)">Voltar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Em Disputa: aviso -->
+    <div *ngIf="servico()!.status === 'em_disputa'" class="aviso-disputa">
+      <strong>Serviço em Disputa</strong>
+      <p>Este serviço está sob análise do Admin. Nenhuma ação pode ser tomada pelas partes até a resolução.</p>
+    </div>
+
+    <!-- Chat / Mensagens -->
+    <div class="chat-container">
+      <h3>Mensagens e Negociação</h3>
+
+      <div class="chat-mensagens" *ngIf="mensagens().length > 0; else semMensagens">
+
+        <!-- Aviso de histórico truncado -->
+        <div *ngIf="temMaisAnteriores()" class="aviso-historico">
+          <span>Mostrando as últimas 50 mensagens</span>
+        </div>
+
+        <div
+          *ngFor="let msg of mensagens()"
+          class="mensagem"
+          [class.mensagem-propria]="msg.remetenteId === usuario()?.id"
+          [class.mensagem-sistema]="msg.papelRemetente === 'sistema'">
+
+          <div class="mensagem-meta">
+            <span class="mensagem-autor">{{ msg.remetenteNome ?? 'Sistema' }}</span>
+            <span class="mensagem-papel">({{ msg.papelRemetente }})</span>
+            <span class="mensagem-hora">{{ msg.criadoEm | date:'HH:mm' }}</span>
+          </div>
+
+          <!-- Proposta -->
+          <div *ngIf="ehProposta(msg)" class="proposta-card" [class.proposta-pendente]="msg.statusProposta === 'pendente'">
+            <div class="proposta-valor">R$ {{ msg.valorProposta | number:'1.2-2' }}</div>
+            <div class="proposta-status">{{ msg.statusProposta }}</div>
+            <button
+              *ngIf="propostaPodeSerAceita(msg)"
+              class="btn-aceitar-proposta"
+              [disabled]="enviando()"
+              (click)="aceitarProposta(msg.id)">
+              Aceitar esta Proposta
+            </button>
+          </div>
+
+          <!-- Texto normal -->
+          <p *ngIf="!ehProposta(msg)" class="mensagem-conteudo">{{ msg.conteudo }}</p>
+        </div>
+      </div>
+
+      <ng-template #semMensagens>
+        <p class="sem-mensagens">Nenhuma mensagem ainda. Inicie a conversa!</p>
+      </ng-template>
+
+      <!-- Formulário de envio -->
+      <div *ngIf="podeEnviarMensagem()" class="chat-input-area">
+        <div class="chat-input-row">
+          <input
+            [(ngModel)]="conteudoMensagem"
+            class="input chat-input"
+            placeholder="Digite uma mensagem..."
+            (keyup.enter)="enviarMensagem()" />
+          <button class="btn-primario" [disabled]="enviando() || !conteudoMensagem.trim()" (click)="enviarMensagem()">
+            Enviar
+          </button>
+        </div>
+
+        <!-- Enviar proposta -->
+        <div *ngIf="podeEnviarProposta()" class="proposta-area">
+          <button
+            *ngIf="!mostrarFormProposta()"
+            class="btn-outline"
+            (click)="mostrarFormProposta.set(true)">
+            Enviar Proposta de Preço
+          </button>
+
+          <div *ngIf="mostrarFormProposta()" class="proposta-form">
+            <input
+              [(ngModel)]="valorProposta"
+              type="number"
+              min="0.01"
+              step="0.01"
+              class="input"
+              placeholder="Valor (R$)" />
+            <button class="btn-primario" [disabled]="enviando()" (click)="enviarProposta()">
+              Enviar Proposta
+            </button>
+            <button class="btn-outline" (click)="mostrarFormProposta.set(false)">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

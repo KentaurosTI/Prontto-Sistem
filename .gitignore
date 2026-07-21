@@ -1,0 +1,95 @@
+# ── Node.js / TypeScript ──────────────────────────────────────────────────────
+node_modules/
+dist/
+tmp/
+out-tsc/
+*.tsbuildinfo
+.expo
+.expo-shared
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# ── .NET / C# ─────────────────────────────────────────────────────────────────
+backend/src/**/bin/
+backend/src/**/obj/
+backend/tests/**/bin/
+backend/tests/**/obj/
+*.user
+*.suo
+.vs/
+backend/**/*.db
+backend/**/*.db-shm
+backend/**/*.db-wal
+
+# ── Angular ───────────────────────────────────────────────────────────────────
+frontend/dist/
+frontend/.angular/
+frontend/node_modules/
+frontend/coverage/
+
+# ── Ambiente / segredos ───────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+
+# ── IDEs e editores ───────────────────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.launch
+.settings/
+.project
+.classpath
+.c9/
+
+# ── Sistema ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+/.sass-cache
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── Outros ────────────────────────────────────────────────────────────────────
+.cache/
+.local/
+.cursor/rules/nx-rules.mdc
+.github/instructions/nx.instructions.md
+
+# ── Seeders (bin/obj gerados) ─────────────────────────────────────────────────
+database/seeders/**/bin/
+database/seeders/**/obj/
+
+# ── Claude Code (memória interna dos agentes) ─────────────────────────────────
+.claude/
+*/.claude/
+
+# ── package-lock.json na raiz (lock correto fica em frontend/) ────────────────
+/package-lock.json
+
+# ── Segredos / config local (NÃO commitar) ─────────────────────────────────────
+.mcp.json
+**/appsettings.Development.json
+
+# ── Build & deploy artifacts ───────────────────────────────────────────────────
+/publish/
+backend/publish/
+/public_html/
+deploy/*.zip
+**/*.tar.gz
+# Build extraído / scratch (não versionar)
+/deploy/prontto-frontend/
+/attached_assets/

@@ -1,0 +1,68 @@
+<div class="pagina-auth">
+  <!-- Painel promocional (desktop) -->
+  <aside class="auth-painel" aria-hidden="true">
+    <div class="auth-painel__inner">
+      <a routerLink="/" class="auth-painel__logo"><span class="logo-pront">PRONT</span><span class="logo-to">TO</span></a>
+      <h2 class="auth-painel__titulo">Bem-vindo de volta ao Prontto</h2>
+      <p class="auth-painel__subtitulo">O marketplace de serviços domésticos mais confiável do Brasil.</p>
+      <ul class="auth-painel__lista" role="list">
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Profissionais verificados</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Pagamento seguro e protegido</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Avaliações reais de clientes</li>
+        <li class="auth-painel__item"><span class="auth-painel__check" aria-hidden="true">✓</span>Atendimento na Grande São Paulo</li>
+      </ul>
+      <div class="auth-painel__orb" aria-hidden="true"></div>
+    </div>
+  </aside>
+
+  <!-- Formulário -->
+  <div class="auth-form-wrapper">
+    <div class="auth-form-inner">
+      <a routerLink="/" class="auth-logo-mobile"><span class="logo-pront">PRONT</span><span class="logo-to">TO</span></a>
+      <h1 class="auth-titulo">Entrar na sua conta</h1>
+      <p class="auth-subtitulo">Bem-vindo de volta. Continue de onde parou.</p>
+
+      @if (erro()) {
+        <div class="auth-erro" role="alert" aria-live="assertive">
+          <span class="auth-erro__icone" aria-hidden="true">⚠</span> {{ erro() }}
+        </div>
+      }
+
+      <form class="auth-form" [formGroup]="formulario" (ngSubmit)="entrar()" novalidate>
+        <div class="campo" [class.campo--erro]="formulario.get('email')?.invalid && formulario.get('email')?.touched">
+          <label class="campo__label" for="email">E-mail</label>
+          <div class="campo__wrapper">
+            <input id="email" type="email" formControlName="email" placeholder="seu@email.com"
+              class="campo__input" autocomplete="email">
+          </div>
+          @if (formulario.get('email')?.invalid && formulario.get('email')?.touched) {
+            <span class="campo__erro-msg" role="alert">Informe um e-mail válido</span>
+          }
+        </div>
+
+        <div class="campo" [class.campo--erro]="formulario.get('senha')?.invalid && formulario.get('senha')?.touched">
+          <label class="campo__label" for="senha">Senha</label>
+          <div class="campo-senha">
+            <input id="senha" [type]="senhaVisivel() ? 'text' : 'password'" formControlName="senha"
+              placeholder="Mínimo 8 caracteres" class="campo__input" autocomplete="current-password">
+            <button type="button" class="btn-toggle-senha" (click)="senhaVisivel.set(!senhaVisivel())"
+              [attr.aria-label]="senhaVisivel() ? 'Ocultar senha' : 'Mostrar senha'">
+              <i [class]="senhaVisivel() ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+            </button>
+          </div>
+          @if (formulario.get('senha')?.hasError('minlength') && formulario.get('senha')?.touched) {
+            <span class="campo__erro-msg" role="alert">Mínimo 8 caracteres</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="formulario.invalid || carregando()">
+          @if (carregando()) { <span class="spinner" aria-hidden="true"></span> Entrando... }
+          @else { Entrar }
+        </button>
+      </form>
+
+      <div class="auth-separator" aria-hidden="true"><span>ou</span></div>
+      <p class="auth-link">Não tem conta? <a routerLink="/cadastrar">Cadastre-se grátis</a></p>
+    </div>
+  </div>
+</div>

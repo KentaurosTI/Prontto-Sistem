@@ -1,0 +1,202 @@
+<div class="criar-servico-wrapper">
+  <div class="criar-servico-container">
+
+    <!-- Cabeçalho da página -->
+    <header class="pagina-header">
+      <a routerLink="/minha-area" class="voltar-link" aria-label="Voltar para minha área">
+        <span aria-hidden="true">←</span> Minha Área
+      </a>
+      <h1 class="pagina-titulo">Solicitar Serviço</h1>
+      <p class="pagina-descricao">Descreva o que você precisa e conectaremos você com o profissional ideal.</p>
+    </header>
+
+    <!-- Infobanner: prestador pré-selecionado -->
+    @if (prestadorNomeParam()) {
+      <div class="info-prestador" role="status">
+        <span class="info-prestador__icone" aria-hidden="true">👷</span>
+        <div>
+          <strong>Prestador selecionado</strong>
+          <p>Você está solicitando o serviço para <strong>{{ prestadorNomeParam() }}</strong>.</p>
+        </div>
+      </div>
+    }
+
+    <!-- Card do formulário -->
+    <div class="form-card">
+
+      <!-- Mensagem de erro global -->
+      @if (erro()) {
+        <div class="msg-erro" role="alert" aria-live="assertive">
+          <span aria-hidden="true">⚠</span> {{ erro() }}
+        </div>
+      }
+
+      <form [formGroup]="formulario" (ngSubmit)="submeter()" novalidate>
+
+        <!-- Título -->
+        <div class="campo" [class.campo--invalido]="campoInvalido('titulo')">
+          <label class="campo__label" for="titulo">
+            Título <span class="obrigatorio" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="titulo"
+            type="text"
+            class="campo__input"
+            formControlName="titulo"
+            placeholder="Ex: Instalação de tomadas e interruptores"
+            autocomplete="off"
+            aria-required="true"
+            [attr.aria-invalid]="campoInvalido('titulo')"
+            aria-describedby="titulo-erro"
+          />
+          @if (campoInvalido('titulo')) {
+            <span id="titulo-erro" class="campo__erro" role="alert">
+              @if (erroCampo('titulo', 'required')) { Título é obrigatório. }
+              @else if (erroCampo('titulo', 'minlength')) { Mínimo de 5 caracteres. }
+              @else if (erroCampo('titulo', 'maxlength')) { Máximo de 120 caracteres. }
+            </span>
+          }
+        </div>
+
+        <!-- Descrição -->
+        <div class="campo" [class.campo--invalido]="campoInvalido('descricao')">
+          <label class="campo__label" for="descricao">
+            Descrição <span class="obrigatorio" aria-hidden="true">*</span>
+          </label>
+          <textarea
+            id="descricao"
+            class="campo__textarea"
+            formControlName="descricao"
+            rows="4"
+            placeholder="Descreva com detalhes o serviço que precisa: local, materiais, urgência, etc."
+            aria-required="true"
+            [attr.aria-invalid]="campoInvalido('descricao')"
+            aria-describedby="descricao-erro"
+          ></textarea>
+          @if (campoInvalido('descricao')) {
+            <span id="descricao-erro" class="campo__erro" role="alert">
+              @if (erroCampo('descricao', 'required')) { Descrição é obrigatória. }
+              @else if (erroCampo('descricao', 'minlength')) { Mínimo de 10 caracteres. }
+            </span>
+          }
+        </div>
+
+        <!-- Categoria -->
+        <div class="campo" [class.campo--invalido]="campoInvalido('categoriaId')">
+          <label class="campo__label" for="categoriaId">
+            Categoria <span class="obrigatorio" aria-hidden="true">*</span>
+          </label>
+          @if (carregandoListas()) {
+            <div class="campo__skeleton" aria-busy="true" aria-label="Carregando categorias"></div>
+          } @else {
+            <select
+              id="categoriaId"
+              class="campo__select"
+              formControlName="categoriaId"
+              (change)="aoTrocarCategoria()"
+              aria-required="true"
+              [attr.aria-invalid]="campoInvalido('categoriaId')"
+              aria-describedby="categoriaId-erro"
+            >
+              <option value="">Selecione uma categoria</option>
+              @for (cat of categorias(); track cat.id) {
+                <option [value]="cat.id">{{ cat.nome }}</option>
+              }
+            </select>
+          }
+          @if (campoInvalido('categoriaId')) {
+            <span id="categoriaId-erro" class="campo__erro" role="alert">Selecione uma categoria.</span>
+          }
+        </div>
+
+        <!-- Subcategoria (opcional) — aparece conforme a categoria escolhida -->
+        @if (subcategoriasDisponiveis().length > 0) {
+          <div class="campo">
+            <label class="campo__label" for="subcategoria">
+              Tipo de serviço <span class="campo__opcional">(opcional)</span>
+            </label>
+            <select
+              id="subcategoria"
+              class="campo__select"
+              formControlName="subcategoria"
+            >
+              <option value="">Selecione o tipo de serviço</option>
+              @for (sub of subcategoriasDisponiveis(); track sub) {
+                <option [value]="sub">{{ sub }}</option>
+              }
+            </select>
+          </div>
+        }
+
+        <!-- Linha: Cidade + Data agendada -->
+        <div class="campo-duplo">
+          <!-- Cidade -->
+          <div class="campo">
+            <label class="campo__label" for="cidadeId">Cidade</label>
+            @if (carregandoListas()) {
+              <div class="campo__skeleton" aria-busy="true" aria-label="Carregando cidades"></div>
+            } @else {
+              <select
+                id="cidadeId"
+                class="campo__select"
+                formControlName="cidadeId"
+              >
+                <option value="">Qualquer cidade</option>
+                @for (cid of cidades(); track cid.id) {
+                  <option [value]="cid.id">{{ cid.nome }}/{{ cid.estado }}</option>
+                }
+              </select>
+            }
+          </div>
+
+          <!-- Data agendada -->
+          <div class="campo">
+            <label class="campo__label" for="agendadoEm">Data desejada</label>
+            <input
+              id="agendadoEm"
+              type="date"
+              class="campo__input"
+              formControlName="agendadoEm"
+              [min]="hoje"
+            />
+            <span class="campo__dica">Opcional — quando você precisa do serviço.</span>
+          </div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="campo">
+          <label class="campo__label" for="endereco">Endereço do serviço</label>
+          <input
+            id="endereco"
+            type="text"
+            class="campo__input"
+            formControlName="endereco"
+            placeholder="Rua, número, bairro (opcional)"
+            autocomplete="street-address"
+          />
+          <span class="campo__dica">Informe o local se o serviço for presencial.</span>
+        </div>
+
+        <!-- Ações -->
+        <div class="form-acoes">
+          <a routerLink="/minha-area" class="btn-cancelar">Cancelar</a>
+          <button
+            type="submit"
+            class="btn-enviar"
+            [disabled]="enviando()"
+            aria-live="polite"
+          >
+            @if (enviando()) {
+              <span class="spinner" aria-hidden="true"></span>
+              Enviando...
+            } @else {
+              Solicitar serviço
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+</div>

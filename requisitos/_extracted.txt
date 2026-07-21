@@ -1,0 +1,645 @@
+=== PAGE 1 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 1
+ PRONTTO
+ Plataforma de Conexão de Prestadores de Serviço
+ ESPECIFICAÇÃO DE REQUISITOS FUNCIONAIS
+ Versão 1.0 | 30 de maio de 2026
+Analista / Fornecedor
+Kentaurus IT (Mateus) + Ítalo Anjos
+Cliente
+Prontto — Felipe e Dyllan Marinho
+Referência
+PRJ-PRONTTO-2026
+Data de Geração
+30/05/2026
+Status
+REVISADO — Aguardando assinatura de contrato
+
+=== PAGE 2 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 2
+SEÇÃO DEV — ESPECIFICAÇÃO DE REQUISITOS FUNCIONAIS
+Esta seção detalha todos os requisitos funcionais levantados nas reuniões realizadas entre Kentaurus IT e
+Prontto (28/04 a 21/05/2026). Cada requisito foi extraído diretamente das transcrições e validado pelo contexto
+do sistema marketplace de prestação de serviços.
+RF-01: Cadastro e Segmentação de Usuários
+ID e Nome
+RF-01: Cadastro e Segmentação de Usuários
+Descrição
+O sistema deve oferecer dois fluxos distintos de cadastro: Contratante e
+Prestador de Serviço. O usuário escolhe seu perfil ao se registrar. O acesso é
+segmentado por grupo, garantindo que cada tipo de usuário veja apenas as
+funcionalidades pertinentes ao seu papel.
+Regras de Negócio
+ A tela de cadastro exibe dois botões: 'Sou Cliente' e 'Sou Prestador'. 
+Contratante deve informar: nome, e-mail, senha e região de atuação
+(cidade/bairro).  Prestador deve informar: nome, e-mail, senha, categorias de
+serviço, região de cobertura e dados bancários (chave PIX / conta).  O sistema
+deve suportar login social: Google, Facebook e Apple.  Aprovação de cadastros
+é automática por padrão (admin pode ativar revisão manual).
+Critérios de Aceite
+ Contratante cadastrado consegue visualizar lista de prestadores filtrada por
+região.  Prestador cadastrado aparece na listagem pública com seu perfil. 
+Login social redireciona corretamente para o fluxo do tipo de usuário escolhido. 
+Acesso de Administrador não é acessível por contratante ou prestador.
+RF-02: Perfil Público do Prestador (Modelo Instagram)
+ID e Nome
+RF-02: Perfil Público do Prestador
+Descrição
+Cada prestador deve possuir uma página de perfil pública, semelhante a um
+perfil do Instagram, exibindo foto, serviços, portfólio (fotos de trabalhos
+realizados), avaliações recebidas e informações de contato via chat interno.
+Regras de Negócio
+ O prestador pode adicionar foto de perfil, descrição de experiência e fotos de
+serviços realizados.  Avaliações de contratantes ficam vinculadas ao perfil e
+são visíveis publicamente.  O perfil exibe a média de avaliações (estrelas ou
+nota).  O botão de contato redireciona ao chat interno — não expõe telefone
+diretamente.  O prestador pode editar seu perfil a qualquer momento.
+Critérios de Aceite
+ Página de perfil acessível sem autenticação (pública).  Fotos do portfólio
+exibidas em galeria.  Avaliações listadas com nota, comentário e data.  Botão
+'Contratar' redireciona ao fluxo de solicitação (exige login do contratante).
+RF-03: Busca e Filtragem de Prestadores por Categoria e Região
+ID e Nome
+RF-03: Busca e Filtragem de Prestadores por Categoria e Região
+
+=== PAGE 3 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 3
+Descrição
+O contratante deve conseguir buscar prestadores utilizando filtros de categoria
+de serviço (limpeza, jardinagem, piscineiro, etc.) e de região (cidade/bairro). A
+tela inicial pós-login exibe um grid de categorias como ponto de entrada da
+busca.
+Regras de Negócio
+ A tela inicial do contratante exibe grid de categorias (não lista de prestadores
+diretamente).  Ao clicar em uma categoria, o sistema filtra prestadores que
+atuam naquela categoria E na região do contratante.  Usuário sem cadastro
+que clicar em categoria é redirecionado ao cadastro.  Futuramente: campo de
+pesquisa textual por serviço para indexação via SEO.
+Critérios de Aceite
+ Grid de categorias exibido corretamente na tela inicial.  Filtragem retorna
+apenas prestadores da categoria e região selecionadas.  Usuário não
+autenticado é bloqueado e redirecionado ao cadastro.  Resultado da busca
+exibe nome, foto, média de avaliação e categoria do prestador.
+RF-04: Solicitação e Gestão de Serviços
+ID e Nome
+RF-04: Solicitação e Gestão de Serviços
+Descrição
+O contratante deve poder solicitar um serviço ao prestador selecionado. O
+sistema deve gerenciar o ciclo de vida do serviço: solicitado → aceito → em
+andamento → concluído. O prestador recebe a solicitação e pode comunicar-se
+pelo chat interno.
+Regras de Negócio
+ A solicitação cria um registro no banco de dados de Vagas/Serviços (BD-03). 
+O prestador recebe notificação da solicitação (e-mail e/ou notificação no
+sistema).  O pagamento é coletado no momento da solicitação e fica retido até
+conclusão.  O contratante confirma a conclusão do serviço para liberar o
+pagamento.  O painel do Admin exibe todos os serviços e seus status em
+tempo real.
+Critérios de Aceite
+ Solicitação cria corretamente o registro com status 'solicitado'.  Prestador
+visualiza nova solicitação em seu painel.  Transição de status funciona:
+solicitado → aceito → concluído.  Pagamento só é liberado após confirmação
+do contratante.
+RF-05: Pagamento com Split Automático (80/20)
+ID e Nome
+RF-05: Pagamento com Split Automático
+Descrição
+O sistema deve integrar-se a um gateway de pagamento (AbacatePay ou Banda
+Pay) que realize automaticamente o split: 80% do valor pago vai para o
+prestador e 20% fica retido como comissão da plataforma Prontto. O pagamento
+fica em custódia até a conclusão do serviço.
+Regras de Negócio
+ Gateway suportado: AbacatePay ou Banda Pay (split nativo).  O contratante
+paga 100% do valor no momento da solicitação.  O valor fica retido no gateway
+até confirmação de conclusão.  Após confirmação: 80% transferido ao
+prestador (conta/PIX cadastrado) e 20% à conta da plataforma.  O painel admin
+exibe receita total e taxa da plataforma separadamente.  Impostos incidem
+apenas sobre os 20% (comissão da plataforma), não sobre o valor total.
+
+=== PAGE 4 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 4
+Critérios de Aceite
+ Pagamento processado com sucesso via gateway integrado.  Split de 80/20
+executado automaticamente após confirmação do contratante.  Extrato
+financeiro disponível no painel admin com valores discriminados.  Prestador
+recebe confirmação de recebimento após liberação.
+RF-06: Chat Interno com Filtro de Segurança
+ID e Nome
+RF-06: Chat Interno com Filtro de Segurança
+Descrição
+O sistema deve disponibilizar um chat interno entre contratante e prestador
+vinculado a cada serviço solicitado. O chat deve bloquear o envio de números
+de telefone (WhatsApp) e palavrões, impedindo que as partes contornem a
+comissão da plataforma.
+Regras de Negócio
+ Chat disponível apenas após criação da solicitação de serviço.  Bloqueio
+automático de mensagens contendo padrão de número de telefone brasileiro
+(iniciados com 9 ou +55).  Bloqueio de palavrões e linguagem inapropriada. 
+Admin pode visualizar o histórico completo do chat para auditoria.  Chat exibe:
+quem é o cliente (esquerda) e quem é o prestador (direita).
+Critérios de Aceite
+ Mensagens com número de telefone são bloqueadas e o usuário recebe aviso.
+ Chat funcionando em tempo real entre as partes.  Admin consegue acessar
+histórico de qualquer conversa.  Interface clara indicando os papéis dos
+participantes.
+RF-07: Painel Administrativo (Dashboard)
+ID e Nome
+RF-07: Painel Administrativo (Dashboard)
+Descrição
+O administrador da plataforma deve ter acesso a um painel de controle completo
+com métricas em tempo real, gestão de usuários, serviços, financeiro e
+configurações do sistema. O painel é o 5° banco de dados integrado e não é
+acessível a contratantes ou prestadores.
+Regras de Negócio
+ Acesso exclusivo por login de administrador (admin@prontto.com). 
+Dashboard inicial exibe resumo: total de usuários, serviços ativos, receita do
+mês e taxa acumulada.  Filtragem de usuários por: tipo (contratante/prestador),
+especialidade e região.  Controle de aprovação de cadastros: automático ou
+manual (configurável).  Setor financeiro: serviços aprovados, pendentes e
+histórico de pagamentos.  Módulo de chat: acesso a todas as conversas para
+auditoria.  Futuramente: integração de notificação via WhatsApp e e-mail.
+Critérios de Aceite
+ Admin visualiza corretamente usuários, serviços e financeiro.  Filtros de
+usuário por tipo, especialidade e região funcionam.  Receita total e taxa da
+plataforma exibidas separadamente.  Aprovação automática pode ser
+desativada pelo admin.  Chat de auditoria acessível com histórico completo.
+RF-08: Sistema de Avaliação de Prestadores
+ID e Nome
+RF-08: Sistema de Avaliação de Prestadores
+
+=== PAGE 5 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 5
+Descrição
+Após a conclusão do serviço, o contratante deve poder avaliar o prestador com
+nota e comentário. As avaliações ficam visíveis no perfil público do prestador e
+contribuem para sua média de classificação, gerando confiabilidade na
+plataforma.
+Regras de Negócio
+ Avaliação disponível apenas após confirmação de conclusão do serviço. 
+Campos: nota (1 a 5 estrelas) e comentário textual (opcional).  Avaliação fica
+vinculada ao perfil público do prestador imediatamente.  Média de avaliações
+calculada e exibida no card de listagem e no perfil.  Fase inicial: possibilidade
+de exibir avaliações fictícias para gerar credibilidade (substituídas por
+avaliações reais progressivamente).
+Critérios de Aceite
+ Contratante consegue avaliar prestador após conclusão do serviço.  Avaliação
+aparece no perfil público do prestador.  Média atualizada automaticamente
+após nova avaliação.  Listagem de prestadores exibe a média visualmente
+(estrelas).
+RF-09: Gestão de Prazos e Entrega do Sistema
+ID e Nome
+RF-09: Gestão de Prazos e Entrega do Sistema
+Descrição
+O processo de entrega da plataforma segue um fluxo contratual com prazos
+definidos. O sistema de gestão de entrega deve rastrear as fases: prototipação,
+aceite, publicação em produção e período de testes (UAT).
+Regras de Negócio
+ O prazo de 5 dias começa a contar a partir do aceite formal do protótipo pelo
+cliente.  O protótipo deve ser apresentado e aprovado antes da subida em
+produção.  O período de suporte pós-entrega é de 7 a 15 dias (a confirmar em
+contrato).  Após o período de garantia, suporte adicional é cobrado à parte
+como consultoria.  Atrasos devem ser comunicados formalmente com
+justificativa (cláusula contratual).
+Critérios de Aceite
+ Protótipo entregue para validação dentro do prazo acordado.  Sistema
+publicado em produção no domínio do cliente em até 5 dias após aceite. 
+Período de suporte garantia ativo e equipe disponível para correção de bugs. 
+Comunicação formal documentada em caso de atraso.
+RF-10: SEO, Hospedagem e Configurações Técnicas
+ID e Nome
+RF-10: SEO, Hospedagem e Configurações Técnicas
+Descrição
+O sistema deve ser publicado no domínio já adquirido pelo cliente (Hostinger) e
+conter configurações básicas de SEO para indexação no Google. A plataforma
+deve estar preparada para receber integrações futuras (notificações WhatsApp,
+CRM, e-mail corporativo).
+
+=== PAGE 6 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 6
+Regras de Negócio
+ Deploy realizado no Hostinger usando o domínio e credenciais fornecidos pelo
+cliente.  SEO On-Page aplicado: meta tags, títulos, descrições e URLs
+amigáveis.  Sistema desenvolvido em linguagem robusta e segura, com
+segmentação de acessos por grupo.  Arquitetura preparada para integração
+futura: notificação WhatsApp/e-mail e CRM.  O cliente não precisa gerenciar
+diretamente o servidor — tudo configurado pela equipe Kentaurus IT.  E-mail
+corporativo (admin@prontto.com) configurado via Hostinger para comunicação
+interna.
+Critérios de Aceite
+ Site acessível via domínio do cliente após publicação.  Páginas indexáveis
+pelo Google (meta tags presentes e corretas).  Login de admin funcional e
+seguro.  Arquitetura modular que permita adição de funcionalidades sem
+refatoração total.
+
+=== PAGE 7 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 7
+2. HISTÓRIAS DE USUÁRIO (USER STORIES)
+ID
+Ator
+História
+Prioridade
+US-
+01
+Contratante
+Quero me cadastrar na plataforma informando minha região para
+encontrar prestadores próximos de mim.
+Alta
+US-
+02
+Prestador
+Quero criar um perfil com foto e portfólio de serviços para que
+contratantes confiem no meu trabalho.
+Alta
+US-
+03
+Contratante
+Quero pesquisar prestadores por categoria (ex: limpeza, jardinagem) e
+ver apenas os disponíveis na minha região.
+Alta
+US-
+04
+Contratante
+Quero solicitar um serviço e pagar com segurança sabendo que o
+dinheiro só é liberado após conclusão.
+Alta
+US-
+05
+Prestador
+Quero receber 80% do valor do serviço automaticamente após
+confirmação do contratante.
+Alta
+US-
+06
+Contratante /
+Prestador
+Quero me comunicar com a outra parte pelo chat interno sem precisar
+compartilhar meu número de telefone.
+Alta
+US-
+07
+Administrador
+Quero visualizar em um dashboard o total de usuários, serviços e receita
+da plataforma em tempo real.
+Alta
+US-
+08
+Contratante
+Quero avaliar o prestador após a conclusão do serviço para ajudar outros
+usuários a escolherem bem.
+Média
+US-
+09
+Administrador
+Quero poder aprovar ou reprovar cadastros de prestadores para garantir
+a qualidade da plataforma.
+Média
+US-
+10
+Contratante /
+Prestador
+Quero fazer login com minha conta Google, Facebook ou Apple para
+facilitar meu acesso.
+Média
+
+=== PAGE 8 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 8
+3. CASOS DE USO E FLUXOS PRINCIPAIS
+3.1 Caso de Uso Principal: Contratação de Serviço
+Ator Principal
+Contratante (usuário registrado)
+Atores Secundários
+Prestador de Serviço, Gateway de Pagamento, Administrador
+Pré-Condições
+Contratante cadastrado e autenticado. Prestador com perfil ativo na categoria
+desejada.
+Fluxo Principal
+1. Contratante acessa o grid de categorias. 2. Seleciona a categoria desejada
+(ex: Limpeza). 3. Sistema exibe lista de prestadores filtrados por categoria e
+região. 4. Contratante clica no perfil do prestador e analisa portfólio/avaliações.
+5. Clica em 'Contratar' → preenche detalhes do serviço. 6. Realiza pagamento
+via gateway → valor retido. 7. Prestador recebe notificação e usa chat para
+combinar detalhes. 8. Serviço realizado → Contratante confirma conclusão. 9.
+Split automático: 80% ao prestador, 20% à plataforma. 10. Contratante avalia o
+prestador.
+Fluxos Alternativos
+ Se contratante não tem cadastro: redirecionado ao cadastro antes de ver a
+lista.  Se prestador não está disponível: status exibido no perfil.  Se pagamento
+falha: serviço não é criado e usuário é notificado.
+Exceções
+ Tentativa de enviar número de telefone no chat → mensagem bloqueada com
+aviso.  Atraso na confirmação de conclusão → admin pode intervir
+manualmente.
+3.2 Caso de Uso: Cadastro de Prestador
+Ator Principal
+Prestador de Serviço
+Pré-Condições
+Acesso à internet e dados pessoais disponíveis (CPF, dados bancários/PIX).
+Fluxo Principal
+1. Acessa o site → Clica em 'Sou Prestador'. 2. Preenche nome, e-mail, senha
+(ou login social). 3. Seleciona categorias de serviço e regiões de atuação. 4.
+Adiciona foto de perfil, descrição e fotos de serviços realizados. 5. Informa
+dados bancários (chave PIX, banco, agência/conta). 6. Cadastro aprovado
+automaticamente → perfil disponível na listagem.
+Exceções
+ Dados inválidos: sistema exibe erro e solicita correção.  Se aprovação manual
+estiver ativa: admin recebe notificação para revisar.
+
+=== PAGE 9 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 9
+4. STORYBOARD E FLUXO DO APLICATIVO
+O fluxo de telas do aplicativo segue uma estrutura linear e intuitiva, com foco em reduzir ao máximo as
+barreiras para contratação. Abaixo estão as telas principais e seus propósitos:
+ID
+Tela
+Descrição / Função
+T-01
+Landing Page
+Apresentação da plataforma com categorias, como funciona, depoimentos e
+CTAs de cadastro
+T-02
+Cadastro
+Seleção de perfil (cliente/prestador) e preenchimento de dados (nome, e-mail,
+senha, região)
+T-03
+Login
+Autenticação por e-mail/senha ou login social (Google, Facebook, Apple)
+T-04
+Home Contratante
+Grid de categorias de serviço (tela principal após login do contratante)
+T-05
+Listagem de
+Prestadores
+Lista filtrada por categoria e região com foto, nome e média de avaliação
+T-06
+Perfil do Prestador
+Página pública com portfólio, avaliações, descrição e botão 'Contratar'
+T-07
+Solicitação de Serviço
+Formulário de detalhes do serviço (data, endereço, descrição) e confirmação
+T-08
+Pagamento
+Checkout integrado ao gateway (AbacatePay/Banda Pay) com valor e split
+visíveis
+T-09
+Chat Interno
+Comunicação entre contratante e prestador com filtro de segurança ativo
+T-10
+Confirmação e
+Avaliação
+Contratante confirma conclusão e avalia o prestador (estrelas + comentário)
+T-11
+Home Prestador
+Painel do prestador: solicitações recebidas, dados do perfil e financeiro
+T-12
+Dashboard Admin
+Painel completo: usuários, serviços, receita, chat e configurações
+
+=== PAGE 10 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 10
+5. REGRAS DE NEGÓCIO TRANSVERSAIS
+As regras abaixo se aplicam a todo o sistema, independentemente do módulo ou funcionalidade:
+ID
+Regra
+Descrição
+RN-0
+1
+Split de Pagamento
+100% do valor pago fica retido. Após conclusão: 80% ao prestador e 20% à
+plataforma.
+RN-0
+2
+Geolocalização
+Contratante e Prestador informam região no cadastro. Listagem filtra por
+compatibilidade geográfica.
+RN-0
+3
+Bloqueio no Chat
+Números de telefone e palavrões são bloqueados automaticamente no chat
+interno.
+RN-0
+4
+Segmentação de
+Acesso
+Três grupos: Admin / Contratante / Prestador. Cada grupo acessa apenas suas
+funcionalidades.
+RN-0
+5
+Custódia de
+Pagamento
+Pagamento só é liberado ao prestador após confirmação expressa do
+contratante.
+RN-0
+6
+Aprovação
+Automática
+Cadastros são aprovados automaticamente. Admin pode ativar revisão manual
+a qualquer momento.
+RN-0
+7
+Código Fonte
+O código fonte permanece propriedade da Kentaurus IT até a entrega final e
+pagamento integral.
+RN-0
+8
+Suporte Pós-Entrega
+Suporte incluso por 7 a 15 dias após entrega. Suporte além desse período é
+cobrado à parte.
+RN-0
+9
+Impostos
+Impostos incidem sobre os 20% de comissão da plataforma, não sobre o valor
+total do serviço.
+RN-1
+0
+LGPD
+Dados pessoais armazenados de forma segura. Pagamento em custódia
+conforme regulamentação vigente.
+
+=== PAGE 11 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 11
+6. LEVANTAMENTO E MODELAGEM DE DADOS
+6.1 Entidades e Atributos Principais
+Entidade
+Atributos
+Contratante (BD-01)
+id, nome, e-mail, senha (hash), região, cidade, data_cadastro, status, foto_perfil,
+historico_contratacoes
+Prestador (BD-02)
+id, nome, e-mail, senha (hash), categorias[ ], regioes_cobertura[ ], foto_perfil,
+fotos_portfolio[ ], descricao, chave_pix, banco, agencia, conta, media_avaliacao,
+total_avaliacoes, data_cadastro, status
+Serviço / Vaga (BD-03)
+id, contratante_id, prestador_id, categoria, descricao, endereco, data_solicitacao,
+data_execucao, status (solicitado|aceito|em_andamento|concluido|cancelado),
+valor_total
+Pagamento (BD-04)
+id, servico_id, valor_total, valor_prestador (80%), valor_plataforma (20%),
+gateway, status_pagamento, data_pagamento, data_liberacao, chave_split
+Admin / Dashboard (BD-05)
+Agregado: total_usuarios, total_servicos_mes, receita_total_mes,
+taxa_plataforma_mes, servicos_pendentes, servicos_concluidos, log_aprovacoes,
+historico_auditoria_chat
+Avaliação
+id, servico_id, contratante_id, prestador_id, nota (1-5), comentario, data_avaliacao
+Mensagem (Chat)
+id, servico_id, remetente_id, tipo_remetente, conteudo, data_envio, bloqueada
+(bool), motivo_bloqueio
+6.2 Relacionamentos Principais
+ Um Contratante pode gerar muitos Serviços (1:N).
+ Um Prestador pode receber muitos Serviços (1:N).
+ Cada Serviço gera exatamente um Pagamento (1:1).
+ Cada Serviço concluído pode ter uma Avaliação (1:0..1).
+ Um Serviço pode ter muitas Mensagens no Chat (1:N).
+ Um Prestador tem muitas Avaliações (1:N) e uma Media calculada.
+
+=== PAGE 12 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 12
+7. ARQUITETURA E INTEGRAÇÕES (DEV)
+7.1 Stack e Infraestrutura
+Hospedagem
+Hostinger — domínio e credenciais fornecidos pelo cliente Prontto.
+Frontend
+Interface web responsiva com animações e grid de categorias. Login social via
+OAuth 2.0 (Google, Facebook, Apple).
+Backend
+Sistema com 5 bancos de dados integrados. Desenvolvido por desenvolvedor
+Pleno da equipe Kentaurus IT.
+Gateway de Pagamento
+AbacatePay ou Banda Pay — split automático 80/20 nativo.
+Chat Interno
+Sistema de mensagens em tempo real com filtro de segurança (bloqueio de
+telefone e palavrões).
+SEO
+Meta tags, URLs amigáveis e estrutura otimizada para indexação no Google.
+Segurança
+Segmentação por grupo (Admin/Contratante/Prestador). LGPD aplicada ao
+armazenamento de dados pessoais.
+7.2 Integrações Previstas
+Integração
+Status
+Descrição
+Gateway (AbacatePay/Banda Pay)
+Obrigatória — v1.0
+Split automático de pagamento 80/20
+Login Social (Google/FB/Apple)
+Obrigatória — v1.0
+OAuth 2.0 para autenticação simplificada
+Notificação WhatsApp / E-mail
+Futura — v2.0
+Alertas de solicitação e confirmação
+CRM Interno
+Futura — v2.0
+Gestão de relacionamento com usuários
+Google Ads / Marketing
+Futura — parceria
+externa
+Gerenciamento de tráfego pago (agência
+indicada)
+8. RISCOS TÉCNICOS E DEPENDÊNCIAS
+ID
+Severi
+dade
+Risco
+Mitigação
+R-0
+1
+Alta
+Replit/Hospedagem instável durante
+desenvolvimento
+Deploy final no Hostinger — ambiente de
+produção estável.
+R-0
+2
+Alta
+Disponibilidade do desenvolvedor afeta o
+prazo de 5 dias
+Equipe com 9 desenvolvedores —
+realocação possível caso necessário.
+
+=== PAGE 13 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 13
+R-0
+3
+Média
+Gateway de pagamento pode exigir
+documentação CNPJ
+Cliente sem CNPJ formalizado — abertura
+em andamento (48h possível via Ítalo Anjos).
+R-0
+4
+Média
+Clientes menores de 18 anos exigem
+assinatura de responsável legal
+Contrato assinado por responsáveis legais
+de Felipe e Dyllan + reconhecimento de firma
+em cartório.
+R-0
+5
+Baixa
+Mudanças de escopo após aceite do protótipo
+Alterações formalizadas por escrito com
+concordância de ambas as partes.
+R-0
+6
+Baixa
+Escalabilidade da plataforma com alto volume
+de usuários
+Arquitetura modular permite expansão.
+Revisão de infraestrutura prevista para v2.0.
+
+=== PAGE 14 ===
+PRONTTO — Requisitos Funcionais | v1.0
+Kentaurus IT × Prontto
+Confidencial — Uso Interno | Este documento é propriedade intelectual de Kentaurus IT e Prontto.
+Página 14
+VALIDAÇÃO E ASSINATURAS
+Este documento formaliza os requisitos funcionais levantados nas reuniões realizadas entre 28/04/2026 e
+21/05/2026. Qualquer alteração de escopo após assinatura deve ser formalizada por adendo contratual com
+concordância de ambas as partes.
+Fornecedor — Kentaurus IT
+Cliente — Prontto
+Mateus (Kentaurus IT) Ítalo Anjos
+Felipe / Dyllan Marinho (+ Responsável Legal)
+Assinatura: ________________________
+Assinatura: ________________________
+Data: _____ / _____ / _______
+Data: _____ / _____ / _______

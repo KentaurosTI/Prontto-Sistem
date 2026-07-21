@@ -1,0 +1,95 @@
+<!-- ── Cabeçalho ── -->
+<section class="svc-head">
+  <div class="wrap">
+    <span class="kick">Serviços</span>
+    <h1>Nossos Serviços</h1>
+    <p>Catálogo completo por categoria. Escolha o serviço, veja uma breve descrição e contrate o profissional ideal para a sua necessidade.</p>
+    <div class="svc-jump">
+      @for (cat of catalogo; track cat.key) {
+        <button type="button" class="svc-chip" (click)="irPara(cat.key)"><i [class]="cat.icone"></i>{{ cat.label }}</button>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ── Catálogo por categoria ── -->
+@for (cat of catalogo; track cat.key) {
+  <section class="svc-cat" [id]="'cat-' + cat.key">
+    <div class="wrap">
+      <div class="svc-cat__head">
+        <div class="svc-cat__title">
+          <span class="svc-cat__ic"><i [class]="cat.icone"></i></span>
+          <h2>{{ cat.label }}</h2>
+        </div>
+        <span class="svc-cat__count">{{ cat.total }} serviços</span>
+      </div>
+
+      <!-- primeiro grupo (sempre visível) -->
+      <div class="svc-group">
+        <h3 class="svc-group__title">{{ cat.grupoPrincipal.titulo }}</h3>
+        <div class="svc-grid">
+          @for (item of cat.grupoPrincipal.itens; track item.nome) {
+            <article class="svc-card">
+              @if (item.img) {
+                <div class="svc-card__img"><img [src]="item.img" [alt]="item.nome" loading="lazy"></div>
+              } @else {
+                <div class="svc-card__img svc-card__img--ph"><i [class]="cat.icone"></i></div>
+              }
+              <div class="svc-card__body">
+                <h4 class="svc-card__title">{{ item.nome }}</h4>
+                <p class="svc-card__desc">{{ item.desc }}</p>
+                <a class="btn btn-laranja svc-card__btn" [routerLink]="item.rota">Contratar serviço</a>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+
+      <!-- demais grupos (revelados no "ver mais") -->
+      @if (estaExpandido(cat.key)) {
+        @for (g of cat.grupos; track g.titulo) {
+          <div class="svc-group">
+            <h3 class="svc-group__title">{{ g.titulo }}</h3>
+            <div class="svc-grid">
+              @for (item of g.itens; track item.nome) {
+                <article class="svc-card">
+                  @if (item.img) {
+                    <div class="svc-card__img"><img [src]="item.img" [alt]="item.nome" loading="lazy"></div>
+                  } @else {
+                    <div class="svc-card__img svc-card__img--ph"><i [class]="cat.icone"></i></div>
+                  }
+                  <div class="svc-card__body">
+                    <h4 class="svc-card__title">{{ item.nome }}</h4>
+                    <p class="svc-card__desc">{{ item.desc }}</p>
+                    <a class="btn btn-laranja svc-card__btn" [routerLink]="item.rota">Contratar serviço</a>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      @if (cat.grupos.length > 0) {
+        <div class="svc-cat__more">
+          <button class="btn btn-out svc-toggle" [class.is-open]="estaExpandido(cat.key)" type="button"
+            [attr.aria-expanded]="estaExpandido(cat.key)" (click)="alternar(cat.key)">
+            <span class="svc-toggle__txt">
+              {{ estaExpandido(cat.key) ? 'Ver menos serviços' : 'Ver mais ' + cat.restoCount + ' serviços de ' + cat.label }}
+            </span>
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+}
+
+<!-- ── CTA final ── -->
+<section class="svc-cta">
+  <div class="wrap">
+    <h2>Não encontrou o serviço que procura?</h2>
+    <p>Descreva o que você precisa e receba orçamentos de profissionais avaliados da sua região.</p>
+    <a routerLink="/cadastrar" class="btn btn-laranja btn-lg">Fazer um pedido grátis</a>
+  </div>
+</section>

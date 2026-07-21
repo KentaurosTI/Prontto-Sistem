@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5259",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Default": "Server=localhost;Database=prontto_dev;User=prontto;Password=prontto_dev;Port=3306;AllowPublicKeyRetrieval=true;SslMode=None;",
+        "SESSION_SECRET": "prontto-secret-dev-local-32chars!!"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7011;http://localhost:5259",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Default": "Server=localhost;Database=prontto_dev;User=prontto;Password=prontto_dev;Port=3306;AllowPublicKeyRetrieval=true;SslMode=None;",
+        "SESSION_SECRET": "prontto-secret-dev-local-32chars!!"
+      }
+    }
+  }
+}

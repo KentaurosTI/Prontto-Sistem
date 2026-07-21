@@ -1,0 +1,35 @@
+<div class="notif" (click)="$event.stopPropagation()">
+  <button class="notif__sino" (click)="alternar($event)" [attr.aria-expanded]="aberto()"
+    aria-label="Notificações">
+    <i class="ri-notification-3-line"></i>
+    @if (naoLidas() > 0) {
+      <span class="notif__badge">{{ naoLidas() > 9 ? '9+' : naoLidas() }}</span>
+    }
+  </button>
+
+  @if (aberto()) {
+    <div class="notif__painel" role="menu">
+      <div class="notif__cabecalho">
+        <strong>Notificações</strong>
+        @if (naoLidas() > 0) {
+          <button class="notif__marcar" (click)="marcarTodas($event)">Marcar todas como lidas</button>
+        }
+      </div>
+
+      <div class="notif__lista">
+        @for (n of notificacoes(); track n.id) {
+          <button class="notif__item" [class.notif__item--nao-lida]="!n.lida" (click)="abrir(n)">
+            <span class="notif__ponto" [class.invisivel]="n.lida" aria-hidden="true"></span>
+            <span class="notif__corpo">
+              <span class="notif__titulo">{{ n.titulo }}</span>
+              <span class="notif__msg">{{ n.mensagem }}</span>
+              <span class="notif__data">{{ n.criadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+            </span>
+          </button>
+        } @empty {
+          <p class="notif__vazio">Nenhuma notificação por aqui.</p>
+        }
+      </div>
+    </div>
+  }
+</div>

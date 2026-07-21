@@ -1,0 +1,12 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "Default": "Server=127.0.0.1;Port=3306;Database=prontto_dev;User=prontto;Password=SUA_SENHA_LOCAL;AllowPublicKeyRetrieval=true;SslMode=None;"
+  },
+  "SESSION_SECRET": "gere-uma-string-aleatoria-de-ao-menos-32-caracteres"
+}

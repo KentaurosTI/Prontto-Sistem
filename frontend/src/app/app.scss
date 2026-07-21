@@ -1,0 +1,15 @@
+/* ============================================================
+   Shell da aplicação — header/catbar/mega/footer usam as
+   classes globais do design system (src/styles/redesign.scss).
+   Aqui só ajustes específicos do shell.
+   ============================================================ */
+
+.conteudo-principal {
+  display: block;
+  min-height: 60vh;
+}
+
+/* link "Sair" no header (sem href) */
+.hdr__sair {
+  cursor: pointer;
+}

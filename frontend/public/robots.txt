@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /minha-area
+Disallow: /admin
+
+Sitemap: https://prontto.org/sitemap.xml
