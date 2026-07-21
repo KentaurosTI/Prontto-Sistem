@@ -104,6 +104,15 @@
       <h3>Ações</h3>
       <div class="acoes-grid">
 
+        <!-- Cliente: aceitar proposta pendente do prestador -->
+        <button
+          *ngIf="propostaPendente() && propostaPodeSerAceita(propostaPendente()!)"
+          class="btn-primario btn-aceitar"
+          [disabled]="enviando()"
+          (click)="aceitarProposta(propostaPendente()!.id)">
+          Aceitar Proposta — R$ {{ propostaPendente()!.valorProposta | number:'1.2-2' }}
+        </button>
+
         <!-- Prestador: vincular -->
         <button
           *ngIf="podeVincular()"
