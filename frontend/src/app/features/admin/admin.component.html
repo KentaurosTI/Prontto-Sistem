@@ -165,7 +165,7 @@
               @for (servico of servicos(); track servico.id) {
                 <tr>
                   <td class="tabela__titulo">{{ servico.titulo }}</td>
-                  <td>{{ servico.categoriaId }}</td>
+                  <td>{{ servico.categoriaNome || servico.categoriaId }}</td>
                   <td>R$ {{ servico.preco }}</td>
                   <td>
                     <span class="badge badge-{{ servico.status }}">{{ rotularStatus(servico.status) }}</span>
