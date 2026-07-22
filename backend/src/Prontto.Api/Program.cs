@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,15 @@ builder.Services.AddRateLimiter(opcoes =>
 {
     opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
+    opcoes.OnRejected = async (ctx, token) =>
+    {
+        ctx.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        if (ctx.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+            ctx.HttpContext.Response.Headers.RetryAfter = ((int)retryAfter.TotalSeconds).ToString();
+        await ctx.HttpContext.Response.WriteAsJsonAsync(
+            new { error = "Muitas requisições. Aguarde um momento antes de tentar novamente." }, token);
+    };
+
     // POST /api/auth/login — 10 req/min por IP
     opcoes.AddPolicy("login", ctx =>
         RateLimitPartition.GetFixedWindowLimiter(
@@ -119,6 +129,18 @@ builder.Services.AddRateLimiter(opcoes =>
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
     });
+
+    // PATCH /cancelar e POST /disputa — 5 req/min por usuário autenticado (requer UseAuthentication antes de UseRateLimiter)
+    opcoes.AddPolicy("servicos-criticos", ctx =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: ctx.User.FindFirstValue("userId") ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 0,
+            }));
 });
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
@@ -161,8 +183,8 @@ app.UseSwaggerUI(opt =>
 
 app.UseMiddleware<MiddlewareExcecao>();
 app.UseCors();
-app.UseRateLimiter();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 
