@@ -34,10 +34,15 @@ public class ControladorWebhook(IServicoFinanceiro servicoFinanceiro) : Controll
         {
             return Unauthorized(new { error = "Assinatura inválida" });
         }
+        catch (Prontto.Application.Common.ExcecaoValidacao ex)
+        {
+            // Payload malformado: 400 sinaliza à Pagar.me que não deve reenviar este evento
+            return BadRequest(new { error = ex.Message });
+        }
         catch (Exception)
         {
-            // Retorna 200 para evitar reenvios excessivos do gateway; log já feito no serviço
-            return Ok(new { received = true, warning = "processed_with_error" });
+            // Erro interno: 500 permite que a Pagar.me reenvie o webhook; log feito no serviço
+            return StatusCode(500, new { error = "Erro interno ao processar webhook" });
         }
     }
 }

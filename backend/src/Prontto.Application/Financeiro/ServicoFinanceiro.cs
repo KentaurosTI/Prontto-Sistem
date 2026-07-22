@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Prontto.Application.Common;
@@ -63,34 +64,30 @@ public class ServicoFinanceiro(
         if (!ValidarHmac(payload, assinaturaHmac, segredo))
             throw new ExcecaoNaoAutorizado("Assinatura HMAC inválida");
 
-        // Deserializar payload com System.Text.Json
-        string? tipoEvento = null;
-        string? orderId = null;
-        string? chargeId = null;
-
+        // Deserializar payload com desserialização tipada
+        PagarmeWebhookPayload? evento;
         try
         {
-            using var doc = JsonDocument.Parse(payload);
-            var root = doc.RootElement;
-
-            tipoEvento = root.TryGetProperty("type", out var tp) ? tp.GetString() : null;
-
-            if (root.TryGetProperty("data", out var data))
-            {
-                orderId = data.TryGetProperty("id", out var oid) ? oid.GetString() : null;
-
-                if (data.TryGetProperty("charges", out var charges) && charges.ValueKind == JsonValueKind.Array
-                    && charges.GetArrayLength() > 0)
-                {
-                    chargeId = charges[0].TryGetProperty("id", out var cid) ? cid.GetString() : null;
-                }
-            }
+            evento = JsonSerializer.Deserialize<PagarmeWebhookPayload>(payload,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
         catch (JsonException ex)
         {
-            logger.LogWarning(ex, "Webhook: payload JSON inválido — ignorando");
-            return;
+            var truncado = payload.Length > 500 ? payload[..500] : payload;
+            logger.LogWarning(ex, "Webhook: payload JSON inválido — payload (truncado): {Payload}", truncado);
+            throw new ExcecaoValidacao("Payload do webhook inválido: JSON malformado");
         }
+
+        if (evento is null)
+        {
+            logger.LogWarning("Webhook: deserialização retornou nulo — payload (truncado): {Payload}",
+                payload.Length > 500 ? payload[..500] : payload);
+            throw new ExcecaoValidacao("Payload do webhook inválido");
+        }
+
+        var tipoEvento = evento.Type;
+        var orderId = evento.Data?.Id;
+        var chargeId = evento.Data?.Charges?.FirstOrDefault()?.Id;
 
         // Filtrar: apenas eventos de pagamento confirmado
         if (string.IsNullOrWhiteSpace(tipoEvento) || !EventosPagamentoConfirmado.Contains(tipoEvento))
@@ -101,8 +98,8 @@ public class ServicoFinanceiro(
 
         if (string.IsNullOrWhiteSpace(orderId))
         {
-            logger.LogWarning("Webhook recebido sem order_id reconhecível. Tipo={Tipo}", tipoEvento);
-            return;
+            logger.LogWarning("Webhook: campo obrigatório 'data.id' ausente. Tipo={Tipo}", tipoEvento);
+            throw new ExcecaoValidacao("Payload do webhook inválido: campo 'data.id' ausente");
         }
 
         // RN-08: idempotência
@@ -311,5 +308,21 @@ public class ServicoFinanceiro(
         RetidoEm: c.RetidoEm,
         LiberadoEm: c.LiberadoEm,
         CriadoEm: c.CriadoEm
+    );
+
+    // ── DTOs internos para deserialização tipada do webhook Pagar.me ──────────
+
+    private sealed record PagarmeWebhookPayload(
+        [property: JsonPropertyName("type")] string? Type,
+        [property: JsonPropertyName("data")] PagarmeWebhookData? Data
+    );
+
+    private sealed record PagarmeWebhookData(
+        [property: JsonPropertyName("id")] string? Id,
+        [property: JsonPropertyName("charges")] List<PagarmeWebhookCharge>? Charges
+    );
+
+    private sealed record PagarmeWebhookCharge(
+        [property: JsonPropertyName("id")] string? Id
     );
 }
