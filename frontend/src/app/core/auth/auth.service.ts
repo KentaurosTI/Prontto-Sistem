@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 import { Usuario } from '../models/usuario.model';
 
 interface RespostaAuth {
-  token: string;
   user: any;
 }
 
@@ -16,7 +15,6 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly _usuario = signal<Usuario | null>(this.carregarUsuarioLocal());
-  private readonly _token = signal<string | null>(localStorage.getItem('prontto_token'));
 
   readonly usuario = this._usuario.asReadonly();
   readonly estaAutenticado = computed(() => this._usuario() !== null);
@@ -63,7 +61,7 @@ export class AuthService {
   }
 
   sair(): void {
-    // Best-effort: encerra a sessão no backend (limpa o cookie de refresh).
+    // Best-effort: encerra a sessão no backend (limpa os cookies de refresh e access).
     this.http
       .post(`${environment.apiUrl}/api/auth/logout`, {}, { withCredentials: true })
       .subscribe({ next: () => {}, error: () => {} });
@@ -73,9 +71,7 @@ export class AuthService {
 
   /** Limpa apenas o estado local (usado no logout e ao falhar o refresh). */
   limparSessaoLocal(): void {
-    localStorage.removeItem('prontto_token');
     localStorage.removeItem('prontto_usuario');
-    this._token.set(null);
     this._usuario.set(null);
   }
 
@@ -85,8 +81,9 @@ export class AuthService {
     this.router.navigate(['/entrar']);
   }
 
+  /** Mantido por compatibilidade — token agora trafega via cookie httpOnly. */
   obterToken(): string | null {
-    return this._token();
+    return null;
   }
 
   /** Atualiza campos do usuário logado em memória e no localStorage (ex.: foto de perfil). */
@@ -100,9 +97,7 @@ export class AuthService {
 
   private salvarSessao(resposta: RespostaAuth): void {
     const usuario = this.mapearUsuario(resposta.user);
-    localStorage.setItem('prontto_token', resposta.token);
     localStorage.setItem('prontto_usuario', JSON.stringify(usuario));
-    this._token.set(resposta.token);
     this._usuario.set(usuario);
   }
 
