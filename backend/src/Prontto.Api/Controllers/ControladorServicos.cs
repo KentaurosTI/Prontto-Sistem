@@ -158,6 +158,7 @@ public class ControladorServicos(
     }
 
     [HttpPatch("{id:guid}/cancelar")]
+    [EnableRateLimiting("servicos-criticos")]
     public async Task<IActionResult> Cancelar(Guid id, [FromBody] RequisicaoCancelamento? req = null)
     {
         var userId = ObterUsuarioId();
@@ -167,6 +168,7 @@ public class ControladorServicos(
     }
 
     [HttpPost("{id:guid}/disputa")]
+    [EnableRateLimiting("servicos-criticos")]
     public async Task<IActionResult> AbrirDisputa(Guid id, [FromBody] RequisicaoDisputa req)
     {
         var userId = ObterUsuarioId();
