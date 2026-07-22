@@ -45,16 +45,16 @@ public class RepositorioAvaliacao(ContextoBancoDados contexto) : IRepositorioAva
 
     public async Task<(decimal Media, int Total)> CalcularMediaAsync(Guid avaliadoId)
     {
-        var avaliacoes = await contexto.Avaliacoes
+        var query = contexto.Avaliacoes
             .Where(a => a.AvaliadoId == avaliadoId)
-            .AsNoTracking()
-            .ToListAsync();
+            .AsNoTracking();
 
-        if (avaliacoes.Count == 0)
+        var total = await query.CountAsync();
+        if (total == 0)
             return (0m, 0);
 
-        var media = (decimal)avaliacoes.Average(a => a.Nota);
-        return (Math.Round(media, 2), avaliacoes.Count);
+        var media = await query.AverageAsync(a => (decimal)a.Nota);
+        return (Math.Round(media, 2), total);
     }
 
     public async Task<List<Avaliacao>> ListarRecentesGlobaisAsync(int limite)
