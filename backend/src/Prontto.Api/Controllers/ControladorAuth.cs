@@ -25,6 +25,7 @@ public class ControladorAuth(
     ILogger<ControladorAuth> logger) : ControllerBase
 {
     private const string NomeCookieRefreshToken = "prontto_refresh_token";
+    private const string NomeCookieAccessToken = "prontto_access_token";
 
     [HttpPost("register")]
     [EnableRateLimiting("cadastro")]
@@ -44,8 +45,9 @@ public class ControladorAuth(
             ip, userAgent));
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
-        return StatusCode(201, new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
+        return StatusCode(201, new { user = DtoUsuario.De(resultado.Usuario) });
     }
 
     [HttpPost("login")]
@@ -60,8 +62,9 @@ public class ControladorAuth(
         var resultado = await servicoAuth.EntrarAsync(new ComandoLogin(req.Email, req.Senha, ip, userAgent));
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
-        return Ok(new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
+        return Ok(new { user = DtoUsuario.De(resultado.Usuario) });
     }
 
     [HttpPost("refresh")]
@@ -77,8 +80,9 @@ public class ControladorAuth(
         var resultado = await servicoAuth.RenovarSessaoAsync(tokenBruto, ip, userAgent);
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
-        return Ok(new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
+        return Ok(new { user = DtoUsuario.De(resultado.Usuario) });
     }
 
     [HttpPost("logout")]
@@ -90,6 +94,7 @@ public class ControladorAuth(
             await servicoAuth.LogoutAsync(tokenBruto);
 
         RemoverCookieRefreshToken();
+        RemoverCookieAccessToken();
 
         return Ok(new { message = "Logout realizado com sucesso" });
     }
@@ -410,6 +415,30 @@ public class ControladorAuth(
             Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/api/auth",
+        });
+    }
+
+    private void DefinirCookieAccessToken(string token)
+    {
+        var opcoes = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTimeOffset.UtcNow.AddMinutes(15),
+            Path = "/",
+        };
+        Response.Cookies.Append(NomeCookieAccessToken, token, opcoes);
+    }
+
+    private void RemoverCookieAccessToken()
+    {
+        Response.Cookies.Delete(NomeCookieAccessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/",
         });
     }
 }

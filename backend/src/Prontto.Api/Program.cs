@@ -79,6 +79,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // Access Token expira em 15 min; sem tolerância de relógio
             ClockSkew = TimeSpan.Zero,
         };
+        // Lê o access token do cookie httpOnly se o header Authorization estiver ausente.
+        opt.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                if (string.IsNullOrEmpty(ctx.Token))
+                    ctx.Token = ctx.Request.Cookies["prontto_access_token"];
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();

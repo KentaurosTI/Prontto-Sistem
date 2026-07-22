@@ -1,4 +1,4 @@
-import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -11,27 +11,24 @@ function ehEndpointAuth(url: string): boolean {
     || url.includes('/api/auth/logout');
 }
 
-function comToken(requisicao: HttpRequest<unknown>, token: string | null) {
-  return token
-    ? requisicao.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : requisicao;
-}
-
 export const authInterceptor: HttpInterceptorFn = (requisicao, proximo) => {
   const auth = inject(AuthService);
 
-  return proximo(comToken(requisicao, auth.obterToken())).pipe(
+  // Envia cookies httpOnly automaticamente em todas as requisições.
+  const req = requisicao.clone({ withCredentials: true });
+
+  return proximo(req).pipe(
     catchError((erro: unknown) => {
       const status = erro instanceof HttpErrorResponse ? erro.status : 0;
 
       // Só tenta renovar em 401 de rotas protegidas (não nos próprios endpoints de auth).
-      if (status !== 401 || ehEndpointAuth(requisicao.url)) {
+      if (status !== 401 || ehEndpointAuth(req.url)) {
         return throwError(() => erro);
       }
 
       // Access token expirou: renova via cookie de refresh e refaz a requisição.
       return auth.renovarSessao().pipe(
-        switchMap(() => proximo(comToken(requisicao, auth.obterToken()))),
+        switchMap(() => proximo(req.clone({ withCredentials: true }))),
         catchError(() => {
           // Refresh falhou (sessão realmente expirada): desloga e manda pro login.
           auth.sessaoExpirada();
