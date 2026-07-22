@@ -32,6 +32,7 @@ public class ContextoBancoDados(DbContextOptions<ContextoBancoDados> opcoes) : D
             e.ToTable("usuarios");
             e.HasIndex(u => u.Email).IsUnique();
             e.HasIndex(u => u.Slug).IsUnique();
+            e.HasIndex(u => new { u.TipoConta, u.Slug }); // acelera filtro de prestadores com slug na busca da home
 
             e.Property(u => u.Id).HasColumnName("id");
             e.Property(u => u.Nome).HasColumnName("nome");
@@ -277,6 +278,7 @@ public class ContextoBancoDados(DbContextOptions<ContextoBancoDados> opcoes) : D
         {
             e.ToTable("usuarios_categorias");
             e.HasKey(cu => new { cu.UsuarioId, cu.CategoriaId });
+            e.HasIndex(cu => cu.CategoriaId); // acelera Any() por categoria na busca de prestadores
 
             e.Property(cu => cu.UsuarioId).HasColumnName("usuario_id");
             e.Property(cu => cu.CategoriaId).HasColumnName("categoria_id");
@@ -297,6 +299,7 @@ public class ContextoBancoDados(DbContextOptions<ContextoBancoDados> opcoes) : D
         {
             e.ToTable("usuarios_cidades");
             e.HasKey(cu => new { cu.UsuarioId, cu.CidadeId });
+            e.HasIndex(cu => cu.CidadeId); // acelera filtro opcional por cidade na busca de prestadores
 
             e.Property(cu => cu.UsuarioId).HasColumnName("usuario_id");
             e.Property(cu => cu.CidadeId).HasColumnName("cidade_id");

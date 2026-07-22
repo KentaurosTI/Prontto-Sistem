@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Prontto.Infrastructure.Persistence.Context;
 
@@ -11,9 +12,11 @@ using Prontto.Infrastructure.Persistence.Context;
 namespace Prontto.Infrastructure.Migrations
 {
     [DbContext(typeof(ContextoBancoDados))]
-    partial class ContextoBancoDadosModelSnapshot : ModelSnapshot
+    [Migration("20260722172913_AddSearchIndexes")]
+    partial class AddSearchIndexes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
