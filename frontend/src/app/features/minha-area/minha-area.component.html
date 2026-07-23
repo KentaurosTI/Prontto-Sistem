@@ -342,8 +342,8 @@
           </div>
 
           <div class="campo">
-            <label class="campo__label" for="chavePix">Chave Pix</label>
-            <input id="chavePix" type="text" class="campo__input" formControlName="chavePix" />
+            <label class="campo__label" for="chavePix">{{ tipoPixLabel() }}</label>
+            <input id="chavePix" [type]="tipoPixInputType()" class="campo__input" formControlName="chavePix" [placeholder]="tipoPixPlaceholder()" />
           </div>
 
           <div class="campo-duplo">
