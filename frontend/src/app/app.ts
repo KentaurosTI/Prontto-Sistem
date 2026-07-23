@@ -55,6 +55,10 @@ export class App {
   }
 
   abrirMega(idx: number): void {
+    // No touch/mobile o browser sintetiza `mouseenter` antes do `click`. Se abríssemos
+    // o mega aqui, o onClickCatbarItem veria megaIdx já == idx e fecharia na sequência.
+    // Por isso, abaixo de 920px a abertura é feita SÓ pelo clique (SCRUM-6 re-fix / PR #14).
+    if (typeof window !== 'undefined' && window.innerWidth < 920) return;
     if (this.timerMega) clearTimeout(this.timerMega);
     this.megaIdx.set(idx);
   }

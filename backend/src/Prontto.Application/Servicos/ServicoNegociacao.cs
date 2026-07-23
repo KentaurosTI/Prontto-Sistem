@@ -265,11 +265,13 @@ public class ServicoNegociacao(
             ServicoId: m.ServicoId,
             RemetenteId: m.RemetenteId,
             RemetenteNome: m.Remetente?.Nome,
-            PapelRemetente: m.PapelRemetente.ToString(),
-            TipoMensagem: m.TipoMensagem.ToString(),
+            // Enums em minúsculo — o frontend compara com 'proposta'/'pendente'/'cliente' etc.
+            // (sem isso, propostaPendente() nunca casa e o botão "Aceitar Proposta" fica oculto).
+            PapelRemetente: m.PapelRemetente.ToString().ToLowerInvariant(),
+            TipoMensagem: m.TipoMensagem.ToString().ToLowerInvariant(),
             Conteudo: m.Conteudo,
             ValorProposta: m.ValorProposta,
-            StatusProposta: m.StatusProposta?.ToString(),
+            StatusProposta: m.StatusProposta?.ToString().ToLowerInvariant(),
             CriadoEm: m.CriadoEm
         );
 }
