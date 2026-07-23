@@ -76,7 +76,7 @@ button{font-family:inherit;cursor:pointer}
   .hdr__menu{position:absolute;top:100%;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
     background:#fff;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);box-shadow:var(--sombra-md);
     padding:6px 0;max-height:0;overflow:hidden;visibility:hidden;transition:max-height .25s ease,visibility .25s}
-  .hdr__menu.open{max-height:340px;visibility:visible}
+  .hdr__menu.open{max-height:340px;visibility:visible;overflow:visible;transition:max-height .25s ease,visibility .25s,overflow 0s .25s}
   .hdr__menu a{display:flex;width:100%;justify-content:flex-start;padding:14px 24px;border-radius:0;font-size:1.05rem}
   .hdr__menu a:hover{background:var(--laranja-suave)}
 }
