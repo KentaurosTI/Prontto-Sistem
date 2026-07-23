@@ -265,11 +265,11 @@ public class ServicoNegociacao(
             ServicoId: m.ServicoId,
             RemetenteId: m.RemetenteId,
             RemetenteNome: m.Remetente?.Nome,
-            PapelRemetente: m.PapelRemetente.ToString(),
-            TipoMensagem: m.TipoMensagem.ToString(),
+            PapelRemetente: m.PapelRemetente.ToString().ToLower(),
+            TipoMensagem: m.TipoMensagem.ToString().ToLower(),
             Conteudo: m.Conteudo,
             ValorProposta: m.ValorProposta,
-            StatusProposta: m.StatusProposta?.ToString(),
+            StatusProposta: m.StatusProposta?.ToString().ToLower(),
             CriadoEm: m.CriadoEm
         );
 }
