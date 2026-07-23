@@ -136,10 +136,16 @@
   border-radius: var(--raio-borda);
   cursor: pointer;
   font-size: 1.25rem;
-  transition: background var(--transicao);
+  color: rgba(255, 255, 255, 0.55);
+  transition: background var(--transicao), color var(--transicao);
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
 
   &.ativo {
     background: var(--cor-primaria);
+    color: #fff;
   }
 }
 
