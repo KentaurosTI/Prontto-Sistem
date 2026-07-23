@@ -581,4 +581,37 @@ export class MinhaAreaComponent implements OnInit {
   }
 
   readonly indicesEstrelas = [1, 2, 3, 4, 5] as const;
+
+  tipoPixSelecionado(): string {
+    return this.formularioBanking.get('tipoChavePix')?.value ?? 'cpf';
+  }
+
+  tipoPixLabel(): string {
+    const labels: Record<string, string> = {
+      cpf: 'Chave PIX — CPF',
+      cnpj: 'Chave PIX — CNPJ',
+      email: 'Chave PIX — E-mail',
+      telefone: 'Chave PIX — Telefone',
+      aleatoria: 'Chave PIX — Aleatória',
+    };
+    return labels[this.tipoPixSelecionado()] ?? 'Chave PIX';
+  }
+
+  tipoPixPlaceholder(): string {
+    const placeholders: Record<string, string> = {
+      cpf: '000.000.000-00',
+      cnpj: '00.000.000/0000-00',
+      email: 'exemplo@email.com',
+      telefone: '+55 (11) 99999-9999',
+      aleatoria: 'Cole aqui a chave aleatória (UUID)',
+    };
+    return placeholders[this.tipoPixSelecionado()] ?? '';
+  }
+
+  tipoPixInputType(): string {
+    const tipo = this.tipoPixSelecionado();
+    if (tipo === 'email') return 'email';
+    if (tipo === 'telefone') return 'tel';
+    return 'text';
+  }
 }
