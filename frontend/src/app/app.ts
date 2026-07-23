@@ -55,6 +55,9 @@ export class App {
   }
 
   abrirMega(idx: number): void {
+    // No mobile, mouseenter fires from synthetic touch events before click,
+    // causing onClickCatbarItem to see megaIdx===i and close the menu. Skip hover on touch.
+    if (window.innerWidth < 920) return;
     if (this.timerMega) clearTimeout(this.timerMega);
     this.megaIdx.set(idx);
   }
