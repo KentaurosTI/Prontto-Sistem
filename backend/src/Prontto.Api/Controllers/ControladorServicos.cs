@@ -184,7 +184,7 @@ public class ControladorServicos(
     // ── Helpers privados ───────────────────────────────────────────────────────
 
     private Guid ObterUsuarioId()
-        => Guid.Parse(User.FindFirstValue("userId")!);
+        => User.GetRequiredUserId();
 
     private TipoConta ObterTipoConta()
     {

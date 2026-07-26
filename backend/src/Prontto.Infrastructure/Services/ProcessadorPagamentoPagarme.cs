@@ -33,8 +33,14 @@ public class ProcessadorPagamentoPagarme(
     {
         var cliente = CriarCliente();
 
-        // Pagar.me trabalha com centavos (int)
-        var valorCentavos = (int)(valor * 100);
+        // Pagar.me trabalha com centavos. Usa long para evitar overflow (SCRUM-32):
+        // (int)(valor*100) estoura acima de ~R$21M e vira valor negativo.
+        if (valor <= 0)
+            throw new InvalidOperationException("Valor da cobrança deve ser maior que zero.");
+        var centavosDecimal = decimal.Round(valor * 100m, 0, MidpointRounding.AwayFromZero);
+        if (centavosDecimal > long.MaxValue)
+            throw new InvalidOperationException("Valor da cobrança excede o limite suportado.");
+        var valorCentavos = (long)centavosDecimal;
         var expiracaoSegundos = (int)expiracao.TotalSeconds;
 
         var plataformaRecipientId = configuracao["PAGARME_PLATFORM_RECIPIENT_ID"]

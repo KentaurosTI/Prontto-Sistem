@@ -102,7 +102,7 @@ public class ControladorAuth(
     [Authorize]
     public async Task<IActionResult> ObterPerfil()
     {
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
         var usuario = await servicoAuth.ObterUsuarioAtualAsync(idUsuario);
         return Ok(new { user = DtoUsuario.De(usuario) });
     }
@@ -115,7 +115,7 @@ public class ControladorAuth(
     [Authorize]
     public async Task<IActionResult> AtualizarMeuCadastro([FromBody] RequisicaoMeuCadastro req)
     {
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
         var usuario = await repositorioUsuario.ObterPorIdAsync(idUsuario)
             ?? throw new ExcecaoNaoEncontrado("Usuário não encontrado");
 
@@ -134,7 +134,7 @@ public class ControladorAuth(
     [Authorize]
     public async Task<IActionResult> ObterDadosBancarios()
     {
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
         var dados = await banking.ObterPorUsuarioIdAsync(idUsuario);
         return Ok(new { banking = dados });
     }
@@ -153,7 +153,7 @@ public class ControladorAuth(
         if (!Enum.TryParse<TipoChavePix>(req.TipoChavePix, ignoreCase: true, out var tipoChavePix))
             return BadRequest(new { error = "Tipo de chave Pix inválido" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
         var dadosBancarios = new Prontto.Domain.Entities.DadosBancarios
         {
             UsuarioId = idUsuario,
@@ -211,7 +211,7 @@ public class ControladorAuth(
         if (tipoConta != "prestador")
             return StatusCode(403, new { error = "Apenas prestadores podem editar o perfil público" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
 
         var perfil = await servicoPerfil.AtualizarPerfilAsync(idUsuario, new ComandoAtualizarPerfil(
             req.Nome,
@@ -238,7 +238,7 @@ public class ControladorAuth(
         if (tipoConta != "prestador")
             return StatusCode(403, new { error = "Apenas prestadores têm portfólio" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
         var imagens = await repositorioPerfil.ListarImagensAprovadasAsync(idUsuario);
 
         var resultado = imagens.Select(i => new { id = i.Id, url = i.Url, ordem = i.Ordem });
@@ -271,7 +271,7 @@ public class ControladorAuth(
         if (tipoConta != "prestador")
             return StatusCode(403, new { error = "Apenas prestadores podem adicionar imagens ao portfólio" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
 
         var urlRelativa = await armazenamentoArquivo.SalvarAsync(
             arquivo.OpenReadStream(),
@@ -340,7 +340,7 @@ public class ControladorAuth(
         if (tipoConta != "prestador")
             return StatusCode(403, new { error = "Apenas prestadores podem adicionar imagens ao portfólio" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
 
         var imagem = new ImagemPortfolio
         {
@@ -372,7 +372,7 @@ public class ControladorAuth(
         if (tipoConta != "prestador")
             return StatusCode(403, new { error = "Apenas prestadores podem remover imagens do portfólio" });
 
-        var idUsuario = Guid.Parse(User.FindFirstValue("userId")!);
+        var idUsuario = User.GetRequiredUserId();
 
         var imagem = await repositorioPerfil.ObterImagemPorIdAsync(id);
         if (imagem is null)

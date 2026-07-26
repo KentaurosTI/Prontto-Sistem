@@ -13,7 +13,7 @@ namespace Prontto.Api.Controllers;
 [Authorize]
 public class ControladorNotificacoes(IRepositorioNotificacao repositorio) : ControllerBase
 {
-    private Guid IdUsuario => Guid.Parse(User.FindFirstValue("userId")!);
+    private Guid IdUsuario => User.GetRequiredUserId();
 
     /// <summary>Lista as notificações (até 50) + contagem de não lidas.</summary>
     [HttpGet]

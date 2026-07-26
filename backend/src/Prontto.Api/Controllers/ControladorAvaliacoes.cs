@@ -56,7 +56,7 @@ public class ControladorAvaliacoes(IServicoAvaliacao servicoAvaliacao) : Control
     // ── Helpers privados ───────────────────────────────────────────────────────
 
     private Guid ObterUsuarioId()
-        => Guid.Parse(User.FindFirstValue("userId")!);
+        => User.GetRequiredUserId();
 }
 
 // ── Request Records ────────────────────────────────────────────────────────────

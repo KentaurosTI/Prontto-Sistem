@@ -14,7 +14,7 @@ public class ControladorAdmin(
     IServicoAdmin admin,
     IServicoDisputa servicoDisputa) : ControllerBase
 {
-    private Guid IdAdmin => Guid.Parse(User.FindFirstValue("userId")!);
+    private Guid IdAdmin => User.GetRequiredUserId();
 
     [HttpGet("stats")]
     public async Task<IActionResult> Estatisticas() => Ok(await admin.ObterEstatisticasAsync());

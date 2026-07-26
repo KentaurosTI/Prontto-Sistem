@@ -332,7 +332,7 @@
                   type="button"
                   class="pix-tipo-btn"
                   [class.ativo]="formularioBanking.get('tipoChavePix')?.value === tipo.valor"
-                  (click)="formularioBanking.patchValue({ tipoChavePix: tipo.valor })"
+                  (click)="selecionarTipoPix(tipo.valor)"
                 >
                   <span aria-hidden="true">{{ tipo.icone }}</span>
                   {{ tipo.label }}
@@ -342,8 +342,11 @@
           </div>
 
           <div class="campo">
-            <label class="campo__label" for="chavePix">Chave Pix</label>
-            <input id="chavePix" type="text" class="campo__input" formControlName="chavePix" />
+            <label class="campo__label" for="chavePix">{{ rotuloChavePix() }}</label>
+            <input id="chavePix"
+              [type]="formularioBanking.get('tipoChavePix')?.value === 'email' ? 'email' : (formularioBanking.get('tipoChavePix')?.value === 'telefone' ? 'tel' : 'text')"
+              class="campo__input" formControlName="chavePix"
+              [placeholder]="placeholderChavePix()" />
           </div>
 
           <div class="campo-duplo">

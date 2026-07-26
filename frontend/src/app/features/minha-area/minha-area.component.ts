@@ -87,6 +87,29 @@ export class MinhaAreaComponent implements OnInit {
     { valor: 'aleatoria', label: 'Aleatória', icone: '🔑' },
   ];
 
+  /** Ao trocar o tipo de chave, limpa a chave digitada para o novo formato (SCRUM-29). */
+  selecionarTipoPix(valor: string): void {
+    this.formularioBanking.patchValue({ tipoChavePix: valor, chavePix: '' });
+  }
+
+  /** Placeholder do campo "Chave Pix" conforme o tipo selecionado (SCRUM-29). */
+  placeholderChavePix(): string {
+    switch (this.formularioBanking.get('tipoChavePix')?.value) {
+      case 'cpf': return '000.000.000-00';
+      case 'cnpj': return '00.000.000/0000-00';
+      case 'email': return 'seu@email.com';
+      case 'telefone': return '(11) 99999-9999';
+      case 'aleatoria': return 'Chave aleatória (ex.: 123e4567-e89b-12d3-…)';
+      default: return 'Sua chave Pix';
+    }
+  }
+
+  /** Rótulo do campo conforme o tipo (para o usuário saber o que digitar). */
+  rotuloChavePix(): string {
+    const t = this.tiposPix.find(x => x.valor === this.formularioBanking.get('tipoChavePix')?.value);
+    return t ? `Chave Pix — ${t.label}` : 'Chave Pix';
+  }
+
   readonly formularioBanking = this.fb.group({
     tipoChavePix: ['cpf'],
     chavePix: [''],

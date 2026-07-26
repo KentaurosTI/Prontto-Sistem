@@ -12,7 +12,8 @@
 .painel-admin {
   min-height: calc(100vh - 64px);
   display: grid;
-  grid-template-columns: 1fr;
+  // minmax(0,…) permite a coluna encolher no mobile para a tabela poder rolar (SCRUM-36).
+  grid-template-columns: minmax(0, 1fr);
   background: var(--cor-fundo);
 
   /* Sidebar encostada na borda esquerda; conteúdo ocupa o resto.
@@ -453,6 +454,11 @@
 
 /* ── Menu de ações "..." nas tabelas ─────────────────────── */
 .tabela-wrapper { overflow: visible; }
+/* No mobile a tabela é larga: permite rolagem horizontal para ver todas as colunas
+   (no desktop mantém overflow:visible para o menu de ações "..." não cortar). SCRUM-36. */
+@media (max-width: 640px) {
+  .tabela-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
 .tabela__acoes-col { text-align: right; white-space: nowrap; }
 
 .acao-menu { position: relative; display: inline-block; }
