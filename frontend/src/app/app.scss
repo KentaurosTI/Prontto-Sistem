@@ -13,3 +13,34 @@
 .hdr__sair {
   cursor: pointer;
 }
+
+/* Barra de busca do header (contratante) */
+.hdr__busca {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--cor-fundo, #f8fafc);
+  border: 1px solid var(--cor-borda, #e5e7eb);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  min-width: 200px;
+  transition: border-color 0.15s;
+
+  &:focus-within { border-color: var(--cor-primaria); background: #fff; }
+  i { color: var(--cor-texto-suave, #64748b); font-size: 1rem; }
+  input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: var(--cor-navy-medio, #0f172a);
+    width: 100%;
+    &::placeholder { color: #9ca3af; }
+  }
+
+  /* No menu mobile (hamburguer) ocupa a linha inteira */
+  @media (max-width: 919px) {
+    margin: 8px 16px;
+    min-width: 0;
+  }
+}

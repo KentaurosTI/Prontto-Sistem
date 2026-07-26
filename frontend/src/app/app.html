@@ -11,6 +11,13 @@
       }
 
       @if (auth.estaAutenticado()) {
+        @if (ehCliente()) {
+          <form class="hdr__busca" (ngSubmit)="buscarNoHeader()" role="search">
+            <i class="ri-search-line" aria-hidden="true"></i>
+            <input type="text" name="q" [ngModel]="termoBusca()" (ngModelChange)="termoBusca.set($event)"
+              placeholder="Buscar serviço…" aria-label="Buscar serviço" autocomplete="off" />
+          </form>
+        }
         <app-notificacoes />
         <a routerLink="/minha-area" class="hdr__entrar" (click)="fecharMenu()">
           <i class="ri-user-line"></i>Minha área

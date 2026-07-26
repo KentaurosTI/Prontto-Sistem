@@ -1,0 +1,54 @@
+<div class="buscar-pagina">
+  <header class="buscar-hero">
+    <h1 class="buscar-titulo">Do que você precisa?</h1>
+    <p class="buscar-sub">Pesquise o serviço e veja os profissionais disponíveis na sua região.</p>
+
+    <div class="buscar-box">
+      <form class="buscar-form" (ngSubmit)="buscar()">
+        <i class="ri-search-line buscar-form__ic" aria-hidden="true"></i>
+        <input
+          type="text"
+          class="buscar-input"
+          placeholder="Ex.: instalação elétrica, pintura, diarista…"
+          [ngModel]="termo()"
+          (ngModelChange)="termo.set($event); semResultado.set(false)"
+          (focus)="focado.set(true)"
+          name="q"
+          autocomplete="off"
+          aria-label="Buscar serviço"
+        />
+        <button type="submit" class="buscar-btn">Buscar</button>
+      </form>
+
+      @if (focado() && sugestoes().length > 0) {
+        <ul class="buscar-ac" role="listbox">
+          @for (s of sugestoes(); track s) {
+            <li>
+              <button type="button" class="buscar-ac__item" (click)="selecionar(s)">
+                <i class="ri-search-line" aria-hidden="true"></i> {{ s }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (semResultado()) {
+      <p class="buscar-nada" role="status">
+        Não encontramos esse serviço. Tente outro termo ou escolha uma categoria abaixo.
+      </p>
+    }
+  </header>
+
+  <section class="buscar-cats" aria-label="Categorias populares">
+    <h2 class="buscar-cats__titulo">Ou escolha uma categoria</h2>
+    <div class="buscar-cats__grid">
+      @for (cat of categorias; track cat.key) {
+        <button type="button" class="cat-chip" (click)="irParaCategoria(cat.key)">
+          <span class="cat-chip__emoji" aria-hidden="true">{{ cat.emoji }}</span>
+          <span class="cat-chip__label">{{ cat.label }}</span>
+        </button>
+      }
+    </div>
+  </section>
+</div>

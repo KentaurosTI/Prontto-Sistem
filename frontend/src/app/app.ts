@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from './core/auth/auth.service';
@@ -13,7 +14,7 @@ const ROTAS_SEM_MARKETING = ['/entrar', '/cadastrar', '/minha-area', '/admin'];
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CookieConsentComponent, NotificacoesComponent],
+  imports: [RouterOutlet, RouterLink, FormsModule, CookieConsentComponent, NotificacoesComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
@@ -25,6 +26,19 @@ export class App {
 
   readonly menuAberto = signal(false);
   readonly scrollado = signal(false);
+  /** Termo da barra de busca do header (contratante). */
+  readonly termoBusca = signal('');
+
+  /** True quando o usuário logado é contratante (cliente). */
+  readonly ehCliente = computed(() => this.auth.usuario()?.tipoConta === 'cliente');
+
+  /** Submete a busca do header → página de busca de profissionais. */
+  buscarNoHeader(): void {
+    const q = this.termoBusca().trim();
+    this.fecharMenu();
+    this.router.navigate(['/buscar'], q ? { queryParams: { q } } : {});
+    this.termoBusca.set('');
+  }
   /** Índice da categoria com mega-menu aberto, ou null. */
   readonly megaIdx = signal<number | null>(null);
   private timerMega: ReturnType<typeof setTimeout> | null = null;

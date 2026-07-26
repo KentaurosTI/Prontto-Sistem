@@ -32,6 +32,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/categoria/categoria.component').then(m => m.CategoriaComponent),
   },
+  // Busca de serviço (contratante) — leva às boxes de profissionais
+  {
+    path: 'buscar',
+    loadComponent: () =>
+      import('./features/buscar/buscar.component').then(m => m.BuscarComponent),
+  },
   // Listagem de profissionais por serviço (contratante escolhe o prestador)
   {
     path: 'prestadores/:categoriaSlug',
