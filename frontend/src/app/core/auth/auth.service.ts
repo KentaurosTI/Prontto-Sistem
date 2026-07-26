@@ -16,7 +16,8 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly _usuario = signal<Usuario | null>(this.carregarUsuarioLocal());
-  private readonly _token = signal<string | null>(localStorage.getItem('prontto_token'));
+  // SCRUM-22: o access token agora vive em cookie httpOnly (inacessível ao JS).
+  // O estado "logado" da UI é derivado apenas do usuário persistido localmente.
 
   readonly usuario = this._usuario.asReadonly();
   readonly estaAutenticado = computed(() => this._usuario() !== null);
@@ -73,9 +74,7 @@ export class AuthService {
 
   /** Limpa apenas o estado local (usado no logout e ao falhar o refresh). */
   limparSessaoLocal(): void {
-    localStorage.removeItem('prontto_token');
     localStorage.removeItem('prontto_usuario');
-    this._token.set(null);
     this._usuario.set(null);
   }
 
@@ -83,10 +82,6 @@ export class AuthService {
   sessaoExpirada(): void {
     this.limparSessaoLocal();
     this.router.navigate(['/entrar']);
-  }
-
-  obterToken(): string | null {
-    return this._token();
   }
 
   /** Atualiza campos do usuário logado em memória e no localStorage (ex.: foto de perfil). */
@@ -100,9 +95,8 @@ export class AuthService {
 
   private salvarSessao(resposta: RespostaAuth): void {
     const usuario = this.mapearUsuario(resposta.user);
-    localStorage.setItem('prontto_token', resposta.token);
+    // O token não é mais guardado no JS — vem no cookie httpOnly definido pelo backend.
     localStorage.setItem('prontto_usuario', JSON.stringify(usuario));
-    this._token.set(resposta.token);
     this._usuario.set(usuario);
   }
 

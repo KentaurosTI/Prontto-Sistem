@@ -39,11 +39,7 @@ describe('AuthService', () => {
     servico.sair();
     expect(servico.estaAutenticado()).toBe(false);
     expect(servico.usuario()).toBeNull();
-    expect(localStorage.getItem('prontto_token')).toBeNull();
+    // SCRUM-22: o token vive em cookie httpOnly; só o usuário é persistido localmente.
     expect(localStorage.getItem('prontto_usuario')).toBeNull();
-  });
-
-  it('obterToken deve retornar null sem sessão ativa', () => {
-    expect(servico.obterToken()).toBeNull();
   });
 });

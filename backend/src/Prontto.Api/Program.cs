@@ -79,6 +79,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // Access Token expira em 15 min; sem tolerância de relógio
             ClockSkew = TimeSpan.Zero,
         };
+
+        // SCRUM-22: o app envia o access token via cookie httpOnly (não mais em header).
+        // Se não houver header Authorization (ex.: Swagger continua funcionando com Bearer),
+        // extrai o token do cookie `prontto_access_token`.
+        opt.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = contexto =>
+            {
+                if (string.IsNullOrEmpty(contexto.Token))
+                {
+                    var doCookie = contexto.Request.Cookies["prontto_access_token"];
+                    if (!string.IsNullOrEmpty(doCookie))
+                        contexto.Token = doCookie;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();

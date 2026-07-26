@@ -44,6 +44,7 @@ public class ControladorAuth(
             ip, userAgent));
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
         return StatusCode(201, new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
     }
@@ -60,6 +61,7 @@ public class ControladorAuth(
         var resultado = await servicoAuth.EntrarAsync(new ComandoLogin(req.Email, req.Senha, ip, userAgent));
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
         return Ok(new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
     }
@@ -77,6 +79,7 @@ public class ControladorAuth(
         var resultado = await servicoAuth.RenovarSessaoAsync(tokenBruto, ip, userAgent);
 
         DefinirCookieRefreshToken(resultado.RefreshToken);
+        DefinirCookieAccessToken(resultado.Token);
 
         return Ok(new { token = resultado.Token, user = DtoUsuario.De(resultado.Usuario) });
     }
@@ -90,6 +93,7 @@ public class ControladorAuth(
             await servicoAuth.LogoutAsync(tokenBruto);
 
         RemoverCookieRefreshToken();
+        RemoverCookieAccessToken();
 
         return Ok(new { message = "Logout realizado com sucesso" });
     }
@@ -410,6 +414,33 @@ public class ControladorAuth(
             Secure = true,
             SameSite = SameSiteMode.None,
             Path = "/api/auth",
+        });
+    }
+
+    // ── Access token via cookie httpOnly (SCRUM-22) ────────────────────────────
+    private const string NomeCookieAccessToken = "prontto_access_token";
+
+    private void DefinirCookieAccessToken(string token)
+    {
+        Response.Cookies.Append(NomeCookieAccessToken, token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            // 15 min (mesma validade do access token). Path "/" — vai em toda a API.
+            Expires = DateTimeOffset.UtcNow.AddMinutes(15),
+            Path = "/",
+        });
+    }
+
+    private void RemoverCookieAccessToken()
+    {
+        Response.Cookies.Delete(NomeCookieAccessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = "/",
         });
     }
 }

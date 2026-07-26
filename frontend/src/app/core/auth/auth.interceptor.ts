@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/comm
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 /** Endpoints de autenticação não devem disparar tentativa de refresh. */
 function ehEndpointAuth(url: string): boolean {
@@ -11,16 +12,21 @@ function ehEndpointAuth(url: string): boolean {
     || url.includes('/api/auth/logout');
 }
 
-function comToken(requisicao: HttpRequest<unknown>, token: string | null) {
-  return token
-    ? requisicao.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+/**
+ * SCRUM-22: autenticação por cookie httpOnly. Toda requisição para a API é enviada
+ * com `withCredentials: true` para que o cookie `prontto_access_token` acompanhe —
+ * não há mais header Authorization/Bearer no frontend.
+ */
+function comCredenciais(requisicao: HttpRequest<unknown>): HttpRequest<unknown> {
+  return requisicao.url.startsWith(environment.apiUrl)
+    ? requisicao.clone({ withCredentials: true })
     : requisicao;
 }
 
 export const authInterceptor: HttpInterceptorFn = (requisicao, proximo) => {
   const auth = inject(AuthService);
 
-  return proximo(comToken(requisicao, auth.obterToken())).pipe(
+  return proximo(comCredenciais(requisicao)).pipe(
     catchError((erro: unknown) => {
       const status = erro instanceof HttpErrorResponse ? erro.status : 0;
 
@@ -31,7 +37,7 @@ export const authInterceptor: HttpInterceptorFn = (requisicao, proximo) => {
 
       // Access token expirou: renova via cookie de refresh e refaz a requisição.
       return auth.renovarSessao().pipe(
-        switchMap(() => proximo(comToken(requisicao, auth.obterToken()))),
+        switchMap(() => proximo(comCredenciais(requisicao))),
         catchError(() => {
           // Refresh falhou (sessão realmente expirada): desloga e manda pro login.
           auth.sessaoExpirada();
