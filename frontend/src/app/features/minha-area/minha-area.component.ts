@@ -44,7 +44,14 @@ export class MinhaAreaComponent implements OnInit {
   readonly cidades = signal<Cidade[]>([]);
 
   // Aba ativa
-  readonly abaAtiva = signal<'perfil' | 'banking' | 'servicos' | 'portfolio' | 'cadastro'>('perfil');
+  readonly abaAtiva = signal<'perfil' | 'banking' | 'servicos' | 'disponiveis' | 'portfolio' | 'cadastro'>('perfil');
+
+  // Serviços disponíveis para o prestador se vincular (SCRUM-37)
+  readonly servicosDisponiveis = signal<Servico[]>([]);
+  readonly carregandoDisponiveis = signal(false);
+  readonly erroDisponiveis = signal<string | null>(null);
+  readonly vinculandoId = signal<string | null>(null);
+  readonly mensagemVinculo = signal<string | null>(null);
 
   // ── Portfólio (upload local) ─────────────────────────────────────────────────
   readonly imagens = signal<ImagemPortfolio[]>([]);
@@ -263,14 +270,57 @@ export class MinhaAreaComponent implements OnInit {
     });
   }
 
-  mudarAba(aba: 'perfil' | 'banking' | 'servicos' | 'portfolio' | 'cadastro'): void {
+  mudarAba(aba: 'perfil' | 'banking' | 'servicos' | 'disponiveis' | 'portfolio' | 'cadastro'): void {
     this.abaAtiva.set(aba);
     if (aba === 'servicos' && this.servicos().length === 0 && !this.carregandoServicos()) {
       this.carregarServicos();
     }
+    if (aba === 'disponiveis' && this.servicosDisponiveis().length === 0 && !this.carregandoDisponiveis()) {
+      this.carregarDisponiveis();
+    }
     if (aba === 'portfolio' && this.imagens().length === 0 && !this.carregandoImagens()) {
       this.carregarImagens();
     }
+  }
+
+  /** Lista solicitações abertas (sem prestador) que o prestador pode assumir (SCRUM-37). */
+  carregarDisponiveis(): void {
+    this.carregandoDisponiveis.set(true);
+    this.erroDisponiveis.set(null);
+    this.servicosService.listarDisponiveis().subscribe({
+      next: (res) => {
+        this.servicosDisponiveis.set(res.servicos);
+        this.carregandoDisponiveis.set(false);
+      },
+      error: () => {
+        this.erroDisponiveis.set('Não foi possível carregar os serviços disponíveis. Tente novamente.');
+        this.carregandoDisponiveis.set(false);
+      },
+    });
+  }
+
+  /** Vincula o prestador logado à solicitação escolhida (SCRUM-37). */
+  vincular(servicoId: string): void {
+    this.vinculandoId.set(servicoId);
+    this.mensagemVinculo.set(null);
+    this.erroDisponiveis.set(null);
+    this.servicosService.vincularPrestador(servicoId).subscribe({
+      next: () => {
+        // Some da lista de disponíveis e passa a fazer parte de "Meus serviços".
+        this.servicosDisponiveis.update((lista) => lista.filter((s) => s.id !== servicoId));
+        this.vinculandoId.set(null);
+        this.mensagemVinculo.set('Você se vinculou ao serviço! Ele já aparece em "Meus serviços".');
+        // Recarrega "Meus serviços" para refletir a vinculação.
+        this.carregarServicos();
+      },
+      error: (err) => {
+        this.vinculandoId.set(null);
+        const detalhe = err?.error?.error;
+        this.erroDisponiveis.set(
+          detalhe ? `Não foi possível vincular: ${detalhe}` : 'Não foi possível vincular ao serviço. Tente novamente.'
+        );
+      },
+    });
   }
 
   badgeStatus(status: StatusServico): { texto: string; cor: string } {

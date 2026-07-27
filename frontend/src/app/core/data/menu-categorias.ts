@@ -28,6 +28,9 @@ export const ICONE_CATEGORIA: Record<string, string> = {
   seguranca: 'ri-shield-check-line',
   serralheria: 'ri-door-lock-line',
   autos: 'ri-car-line',
+  festas: 'ri-goblet-line',
+  aulas: 'ri-book-open-line',
+  cuidados: 'ri-heart-pulse-line',
 };
 
 export const CATEGORIAS_MENU: CategoriaMenu[] = [
@@ -146,6 +149,45 @@ export const CATEGORIAS_MENU: CategoriaMenu[] = [
       { titulo: 'Cuidados', itens: ['Lavagem e estética', 'Película / insulfilm', 'Som automotivo', 'Guincho'] },
     ],
   },
+  {
+    key: 'festas',
+    label: 'Festas e Eventos',
+    emoji: '🎉',
+    icone: ICONE_CATEGORIA['festas'],
+    grupos: [
+      { titulo: 'Bar e Alimentação', itens: ['Garçom', 'Garçonete', 'Bartender', 'Barman', 'Churrasqueiro', 'Equipe de buffet', 'Copeiro'] },
+      { titulo: 'Organização', itens: ['Recepcionista', 'Cerimonialista', 'Mestre de cerimônias'] },
+      { titulo: 'Música', itens: ['DJ', 'Banda', 'Cantor'] },
+      { titulo: 'Foto e Vídeo', itens: ['Fotógrafo', 'Videomaker', 'Filmagem com drone'] },
+      { titulo: 'Decoração', itens: ['Decorador de festas', 'Florista'] },
+      { titulo: 'Recreação', itens: ['Recreador infantil', 'Monitor de brinquedos'] },
+      { titulo: 'Apoio', itens: ['Segurança para eventos', 'Manobrista'] },
+      { titulo: 'Atrações', itens: ['Brinquedos infláveis', 'Cabine de fotos', 'Mágico', 'Palhaço', 'Personagens infantis'] },
+    ],
+  },
+  {
+    key: 'aulas',
+    label: 'Aulas Particulares',
+    emoji: '📚',
+    icone: ICONE_CATEGORIA['aulas'],
+    grupos: [
+      { titulo: 'Esportes e Fitness', itens: ['Personal trainer', 'Lutas', 'Yoga', 'Pilates', 'Natação', 'Dança', 'Futebol', 'Tênis', 'Beach tennis', 'Vôlei', 'Basquete', 'Corrida', 'Ciclismo'] },
+      { titulo: 'Música', itens: ['Violão', 'Guitarra', 'Piano', 'Bateria', 'Canto'] },
+      { titulo: 'Artes', itens: ['Desenho', 'Pintura artística'] },
+      { titulo: 'Reforço e Escolar', itens: ['Programação', 'Matemática', 'Física', 'Química', 'Biologia', 'Português', 'Redação', 'Vestibular', 'Reforço escolar'] },
+      { titulo: 'Idiomas', itens: ['Inglês', 'Espanhol', 'Francês', 'Italiano', 'Libras'] },
+    ],
+  },
+  {
+    key: 'cuidados',
+    label: 'Cuidados e Pets',
+    emoji: '🐾',
+    icone: ICONE_CATEGORIA['cuidados'],
+    grupos: [
+      { titulo: 'Pessoas', itens: ['Babá', 'Cuidador de idosos'] },
+      { titulo: 'Pets', itens: ['Cuidador de pets', 'Passeador de cães'] },
+    ],
+  },
 ];
 
 export function slugificar(str: string): string {
@@ -238,6 +280,20 @@ const SUBIMG_SLUGS = new Set([
   'quadro-de-distribuicao', 'reboco-e-massa', 'recarga-de-gas', 'residencial', 'restauracao', 'sancas',
   'sinalizacao', 'solda', 'som-automotivo', 'som-e-home-theater', 'textura', 'toldos-e-coberturas',
   'tomadas-e-interruptores', 'tv', 'vazamentos', 'verniz-e-laca',
+  // Festas e Eventos
+  'garcom', 'garconete', 'bartender', 'barman', 'churrasqueiro', 'equipe-de-buffet', 'copeiro',
+  'recepcionista', 'cerimonialista', 'mestre-de-cerimonias', 'dj', 'banda', 'cantor', 'fotografo',
+  'videomaker', 'filmagem-com-drone', 'decorador-de-festas', 'florista', 'recreador-infantil',
+  'monitor-de-brinquedos', 'seguranca-para-eventos', 'manobrista', 'brinquedos-inflaveis',
+  'cabine-de-fotos', 'magico', 'palhaco', 'personagens-infantis',
+  // Aulas Particulares
+  'personal-trainer', 'lutas', 'yoga', 'pilates', 'natacao', 'danca', 'futebol', 'tenis',
+  'beach-tennis', 'volei', 'basquete', 'corrida', 'ciclismo', 'violao', 'guitarra', 'piano',
+  'bateria', 'canto', 'desenho', 'pintura-artistica', 'programacao', 'matematica', 'fisica',
+  'quimica', 'biologia', 'portugues', 'redacao', 'vestibular', 'reforco-escolar', 'ingles',
+  'espanhol', 'frances', 'italiano', 'libras',
+  // Cuidados e Pets
+  'baba', 'cuidador-de-idosos', 'cuidador-de-pets', 'passeador-de-caes',
 ]);
 
 /** Categorias que possuem capa em /img/cat/{key}.jpg */

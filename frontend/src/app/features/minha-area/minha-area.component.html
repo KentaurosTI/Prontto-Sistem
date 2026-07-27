@@ -55,6 +55,13 @@
         >
           <span aria-hidden="true">🖼️</span> Portfólio
         </button>
+        <button
+          class="sidebar__nav-item"
+          [class.ativo]="abaAtiva() === 'disponiveis'"
+          (click)="mudarAba('disponiveis')"
+        >
+          <span aria-hidden="true">🔎</span> Serviços disponíveis
+        </button>
       }
       <button
         class="sidebar__nav-item"
@@ -118,6 +125,13 @@
           [class.ativo]="abaAtiva() === 'portfolio'"
           (click)="mudarAba('portfolio')"
         >Portfólio</button>
+        <button
+          role="tab"
+          [attr.aria-selected]="abaAtiva() === 'disponiveis'"
+          class="aba-mobile"
+          [class.ativo]="abaAtiva() === 'disponiveis'"
+          (click)="mudarAba('disponiveis')"
+        >Disponíveis</button>
       }
       <button
         role="tab"
@@ -417,6 +431,99 @@
           <input id="pfInput" type="file" accept="image/jpeg,image/png,image/webp"
             (change)="onArquivoSelecionado($event)" hidden [disabled]="uploadEmAndamento()" />
         </div>
+      </section>
+    }
+
+    <!-- ABA: Serviços disponíveis (prestadores) — SCRUM-37 -->
+    @if (abaAtiva() === 'disponiveis' && usuario()?.tipoConta === 'prestador') {
+      <section class="secao-card" aria-labelledby="titulo-disponiveis">
+        <div class="secao-card__header secao-card__header--com-acao">
+          <h2 class="secao-card__titulo" id="titulo-disponiveis">Serviços disponíveis</h2>
+          <button class="btn-retentar" (click)="carregarDisponiveis()" [disabled]="carregandoDisponiveis()">
+            <span aria-hidden="true">↻</span> Atualizar
+          </button>
+        </div>
+        <p class="campo__dica" style="margin-bottom:14px">
+          Solicitações abertas de clientes, sem profissional definido. Vincule-se para iniciar a negociação.
+        </p>
+
+        @if (mensagemVinculo()) {
+          <div class="msg-sucesso" role="status" aria-live="polite">
+            <span aria-hidden="true">✓</span> {{ mensagemVinculo() }}
+          </div>
+        }
+
+        <!-- Estado: carregando -->
+        @if (carregandoDisponiveis()) {
+          <div class="lista-servicos-skeleton" aria-busy="true" aria-label="Carregando serviços disponíveis">
+            @for (i of [1, 2, 3]; track i) {
+              <div class="card-servico-skeleton">
+                <div class="skeleton skeleton-titulo"></div>
+                <div class="skeleton skeleton-subtitulo"></div>
+                <div class="skeleton skeleton-badge"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Estado: erro -->
+        @if (!carregandoDisponiveis() && erroDisponiveis()) {
+          <div class="estado-erro" role="alert">
+            <div class="estado-erro__icone" aria-hidden="true">😕</div>
+            <p class="estado-erro__texto">{{ erroDisponiveis() }}</p>
+            <button class="btn-retentar" (click)="carregarDisponiveis()">Tentar novamente</button>
+          </div>
+        }
+
+        <!-- Estado: vazio -->
+        @if (!carregandoDisponiveis() && !erroDisponiveis() && servicosDisponiveis().length === 0) {
+          <div class="estado-vazio">
+            <div class="estado-vazio__icone" aria-hidden="true">🔎</div>
+            <p class="estado-vazio__texto">
+              Nenhuma solicitação disponível no momento nas suas categorias e cidades de atuação.
+            </p>
+          </div>
+        }
+
+        <!-- Lista de disponíveis -->
+        @if (!carregandoDisponiveis() && !erroDisponiveis() && servicosDisponiveis().length > 0) {
+          <ul class="ms-lista" role="list" aria-label="Serviços disponíveis">
+            @for (servico of servicosDisponiveis(); track servico.id) {
+              <li role="listitem">
+                <div class="ms-item">
+                  <div>
+                    <strong>{{ servico.titulo }}</strong>
+                    <span class="ms-meta">
+                      @if (servico.clienteNome) { {{ servico.clienteNome }} · }
+                      @if (servico.categoriaNome) { {{ servico.categoriaNome }} · }
+                      @if (servico.cidadeNome) { {{ servico.cidadeNome }} · }
+                      {{ servico.criadoEm | date:'dd/MM/yyyy' }}
+                    </span>
+                  </div>
+                  <div class="ms-item__acoes">
+                    <a
+                      [routerLink]="['/servico', servico.id]"
+                      class="ms-item__link"
+                      [attr.aria-label]="'Ver detalhes do serviço ' + servico.titulo"
+                    >Ver detalhes →</a>
+                    <button
+                      class="btn-vincular"
+                      (click)="vincular(servico.id)"
+                      [disabled]="vinculandoId() === servico.id"
+                      [attr.aria-label]="'Vincular-me ao serviço ' + servico.titulo"
+                    >
+                      @if (vinculandoId() === servico.id) {
+                        <span class="spinner spinner--sm" aria-hidden="true"></span> Vinculando...
+                      } @else {
+                        <span aria-hidden="true">＋</span> Vincular-me
+                      }
+                    </button>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
       </section>
     }
 
