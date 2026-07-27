@@ -60,10 +60,12 @@ public static class InjecaoDependencias
         servicos.AddScoped<IServicoAvaliacao, ServicoAvaliacao>();
 
         // ── Gateway de pagamento ──────────────────────────────────────────────
-        // Em desenvolvimento usa stub local; em produção usa Pagar.me real
+        // PIX: Pagar.me em produção, stub em dev
+        // Cartão: Stripe em produção, stub em dev
         if (env.IsDevelopment())
         {
             servicos.AddScoped<IProcessadorPagamento, ProcessadorPagamentoStub>();
+            servicos.AddScoped<IProcessadorCartao, ProcessadorCartaoStub>();
         }
         else
         {
@@ -74,6 +76,7 @@ public static class InjecaoDependencias
                     new MediaTypeWithQualityHeaderValue("application/json"));
             });
             servicos.AddScoped<IProcessadorPagamento, ProcessadorPagamentoPagarme>();
+            servicos.AddScoped<IProcessadorCartao, ProcessadorCartaoStripe>();
         }
 
         // ── Jobs ──────────────────────────────────────────────────────────────

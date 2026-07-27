@@ -135,6 +135,226 @@
   i { color: var(--cor-primaria); font-style: normal; }
 }
 
+// ── Seção de Pagamento ────────────────────────────────────────────────────────
+
+.pagamento-container {
+  background: white;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.pagamento-titulo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cor-texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem;
+}
+
+.pagamento-valor {
+  font-size: 0.95rem;
+  color: var(--cor-texto);
+  margin: 0 0 1rem;
+
+  strong {
+    color: var(--cor-primaria);
+    font-size: 1.1rem;
+  }
+}
+
+.pagamento-abas {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid var(--cor-borda);
+  padding-bottom: 0;
+}
+
+.aba-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: inherit;
+
+  &:hover { color: var(--cor-primaria); }
+
+  &.aba-ativa {
+    color: var(--cor-primaria);
+    border-bottom-color: var(--cor-primaria);
+  }
+}
+
+.pix-secao {
+  padding-top: 0.75rem;
+}
+
+.pix-qrcode {
+  text-align: center;
+  margin: 1rem 0;
+
+  img {
+    max-width: 200px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+}
+
+.pix-expira {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+  margin-bottom: 0.5rem;
+}
+
+.pix-copia-cola {
+  margin: 0.75rem 0;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cor-texto-suave);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+}
+
+.pix-codigo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--cor-fundo);
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+
+  span {
+    flex: 1;
+    font-size: 0.75rem;
+    word-break: break-all;
+    color: var(--cor-texto);
+    font-family: monospace;
+  }
+}
+
+.btn-copiar {
+  background: var(--cor-primaria);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+
+  &:hover { opacity: 0.85; }
+}
+
+.pix-instrucao {
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+  margin-top: 0.75rem;
+}
+
+// Cartão
+
+.cartao-secao {
+  padding-top: 0.75rem;
+}
+
+.cartao-carregando {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.parcelas-select {
+  margin-bottom: 1rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cor-texto-suave);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+}
+
+.select-parcelas {
+  max-width: 320px;
+}
+
+.cartao-element-wrapper {
+  margin-bottom: 1rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--cor-texto-suave);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+}
+
+.stripe-card-element {
+  border: 1px solid var(--cor-borda);
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: white;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: var(--cor-primaria);
+    outline: 2px solid var(--cor-primaria);
+    outline-offset: 1px;
+  }
+}
+
+.cartao-seguro {
+  font-size: 0.75rem;
+  color: var(--cor-texto-suave);
+  margin: 0.4rem 0 0;
+}
+
+.erro-cartao {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.btn-pagar {
+  width: 100%;
+  max-width: 320px;
+}
+
+.cartao-pago {
+  padding: 1rem;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 // ── Ações ─────────────────────────────────────────────────────────────────────
 
 .acoes-container {

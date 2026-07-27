@@ -233,6 +233,21 @@ public class ControladorServicos(
 
         return Ok(new { cobranca });
     }
+
+    // ── Pagamento por cartão (Stripe) ─────────────────────────────────────────
+
+    [HttpPost("{id:guid}/pagamento-cartao")]
+    public async Task<IActionResult> IniciarPagamentoCartao(Guid id, [FromBody] RequisicaoPagamentoCartao req)
+    {
+        var usuarioId = ObterUsuarioId();
+        var servico = await servicoServico.ObterPorIdAsync(id, usuarioId);
+
+        if (servico.ClienteId != usuarioId)
+            return StatusCode(403, new { error = "Apenas o cliente do serviço pode efetuar o pagamento" });
+
+        var resultado = await servicoFinanceiro.IniciarPagamentoCartaoAsync(id, req.Parcelas);
+        return Ok(resultado);
+    }
 }
 
 // ── Request Records ────────────────────────────────────────────────────────────
@@ -253,3 +268,4 @@ public record RequisicaoMensagemTexto(string Conteudo);
 public record RequisicaoProposta(decimal Valor);
 public record RequisicaoCancelamento(string? Motivo);
 public record RequisicaoDisputa(string Motivo, string? Descricao);
+public record RequisicaoPagamentoCartao(int Parcelas = 1);

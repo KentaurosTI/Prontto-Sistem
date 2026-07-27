@@ -83,24 +83,78 @@
       </div>
     </div>
 
-    <!-- Seção PIX (aguardando_pagamento) -->
-    <div *ngIf="servico()!.status === 'aguardando_pagamento' && cobranca()" class="pix-container">
-      <h3>Pagamento via PIX</h3>
-      <p class="pix-valor">Valor: <strong>{{ cobranca()!.valorTotal | currency:'BRL' }}</strong></p>
-      <p class="pix-expira" *ngIf="cobranca()!.pixExpiracaoEm">
-        Expira em: {{ cobranca()!.pixExpiracaoEm | date:'dd/MM/yyyy HH:mm' }}
-      </p>
-      <div *ngIf="cobranca()!.pixQrCode" class="pix-qrcode">
-        <img [src]="cobranca()!.pixQrCode" alt="QR Code PIX" />
+    <!-- Seção de pagamento (aguardando_pagamento) -->
+    <div *ngIf="servico()!.status === 'aguardando_pagamento' && cobranca() && ehClienteDoServico()" class="pagamento-container">
+      <h3 class="pagamento-titulo">Efetuar Pagamento</h3>
+      <p class="pagamento-valor">Valor: <strong>{{ cobranca()!.valorTotal | currency:'BRL' }}</strong></p>
+
+      <!-- Abas de método de pagamento -->
+      <div *ngIf="!cartaoPago()" class="pagamento-abas">
+        <button class="aba-btn" [class.aba-ativa]="metodoPagamento() === 'pix'" (click)="selecionarMetodoPagamento('pix')">
+          PIX
+        </button>
+        <button class="aba-btn" [class.aba-ativa]="metodoPagamento() === 'cartao'" (click)="selecionarMetodoPagamento('cartao')">
+          Cartão de Crédito/Débito
+        </button>
       </div>
-      <div *ngIf="cobranca()!.pixCopiaCola" class="pix-copia-cola">
-        <label>Copia e Cola:</label>
-        <div class="pix-codigo">
-          <span>{{ cobranca()!.pixCopiaCola }}</span>
-          <button type="button" class="btn-copiar" (click)="copiarPix()">Copiar</button>
+
+      <!-- Conteúdo: PIX -->
+      <div *ngIf="metodoPagamento() === 'pix' && !cartaoPago()" class="pix-secao">
+        <p class="pix-expira" *ngIf="cobranca()!.pixExpiracaoEm">
+          Expira em: {{ cobranca()!.pixExpiracaoEm | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+        <div *ngIf="cobranca()!.pixQrCode" class="pix-qrcode">
+          <img [src]="cobranca()!.pixQrCode" alt="QR Code PIX" />
+        </div>
+        <div *ngIf="cobranca()!.pixCopiaCola" class="pix-copia-cola">
+          <label>Copia e Cola:</label>
+          <div class="pix-codigo">
+            <span>{{ cobranca()!.pixCopiaCola }}</span>
+            <button type="button" class="btn-copiar" (click)="copiarPix()">Copiar</button>
+          </div>
+        </div>
+        <p class="pix-instrucao">Abra o app do seu banco, escaneie o QR Code ou use o Copia e Cola.</p>
+      </div>
+
+      <!-- Conteúdo: Cartão -->
+      <div *ngIf="metodoPagamento() === 'cartao' && !cartaoPago()" class="cartao-secao">
+        <div *ngIf="carregandoCartao()" class="cartao-carregando">
+          <div class="spinner"></div>
+          <span>Preparando formulário seguro...</span>
+        </div>
+
+        <ng-container *ngIf="!carregandoCartao() && inicioCartao()">
+          <div class="parcelas-select">
+            <label for="parcelas">Parcelas</label>
+            <select id="parcelas" [(ngModel)]="parcelas" class="input select-parcelas">
+              <option [value]="1">1× {{ inicioCartao()!.valorTotal | currency:'BRL' }} (à vista)</option>
+              <option *ngFor="let n of [2,3,4,5,6,7,8,9,10,11,12]" [value]="n">
+                {{ n }}× {{ (inicioCartao()!.valorTotal / n) | currency:'BRL' }}
+              </option>
+            </select>
+          </div>
+
+          <div class="cartao-element-wrapper">
+            <label>Dados do cartão</label>
+            <div #stripeCardElement class="stripe-card-element"></div>
+            <p class="cartao-seguro">🔒 Dados tokenizados pelo Stripe — nunca passam pelo nosso servidor.</p>
+          </div>
+
+          <div *ngIf="erroCartao()" class="erro-cartao">{{ erroCartao() }}</div>
+
+          <button class="btn-primario btn-pagar" [disabled]="confirmandoCartao()" (click)="confirmarPagamentoCartao()">
+            {{ confirmandoCartao() ? 'Processando...' : 'Pagar com Cartão' }}
+          </button>
+        </ng-container>
+
+        <div *ngIf="erroCartao() && !carregandoCartao() && !inicioCartao()" class="erro-cartao">
+          {{ erroCartao() }}
         </div>
       </div>
-      <p class="pix-instrucao">Abra o app do seu banco, escaneie o QR Code ou use o Copia e Cola.</p>
+
+      <div *ngIf="cartaoPago()" class="cartao-pago">
+        ✅ Pagamento aprovado! O status do serviço será atualizado em instantes.
+      </div>
     </div>
 
     <!-- Ações disponíveis -->

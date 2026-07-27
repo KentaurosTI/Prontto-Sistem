@@ -11,12 +11,16 @@ public class Cobranca
     public decimal ValorPrestador { get; set; }
     public StatusCobranca Status { get; set; } = StatusCobranca.Pendente;
 
-    // Integração Pagar.me
+    // Integração Pagar.me / Stripe
     public string? PagarmeOrderId { get; set; }
     public string? PagarmePagamentoId { get; set; }
     public string? PixQrCode { get; set; }
     public string? PixCopiaCola { get; set; }
     public DateTime? PixExpiracaoEm { get; set; }
+
+    // Integração Stripe (cartão)
+    public string? StripePaymentIntentId { get; set; }
+    public int Parcelas { get; set; } = 1;
 
     public DateTime? PagadoEm { get; set; }
     public DateTime? RetidoEm { get; set; }

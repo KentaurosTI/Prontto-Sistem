@@ -18,6 +18,7 @@ public class ServicoFinanceiro(
     IRepositorioAuditLog repositorioAuditLog,
     IRepositorioNotificacao repositorioNotificacoes,
     IProcessadorPagamento processadorPagamento,
+    IProcessadorCartao processadorCartao,
     IConfiguration configuracao,
     ILogger<ServicoFinanceiro> logger) : IServicoFinanceiro
 {
@@ -53,6 +54,112 @@ public class ServicoFinanceiro(
 
         await repositorioCobrancas.AtualizarAsync(cobranca);
         return MapearDto(cobranca);
+    }
+
+    // ── Iniciar pagamento cartão (Stripe) ──────────────────────────────────────
+
+    public async Task<DtoInicioCartao> IniciarPagamentoCartaoAsync(Guid servicoId, int parcelas)
+    {
+        if (parcelas < 1 || parcelas > 12)
+            throw new ExcecaoValidacao("Número de parcelas deve ser entre 1 e 12.");
+
+        var cobranca = await repositorioCobrancas.ObterPorServicoIdAsync(servicoId)
+            ?? throw new ExcecaoNaoEncontrado("Cobrança não encontrada");
+
+        if (cobranca.Status != StatusCobranca.Pendente)
+            throw new ExcecaoValidacao("Pagamento já processado para esta cobrança.");
+
+        var servico = await repositorioServicos.ObterPorIdAsync(cobranca.ServicoId)
+            ?? throw new ExcecaoNaoEncontrado("Serviço não encontrado");
+
+        var resultado = await processadorCartao.GerarCartaoAsync(
+            valor: cobranca.ValorTotal,
+            descricao: $"Prontto - {servico.Titulo}",
+            parcelas: parcelas);
+
+        cobranca.StripePaymentIntentId = resultado.PaymentIntentId;
+        cobranca.Parcelas = parcelas;
+        cobranca.AtualizadoEm = DateTime.UtcNow;
+        await repositorioCobrancas.AtualizarAsync(cobranca);
+
+        logger.LogInformation("Cartão: PaymentIntent criado. ServicoId={ServicoId}, Parcelas={Parcelas}, IntentId={IntentId}",
+            servicoId, parcelas, resultado.PaymentIntentId);
+
+        return new DtoInicioCartao(
+            ClientSecret: resultado.ClientSecret,
+            PublishableKey: resultado.PublishableKey,
+            Parcelas: parcelas,
+            ValorTotal: cobranca.ValorTotal);
+    }
+
+    // ── Webhook Stripe ─────────────────────────────────────────────────────────
+
+    public async Task ProcessarWebhookStripeAsync(string payload, string assinaturaStripe)
+    {
+        if (!processadorCartao.ValidarAssinaturaWebhook(payload, assinaturaStripe, out var paymentIntentId))
+            throw new ExcecaoNaoAutorizado("Assinatura Stripe inválida");
+
+        if (string.IsNullOrWhiteSpace(paymentIntentId))
+        {
+            logger.LogInformation("Webhook Stripe: evento ignorado (sem paymentIntentId)");
+            return;
+        }
+
+        var cobranca = await repositorioCobrancas.ObterPorStripePaymentIntentIdAsync(paymentIntentId);
+        if (cobranca == null)
+        {
+            logger.LogWarning("Webhook Stripe: cobrança não encontrada para PaymentIntentId={Id}", paymentIntentId);
+            return;
+        }
+
+        if (cobranca.Status != StatusCobranca.Pendente)
+        {
+            logger.LogInformation("Webhook Stripe duplicado ignorado. PaymentIntentId={Id}", paymentIntentId);
+            return;
+        }
+
+        cobranca.Status = StatusCobranca.Retido;
+        cobranca.PagadoEm = DateTime.UtcNow;
+        cobranca.RetidoEm = DateTime.UtcNow;
+        cobranca.AtualizadoEm = DateTime.UtcNow;
+        await repositorioCobrancas.AtualizarAsync(cobranca);
+
+        var servico = await repositorioServicos.ObterPorIdAsync(cobranca.ServicoId);
+        if (servico != null && servico.Status == StatusServico.AguardandoPagamento)
+        {
+            servico.Status = StatusServico.EmAndamento;
+            servico.AtualizadoEm = DateTime.UtcNow;
+            await repositorioServicos.AtualizarAsync(servico);
+
+            await repositorioAuditLog.RegistrarAsync(new AuditLog
+            {
+                UsuarioId = null,
+                Acao = "pagamento.confirmado.cartao",
+                Entidade = "Cobranca",
+                EntidadeId = cobranca.Id.ToString(),
+                Detalhes = $"{{\"paymentIntentId\":\"{paymentIntentId}\",\"valor\":{cobranca.ValorTotal},\"parcelas\":{cobranca.Parcelas}}}"
+            });
+
+            if (servico.ClienteId.HasValue)
+                await repositorioNotificacoes.AdicionarAsync(new Notificacao
+                {
+                    UsuarioId = servico.ClienteId.Value,
+                    Titulo = "Pagamento confirmado!",
+                    Mensagem = $"Cartão aprovado para o serviço '{servico.Titulo}'. O prestador foi notificado.",
+                    Tipo = "pagamento",
+                    ReferenciaId = servico.Id.ToString()
+                });
+
+            if (servico.PrestadorId.HasValue)
+                await repositorioNotificacoes.AdicionarAsync(new Notificacao
+                {
+                    UsuarioId = servico.PrestadorId.Value,
+                    Titulo = "Pagamento recebido!",
+                    Mensagem = $"O pagamento do serviço '{servico.Titulo}' foi confirmado. Você pode iniciar o trabalho.",
+                    Tipo = "pagamento",
+                    ReferenciaId = servico.Id.ToString()
+                });
+        }
     }
 
     // ── Webhook Pagar.me ───────────────────────────────────────────────────────
@@ -327,6 +434,8 @@ public class ServicoFinanceiro(
         PixQrCode: c.PixQrCode,
         PixCopiaCola: c.PixCopiaCola,
         PixExpiracaoEm: c.PixExpiracaoEm,
+        StripePaymentIntentId: c.StripePaymentIntentId,
+        Parcelas: c.Parcelas,
         PagadoEm: c.PagadoEm,
         RetidoEm: c.RetidoEm,
         LiberadoEm: c.LiberadoEm,

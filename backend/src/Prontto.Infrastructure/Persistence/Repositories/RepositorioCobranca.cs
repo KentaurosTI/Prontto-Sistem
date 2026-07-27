@@ -57,6 +57,9 @@ public class RepositorioCobranca(ContextoBancoDados db) : IRepositorioCobranca
     public Task<Cobranca?> ObterPorPagarmeOrderIdAsync(string pagarmeOrderId)
         => db.Cobrancas.FirstOrDefaultAsync(c => c.PagarmeOrderId == pagarmeOrderId);
 
+    public Task<Cobranca?> ObterPorStripePaymentIntentIdAsync(string paymentIntentId)
+        => db.Cobrancas.FirstOrDefaultAsync(c => c.StripePaymentIntentId == paymentIntentId);
+
     public async Task<List<Cobranca>> ListarPendentesExpiradosAsync()
         => await db.Cobrancas
             .Where(c => c.Status == StatusCobranca.Pendente

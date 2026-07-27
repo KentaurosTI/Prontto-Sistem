@@ -91,12 +91,21 @@ export interface Cobranca {
   pixQrCode?: string | null;
   pixCopiaCola?: string | null;
   pixExpiracaoEm?: string | null;
+  stripePaymentIntentId?: string | null;
+  parcelas: number;
   pagoEm?: string | null;
   retidoEm?: string | null;
   liberadoEm?: string | null;
   criadoEm: string;
   atualizadoEm: string;
   servico?: { titulo: string; categoriaId: string; clienteId?: string | null; prestadorId?: string | null } | null;
+}
+
+export interface DtoInicioCartao {
+  clientSecret: string;
+  publishableKey: string;
+  parcelas: number;
+  valorTotal: number;
 }
 
 export type PapelRemetente = 'cliente' | 'prestador' | 'admin' | 'sistema';
