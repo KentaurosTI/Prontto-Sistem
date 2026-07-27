@@ -45,6 +45,8 @@ public class ServicoServico(
             Status = StatusServico.EmNegociacao,
             Endereco = comando.Endereco?.Trim(),
             AgendadoEm = comando.AgendadoEm,
+            JanelaInicio = comando.JanelaInicio,
+            JanelaFim = comando.JanelaFim,
             Preco = 0m,
             TaxaAdminRate = 0.2000m,
         };
@@ -450,6 +452,8 @@ public class ServicoServico(
             Status: StatusParaSnake(s.Status),
             Endereco: revelarEndereco ? s.Endereco : null,
             AgendadoEm: revelarEndereco ? s.AgendadoEm : null,
+            JanelaInicio: revelarEndereco ? s.JanelaInicio?.ToString("HH:mm") : null,
+            JanelaFim: revelarEndereco ? s.JanelaFim?.ToString("HH:mm") : null,
             ConcluidoEm: s.ConcluidoEm,
             CriadoEm: s.CriadoEm
         );

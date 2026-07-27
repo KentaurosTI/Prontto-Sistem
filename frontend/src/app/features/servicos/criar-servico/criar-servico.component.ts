@@ -1,7 +1,9 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import {
+  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -11,6 +13,16 @@ import { PerfilPrestadorService } from '../../../core/api/perfil-prestador.servi
 import { AuthService } from '../../../core/auth/auth.service';
 import { Categoria, Cidade } from '../../../core/models/usuario.model';
 import { CATEGORIAS_MENU } from '../../../core/data/menu-categorias';
+
+/** Valida a janela de disponibilidade: ou ambos os horários vazios, ou ambos preenchidos com fim > início. */
+function janelaValida(grupo: AbstractControl): ValidationErrors | null {
+  const ini = grupo.get('janelaInicio')?.value as string;
+  const fim = grupo.get('janelaFim')?.value as string;
+  if (!ini && !fim) return null;
+  if (!ini || !fim) return { janelaIncompleta: true };
+  if (fim <= ini) return { janelaInvertida: true };
+  return null;
+}
 
 @Component({
   selector: 'app-criar-servico',
@@ -48,7 +60,9 @@ export class CriarServicoComponent implements OnInit {
     cidadeId: [''],
     endereco: [''],
     agendadoEm: [''],
-  });
+    janelaInicio: [''],
+    janelaFim: [''],
+  }, { validators: [janelaValida] });
 
   /** Subcategorias da categoria selecionada (a partir do menu estático, casado pelo slug). */
   subcategoriasDisponiveis(): string[] {
@@ -137,6 +151,8 @@ export class CriarServicoComponent implements OnInit {
         cidadeId: v.cidadeId || null,
         endereco: v.endereco || null,
         agendadoEm: v.agendadoEm || null,
+        janelaInicio: v.janelaInicio || null,
+        janelaFim: v.janelaFim || null,
         prestadorId: this.prestadorIdParam() || null,
       })
       .subscribe({

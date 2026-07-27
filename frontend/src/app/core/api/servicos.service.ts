@@ -11,6 +11,8 @@ export interface ComandoCriarServico {
   cidadeId?: string | null;
   endereco?: string | null;
   agendadoEm?: string | null;
+  janelaInicio?: string | null;
+  janelaFim?: string | null;
   prestadorId?: string | null;
 }
 

@@ -16,6 +16,8 @@ public record DtoServico(
     string Status,
     string? Endereco,
     DateTime? AgendadoEm,
+    string? JanelaInicio,
+    string? JanelaFim,
     DateTime? ConcluidoEm,
     DateTime CriadoEm
 );
@@ -58,5 +60,7 @@ public record ComandoCriarServico(
     Guid? CidadeId,
     string? Endereco,
     DateTime? AgendadoEm,
+    TimeOnly? JanelaInicio = null,
+    TimeOnly? JanelaFim = null,
     Guid? PrestadorId = null
 );

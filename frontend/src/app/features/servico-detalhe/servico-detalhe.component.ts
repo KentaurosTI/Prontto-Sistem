@@ -209,6 +209,21 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Rola a página até o card de checkout (PIX) após aceitar a proposta. */
+  private rolarParaCheckout(): void {
+    // Aguarda o *ngIf da seção PIX renderizar (status + cobrança carregados).
+    let tentativas = 0;
+    const tentar = () => {
+      const el = document.querySelector('.pix-container');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (tentativas++ < 20) {
+        setTimeout(tentar, 150);
+      }
+    };
+    setTimeout(tentar, 150);
+  }
+
   copiarPix(): void {
     const c = this.cobranca();
     if (c?.pixCopiaCola) {
@@ -298,8 +313,11 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
       next: (res) => {
         this.servico.set(res.servico);
         this.carregarMensagens();
-        this.exibirFeedback('Proposta aceita! Aguardando pagamento.');
+        // Carrega a cobrança/PIX gerada e leva o cliente direto ao checkout.
+        this.carregarCobranca();
+        this.exibirFeedback('Proposta aceita! Finalize o pagamento para agendar o serviço.');
         this.enviando.set(false);
+        this.rolarParaCheckout();
       },
       error: (err) => {
         this.exibirFeedback(err?.error?.error ?? 'Erro ao aceitar proposta.');

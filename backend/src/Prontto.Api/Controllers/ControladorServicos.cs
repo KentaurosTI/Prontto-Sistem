@@ -28,6 +28,9 @@ public class ControladorServicos(
         if (tipoConta != TipoConta.Cliente)
             return StatusCode(403, new { error = "Apenas clientes podem criar solicitações de serviço" });
 
+        TimeOnly? janelaInicio = TimeOnly.TryParse(req.JanelaInicio, out var ji) ? ji : null;
+        TimeOnly? janelaFim = TimeOnly.TryParse(req.JanelaFim, out var jf) ? jf : null;
+
         var comando = new ComandoCriarServico(
             req.Titulo,
             req.Descricao,
@@ -35,6 +38,8 @@ public class ControladorServicos(
             req.CidadeId,
             req.Endereco,
             req.AgendadoEm,
+            janelaInicio,
+            janelaFim,
             req.PrestadorId);
 
         var servico = await servicoServico.CriarSolicitacaoAsync(userId, comando);
@@ -239,6 +244,8 @@ public record RequisicaoCriarServico(
     Guid? CidadeId,
     string? Endereco,
     DateTime? AgendadoEm,
+    string? JanelaInicio = null,
+    string? JanelaFim = null,
     Guid? PrestadorId = null
 );
 

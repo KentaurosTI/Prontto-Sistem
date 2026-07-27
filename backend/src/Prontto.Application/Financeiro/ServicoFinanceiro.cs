@@ -141,12 +141,14 @@ public class ServicoFinanceiro(
                 Detalhes = $"{{\"pagarmeOrderId\":\"{orderId}\",\"valor\":{cobranca.ValorTotal}}}"
             });
 
+            var agendamentoTexto = MontarTextoAgendamento(servico);
+
             if (servico.ClienteId.HasValue)
                 await repositorioNotificacoes.AdicionarAsync(new Notificacao
                 {
                     UsuarioId = servico.ClienteId.Value,
-                    Titulo = "Pagamento confirmado!",
-                    Mensagem = $"PIX recebido para o serviço '{servico.Titulo}'. O prestador foi notificado.",
+                    Titulo = "Serviço agendado!",
+                    Mensagem = $"Pagamento confirmado para '{servico.Titulo}'.{agendamentoTexto} O prestador foi notificado e recebeu o endereço.",
                     Tipo = "pagamento",
                     ReferenciaId = servico.Id.ToString()
                 });
@@ -155,8 +157,8 @@ public class ServicoFinanceiro(
                 await repositorioNotificacoes.AdicionarAsync(new Notificacao
                 {
                     UsuarioId = servico.PrestadorId.Value,
-                    Titulo = "Pagamento recebido!",
-                    Mensagem = $"O pagamento do serviço '{servico.Titulo}' foi confirmado. Você pode iniciar o trabalho.",
+                    Titulo = "Serviço agendado — pagamento recebido!",
+                    Mensagem = $"O pagamento de '{servico.Titulo}' foi confirmado.{agendamentoTexto} O endereço completo já está disponível na tela do serviço.",
                     Tipo = "pagamento",
                     ReferenciaId = servico.Id.ToString()
                 });
@@ -274,6 +276,27 @@ public class ServicoFinanceiro(
     }
 
     // ── Helpers privados ───────────────────────────────────────────────────────
+
+    /// <summary>Monta o trecho " Agendado para dd/MM/yyyy, das HH:mm às HH:mm." conforme os dados disponíveis.</summary>
+    private static string MontarTextoAgendamento(Servico servico)
+    {
+        var temData = servico.AgendadoEm.HasValue;
+        var temJanela = servico.JanelaInicio.HasValue && servico.JanelaFim.HasValue;
+
+        if (!temData && !temJanela)
+            return string.Empty;
+
+        var partes = new StringBuilder(" Agendado para ");
+        if (temData)
+            partes.Append(servico.AgendadoEm!.Value.ToString("dd/MM/yyyy"));
+        if (temJanela)
+        {
+            partes.Append(temData ? ", das " : "das ");
+            partes.Append($"{servico.JanelaInicio!.Value:HH\\:mm} às {servico.JanelaFim!.Value:HH\\:mm}");
+        }
+        partes.Append('.');
+        return partes.ToString();
+    }
 
     private static bool ValidarHmac(string payload, string assinatura, string segredo)
     {

@@ -51,6 +51,8 @@ export interface Servico {
   status: StatusServico;
   endereco?: string | null;
   agendadoEm?: string | null;
+  janelaInicio?: string | null;
+  janelaFim?: string | null;
   concluidoEm?: string | null;
   aguardandoConfirmacaoDesde?: string | null;
   criadoEm: string;

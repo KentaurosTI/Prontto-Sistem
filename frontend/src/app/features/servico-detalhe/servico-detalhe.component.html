@@ -56,6 +56,10 @@
           <span class="info-label">Agendado para</span>
           <span class="info-oculto"><i class="ri-lock-line" aria-hidden="true"></i> Revelado após a aprovação</span>
         </div>
+        <div class="info-linha" *ngIf="servico()!.janelaInicio && servico()!.janelaFim">
+          <span class="info-label">Horário disponível</span>
+          <span>das {{ servico()!.janelaInicio }} às {{ servico()!.janelaFim }}</span>
+        </div>
         <div class="info-linha">
           <span class="info-label">Valor acordado</span>
           <span class="valor-destaque">{{ servico()!.preco | currency:'BRL' }}</span>

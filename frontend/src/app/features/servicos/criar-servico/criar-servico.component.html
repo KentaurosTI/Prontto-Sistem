@@ -163,6 +163,39 @@
           </div>
         </div>
 
+        <!-- Janela de disponibilidade (horário) -->
+        <div class="campo-duplo">
+          <div class="campo">
+            <label class="campo__label" for="janelaInicio">Disponível a partir de</label>
+            <input
+              id="janelaInicio"
+              type="time"
+              class="campo__input"
+              formControlName="janelaInicio"
+            />
+          </div>
+          <div class="campo">
+            <label class="campo__label" for="janelaFim">Disponível até</label>
+            <input
+              id="janelaFim"
+              type="time"
+              class="campo__input"
+              formControlName="janelaFim"
+            />
+          </div>
+        </div>
+        <div class="campo campo--janela-dica">
+          <span class="campo__dica">
+            Opcional — janela de horário em que você pode receber o serviço (ex.: das 08:00 às 12:00).
+          </span>
+          @if (formulario.hasError('janelaIncompleta') && (formulario.get('janelaInicio')?.touched || formulario.get('janelaFim')?.touched)) {
+            <span class="campo__erro">Preencha os dois horários (início e fim) ou deixe ambos em branco.</span>
+          }
+          @if (formulario.hasError('janelaInvertida') && (formulario.get('janelaInicio')?.touched || formulario.get('janelaFim')?.touched)) {
+            <span class="campo__erro">O horário final deve ser maior que o inicial.</span>
+          }
+        </div>
+
         <!-- Endereço -->
         <div class="campo">
           <label class="campo__label" for="endereco">Endereço do serviço</label>

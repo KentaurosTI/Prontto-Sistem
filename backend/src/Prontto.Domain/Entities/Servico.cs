@@ -22,6 +22,9 @@ public class Servico
     public StatusServico Status { get; set; } = StatusServico.EmNegociacao;
     public string? Endereco { get; set; }
     public DateTime? AgendadoEm { get; set; }
+    // Janela de disponibilidade informada pelo cliente (ex.: das 08:00 às 12:00).
+    public TimeOnly? JanelaInicio { get; set; }
+    public TimeOnly? JanelaFim { get; set; }
     public DateTime? ConcluidoEm { get; set; }
     public DateTime? AguardandoConfirmacaoDesde { get; set; }
     public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
