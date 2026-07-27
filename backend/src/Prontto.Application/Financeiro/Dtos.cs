@@ -10,6 +10,8 @@ public record DtoCobranca(
     string? PixQrCode,
     string? PixCopiaCola,
     DateTime? PixExpiracaoEm,
+    string? StripePaymentIntentId,
+    int Parcelas,
     DateTime? PagadoEm,
     DateTime? RetidoEm,
     DateTime? LiberadoEm,
@@ -21,4 +23,11 @@ public record DtoExtratoFinanceiro(
     decimal ReceitaPendente,
     decimal Gmv,
     List<DtoCobranca> Cobrancas
+);
+
+public record DtoInicioCartao(
+    string ClientSecret,
+    string PublishableKey,
+    int Parcelas,
+    decimal ValorTotal
 );

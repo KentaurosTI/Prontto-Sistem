@@ -20,6 +20,7 @@ public class TestesServicoFinanceiro
     private readonly Mock<IRepositorioAuditLog> _repositorioAuditLog = new();
     private readonly Mock<IRepositorioNotificacao> _repositorioNotificacoes = new();
     private readonly Mock<IProcessadorPagamento> _processadorPagamento = new();
+    private readonly Mock<IProcessadorCartao> _processadorCartao = new();
     private readonly Mock<IConfiguration> _configuracao = new();
     private readonly ServicoFinanceiro _sut;
 
@@ -46,6 +47,7 @@ public class TestesServicoFinanceiro
             _repositorioAuditLog.Object,
             _repositorioNotificacoes.Object,
             _processadorPagamento.Object,
+            _processadorCartao.Object,
             _configuracao.Object,
             NullLogger<ServicoFinanceiro>.Instance);
     }

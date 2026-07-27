@@ -5,16 +5,19 @@ import {
   computed,
   OnInit,
   OnDestroy,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js';
 import { AuthService } from '../../core/auth/auth.service';
 import { ServicosService } from '../../core/api/servicos.service';
 import { CobrancaService } from '../../core/api/cobranca.service';
-import { Servico, MensagemServico, Cobranca } from '../../core/models/usuario.model';
+import { Servico, MensagemServico, Cobranca, DtoInicioCartao } from '../../core/models/usuario.model';
 
 @Component({
   selector: 'app-servico-detalhe',
@@ -24,6 +27,7 @@ import { Servico, MensagemServico, Cobranca } from '../../core/models/usuario.mo
   styleUrl: './servico-detalhe.component.scss',
 })
 export class ServicoDetalheComponent implements OnInit, OnDestroy {
+  @ViewChild('stripeCardElement') stripeCardRef?: ElementRef<HTMLDivElement>;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
@@ -54,6 +58,18 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
   readonly mostrarFormProposta = signal(false);
   readonly mostrarFormDisputa = signal(false);
   readonly mostrarFormCancelamento = signal(false);
+
+  // Pagamento por cartão (Stripe)
+  readonly metodoPagamento = signal<'pix' | 'cartao'>('pix');
+  readonly inicioCartao = signal<DtoInicioCartao | null>(null);
+  readonly carregandoCartao = signal(false);
+  readonly confirmandoCartao = signal(false);
+  readonly erroCartao = signal<string | null>(null);
+  readonly cartaoPago = signal(false);
+  parcelas = 1;
+  private stripeInstance: Stripe | null = null;
+  private stripeElements: StripeElements | null = null;
+  private stripeCard: StripeCardElement | null = null;
 
   private servicoId = '';
   private pollingSubscription?: Subscription;
@@ -231,6 +247,106 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
         this.mensagemFeedback.set('Código PIX copiado!');
         setTimeout(() => this.mensagemFeedback.set(null), 3000);
       });
+    }
+  }
+
+  selecionarMetodoPagamento(metodo: 'pix' | 'cartao'): void {
+    this.metodoPagamento.set(metodo);
+    this.erroCartao.set(null);
+    if (metodo === 'cartao') {
+      this.prepararFormularioCartao();
+    } else {
+      this.destruirStripeElement();
+    }
+  }
+
+  private async prepararFormularioCartao(): Promise<void> {
+    if (this.inicioCartao()) {
+      // PaymentIntent já criado — só monta o element
+      setTimeout(() => this.montarStripeElement(), 50);
+      return;
+    }
+
+    this.carregandoCartao.set(true);
+    this.erroCartao.set(null);
+
+    this.cobrancaService.iniciarPagamentoCartao(this.servicoId, this.parcelas).subscribe({
+      next: async (dto) => {
+        this.inicioCartao.set(dto);
+        this.carregandoCartao.set(false);
+        // Aguarda o DOM renderizar o container antes de montar o element
+        setTimeout(() => this.montarStripeElement(), 50);
+      },
+      error: (err) => {
+        this.erroCartao.set(err?.error?.error ?? 'Erro ao iniciar pagamento por cartão.');
+        this.carregandoCartao.set(false);
+      },
+    });
+  }
+
+  private async montarStripeElement(): Promise<void> {
+    const dto = this.inicioCartao();
+    if (!dto || !this.stripeCardRef?.nativeElement) return;
+
+    if (!this.stripeInstance) {
+      const { loadStripe } = await import('@stripe/stripe-js');
+      this.stripeInstance = await loadStripe(dto.publishableKey);
+    }
+
+    if (!this.stripeInstance) {
+      this.erroCartao.set('Erro ao carregar Stripe.');
+      return;
+    }
+
+    if (!this.stripeElements) {
+      this.stripeElements = this.stripeInstance.elements();
+    }
+
+    if (!this.stripeCard) {
+      this.stripeCard = this.stripeElements.create('card', {
+        style: {
+          base: {
+            fontSize: '16px',
+            color: '#374151',
+            fontFamily: '"Inter", sans-serif',
+            '::placeholder': { color: '#9ca3af' },
+          },
+        },
+        hidePostalCode: true,
+      });
+      this.stripeCard.mount(this.stripeCardRef.nativeElement);
+    }
+  }
+
+  private destruirStripeElement(): void {
+    if (this.stripeCard) {
+      this.stripeCard.destroy();
+      this.stripeCard = null;
+      this.stripeElements = null;
+    }
+  }
+
+  async confirmarPagamentoCartao(): Promise<void> {
+    const dto = this.inicioCartao();
+    if (!dto || !this.stripeInstance || !this.stripeCard) return;
+
+    this.confirmandoCartao.set(true);
+    this.erroCartao.set(null);
+
+    const result = await this.stripeInstance.confirmCardPayment(dto.clientSecret, {
+      payment_method: { card: this.stripeCard },
+    });
+
+    this.confirmandoCartao.set(false);
+
+    if (result.error) {
+      this.erroCartao.set(result.error.message ?? 'Pagamento recusado. Verifique os dados do cartão.');
+    } else if (result.paymentIntent?.status === 'succeeded') {
+      this.cartaoPago.set(true);
+      this.destruirStripeElement();
+      this.exibirFeedback('Pagamento aprovado! Aguardando confirmação do sistema.');
+      // Aguarda alguns segundos e recarrega o serviço para refletir o novo status
+      setTimeout(() => this.carregarServico(), 4000);
     }
   }
 

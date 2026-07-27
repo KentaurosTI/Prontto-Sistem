@@ -14,5 +14,6 @@ public interface IRepositorioCobranca
     Task<Cobranca> AtualizarAsync(Cobranca cobranca);
     Task<Cobranca?> ObterPorServicoIdAsync(Guid servicoId);
     Task<Cobranca?> ObterPorPagarmeOrderIdAsync(string pagarmeOrderId);
+    Task<Cobranca?> ObterPorStripePaymentIntentIdAsync(string paymentIntentId);
     Task<List<Cobranca>> ListarPendentesExpiradosAsync();
 }
