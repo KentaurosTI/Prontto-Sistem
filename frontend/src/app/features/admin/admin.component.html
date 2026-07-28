@@ -44,6 +44,15 @@
         <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></span>
         <span class="admin-nav-item__label">Financeiro</span>
       </button>
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'sugestoes'"
+        (click)="abaSelecionada.set('sugestoes')"
+        aria-label="Sugestões"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-lightbulb-flash-line"></i></span>
+        <span class="admin-nav-item__label">Sugestões</span>
+      </button>
     </nav>
   </aside>
 
@@ -63,6 +72,9 @@
       </button>
       <button role="tab" [attr.aria-selected]="abaSelecionada() === 'financeiro'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'financeiro'" (click)="abaSelecionada.set('financeiro')">
         <span aria-hidden="true"><i class="ri-money-dollar-circle-line"></i></span>
+      </button>
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'sugestoes'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'sugestoes'" (click)="abaSelecionada.set('sugestoes')">
+        <span aria-hidden="true"><i class="ri-lightbulb-flash-line"></i></span>
       </button>
     </div>
 
@@ -280,6 +292,41 @@
                   <td>
                     <span class="badge badge-{{ cobranca.status }}">{{ cobranca.status }}</span>
                   </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    @if (abaSelecionada() === 'sugestoes') {
+      <div class="admin-secao">
+        <h1 class="admin-titulo">Sugestões de serviço</h1>
+        <div class="tabela-wrapper">
+          <table class="tabela" aria-label="Sugestões de serviço enviadas pelos clientes">
+            <thead>
+              <tr>
+                <th>Serviço</th>
+                <th>Descrição</th>
+                <th>E-mail</th>
+                <th>Telefone</th>
+                <th>Recebido em</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (sugestoes().length === 0) {
+                <tr>
+                  <td colspan="5" class="tabela__vazio">Nenhuma sugestão recebida ainda.</td>
+                </tr>
+              }
+              @for (s of sugestoes(); track s.id) {
+                <tr>
+                  <td class="tabela__titulo">{{ s.titulo }}</td>
+                  <td>{{ s.descricao || '—' }}</td>
+                  <td class="tabela__email"><a href="mailto:{{ s.email }}">{{ s.email }}</a></td>
+                  <td>{{ s.telefone || '—' }}</td>
+                  <td>{{ s.criadoEm | date:'dd/MM/yyyy HH:mm' }}</td>
                 </tr>
               }
             </tbody>

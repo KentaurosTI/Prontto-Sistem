@@ -535,9 +535,14 @@
             {{ usuario()?.tipoConta === 'prestador' ? 'Meus Serviços' : 'Meus Pedidos' }}
           </h2>
           @if (usuario()?.tipoConta === 'cliente') {
-            <a routerLink="/buscar" class="btn-novo-servico">
-              <span aria-hidden="true">🔍</span> Buscar profissional
-            </a>
+            <div class="ms-header-acoes">
+              <a routerLink="/buscar" class="btn-novo-servico">
+                <span aria-hidden="true">🔍</span> Buscar profissional
+              </a>
+              <a routerLink="/servicos/novo" class="btn-novo-servico btn-novo-servico--secundario">
+                <span aria-hidden="true">＋</span> Solicitar serviço manualmente
+              </a>
+            </div>
           }
         </div>
 

@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
 import { AdminService } from '../../core/api/admin.service';
+import { SugestoesService, Sugestao } from '../../core/api/sugestoes.service';
 import { EstatisticasAdmin, Servico, StatusServico, Cobranca, Usuario } from '../../core/models/usuario.model';
 import { DecimalPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -16,12 +17,14 @@ interface EdicaoServico { tipo: 'servico'; id: string; titulo: string; preco: nu
 })
 export class AdminComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly sugestoesService = inject(SugestoesService);
 
   readonly estatisticas = signal<EstatisticasAdmin | null>(null);
   readonly servicos = signal<Servico[]>([]);
   readonly usuarios = signal<Usuario[]>([]);
   readonly listaCobrancas = signal<Cobranca[]>([]);
-  readonly abaSelecionada = signal<'stats' | 'servicos' | 'usuarios' | 'financeiro'>('stats');
+  readonly sugestoes = signal<Sugestao[]>([]);
+  readonly abaSelecionada = signal<'stats' | 'servicos' | 'usuarios' | 'financeiro' | 'sugestoes'>('stats');
   readonly carregando = signal(false);
 
   /** id da linha com o menu de ações "..." aberto (ou null). */
@@ -95,6 +98,11 @@ export class AdminComponent implements OnInit {
     this.carregarServicos();
     this.carregarUsuarios();
     this.carregarCobrancas();
+    this.carregarSugestoes();
+  }
+
+  carregarSugestoes(): void {
+    this.sugestoesService.listarAdmin().subscribe(res => this.sugestoes.set(res.sugestoes));
   }
 
   carregarEstatisticas(): void {

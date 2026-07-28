@@ -607,6 +607,24 @@
   }
 }
 
+/* ── Ações do cabeçalho de "Meus Pedidos" ───────────────────── */
+.ms-header-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn-novo-servico--secundario {
+  background: var(--cor-branco);
+  color: var(--cor-primaria);
+  border: 1px solid var(--cor-primaria);
+  box-shadow: none;
+
+  &:hover {
+    background: #fff7ed;
+  }
+}
+
 /* ── Botão "Vincular-me" (SCRUM-37) ─────────────────────────── */
 .btn-vincular {
   display: inline-flex;

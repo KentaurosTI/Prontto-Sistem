@@ -43,9 +43,13 @@ public static class InjecaoDependencias
         servicos.AddScoped<IRepositorioAuditLog, RepositorioAuditLog>();
         servicos.AddScoped<IRepositorioAvaliacao, RepositorioAvaliacao>();
         servicos.AddScoped<IRepositorioImagemPortfolio, RepositorioImagemPortfolio>();
+        servicos.AddScoped<IRepositorioSugestao, RepositorioSugestao>();
 
         // ── Armazenamento de arquivos ─────────────────────────────────────────
         servicos.AddScoped<IArmazenamentoArquivo, ArmazenamentoArquivoLocal>();
+
+        // ── E-mail (SMTP) ─────────────────────────────────────────────────────
+        servicos.AddScoped<IServicoEmail, ServicoEmailSmtp>();
 
         // ── Serviços de Aplicação ─────────────────────────────────────────────
         servicos.AddScoped<IHashSenha, HashSenhaBcrypt>();

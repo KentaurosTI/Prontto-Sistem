@@ -34,11 +34,68 @@
     </div>
 
     @if (semResultado()) {
-      <p class="buscar-nada" role="status">
-        Não encontramos esse serviço. Tente outro termo ou escolha uma categoria abaixo.
-      </p>
+      <div class="buscar-nada" role="status">
+        <p>Não encontramos esse serviço. Tente outro termo, escolha uma categoria abaixo — ou nos sugira esse serviço.</p>
+        <button type="button" class="buscar-sugerir-btn" (click)="abrirSugestao()">
+          <i class="ri-lightbulb-flash-line" aria-hidden="true"></i> Sugerir serviço
+        </button>
+      </div>
     }
   </header>
+
+  <!-- Popup: sugerir serviço -->
+  @if (mostrarSugestao()) {
+    <div class="sugestao-overlay" (click)="fecharSugestao()">
+      <div class="sugestao-modal" role="dialog" aria-modal="true" aria-labelledby="sugestao-titulo" (click)="$event.stopPropagation()">
+        <button type="button" class="sugestao-fechar" (click)="fecharSugestao()" aria-label="Fechar">
+          <i class="ri-close-line" aria-hidden="true"></i>
+        </button>
+        <h2 id="sugestao-titulo" class="sugestao-titulo">Sugerir um serviço</h2>
+        <p class="sugestao-desc">Não achou o que procurava? Conte pra gente que avaliamos incluir na plataforma.</p>
+
+        @if (sugestaoEnviada()) {
+          <div class="sugestao-sucesso" role="status">
+            <i class="ri-check-line" aria-hidden="true"></i>
+            Sugestão enviada! Obrigado — nossa equipe vai avaliar.
+          </div>
+        } @else {
+          <form class="sugestao-form" (ngSubmit)="enviarSugestao()">
+            <label class="sugestao-campo">
+              <span>Título do serviço *</span>
+              <input type="text" [(ngModel)]="sugTitulo" name="sugTitulo" [ngModelOptions]="{standalone:true}"
+                placeholder="Ex.: Conserto de portão automático" maxlength="120" />
+            </label>
+            <label class="sugestao-campo">
+              <span>Descrição</span>
+              <textarea [(ngModel)]="sugDescricao" name="sugDescricao" [ngModelOptions]="{standalone:true}"
+                rows="3" placeholder="Descreva o serviço que você precisa" maxlength="600"></textarea>
+            </label>
+            <label class="sugestao-campo">
+              <span>E-mail *</span>
+              <input type="email" [(ngModel)]="sugEmail" name="sugEmail" [ngModelOptions]="{standalone:true}"
+                placeholder="seu@email.com" />
+            </label>
+            <label class="sugestao-campo">
+              <span>Telefone</span>
+              <input type="tel" [(ngModel)]="sugTelefone" name="sugTelefone" [ngModelOptions]="{standalone:true}"
+                placeholder="(11) 99999-9999" />
+            </label>
+
+            @if (sugestaoErro()) {
+              <p class="sugestao-erro" role="alert">{{ sugestaoErro() }}</p>
+            }
+
+            <div class="sugestao-acoes">
+              <button type="button" class="sugestao-cancelar" (click)="fecharSugestao()">Cancelar</button>
+              <button type="submit" class="sugestao-enviar" [disabled]="enviandoSugestao()">
+                {{ enviandoSugestao() ? 'Enviando...' : 'Enviar' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  }
 
   <section class="buscar-cats" aria-label="Categorias populares">
     <h2 class="buscar-cats__titulo">Ou escolha uma categoria</h2>

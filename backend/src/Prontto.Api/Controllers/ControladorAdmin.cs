@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Prontto.Application.Admin;
 using Prontto.Application.Servicos;
 using Prontto.Domain.Enums;
+using Prontto.Domain.Interfaces;
 
 namespace Prontto.Api.Controllers;
 
@@ -12,12 +13,20 @@ namespace Prontto.Api.Controllers;
 [Authorize(Roles = "admin")]
 public class ControladorAdmin(
     IServicoAdmin admin,
-    IServicoDisputa servicoDisputa) : ControllerBase
+    IServicoDisputa servicoDisputa,
+    IRepositorioSugestao repositorioSugestoes) : ControllerBase
 {
     private Guid IdAdmin => User.GetRequiredUserId();
 
     [HttpGet("stats")]
     public async Task<IActionResult> Estatisticas() => Ok(await admin.ObterEstatisticasAsync());
+
+    [HttpGet("sugestoes")]
+    public async Task<IActionResult> Sugestoes()
+    {
+        var sugestoes = await repositorioSugestoes.ListarAsync();
+        return Ok(new { sugestoes });
+    }
 
     // ── Usuários ──────────────────────────────────────────────────────────────
 

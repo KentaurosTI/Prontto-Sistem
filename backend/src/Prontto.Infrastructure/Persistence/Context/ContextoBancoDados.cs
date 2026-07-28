@@ -21,6 +21,7 @@ public class ContextoBancoDados(DbContextOptions<ContextoBancoDados> opcoes) : D
     public DbSet<Notificacao> Notificacoes => Set<Notificacao>();
     public DbSet<AuditLog> LogsAuditoria => Set<AuditLog>();
     public DbSet<Avaliacao> Avaliacoes => Set<Avaliacao>();
+    public DbSet<SugestaoServico> SugestoesServico => Set<SugestaoServico>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
