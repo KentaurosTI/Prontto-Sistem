@@ -41,7 +41,7 @@ public record DtoPerfilPublico(
     List<DtoImagemPortfolio> ImagensPortfolio
 );
 
-public record DtoCategoriaPublica(Guid Id, string Nome, string Slug);
+public record DtoCategoriaPublica(Guid Id, string Nome, string Slug, string? Descricao = null, string? Imagem = null);
 
 public record DtoCidadePublica(Guid Id, string Nome, string Estado, string Slug);
 

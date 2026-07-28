@@ -1,8 +1,10 @@
 import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
 import { AdminService } from '../../core/api/admin.service';
 import { SugestoesService, Sugestao } from '../../core/api/sugestoes.service';
+import { CategoriasAdminService, CategoriaAdmin } from '../../core/api/categorias-admin.service';
 import { EstatisticasAdmin, Servico, StatusServico, Cobranca, Usuario } from '../../core/models/usuario.model';
 import { DecimalPipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 interface EdicaoUsuario { tipo: 'usuario'; id: string; nome: string; telefone: string; }
@@ -11,20 +13,33 @@ interface EdicaoServico { tipo: 'servico'; id: string; titulo: string; preco: nu
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [DecimalPipe, DatePipe, RouterLink],
+  imports: [DecimalPipe, DatePipe, RouterLink, FormsModule],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
 })
 export class AdminComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly sugestoesService = inject(SugestoesService);
+  private readonly categoriasService = inject(CategoriasAdminService);
 
   readonly estatisticas = signal<EstatisticasAdmin | null>(null);
   readonly servicos = signal<Servico[]>([]);
   readonly usuarios = signal<Usuario[]>([]);
   readonly listaCobrancas = signal<Cobranca[]>([]);
   readonly sugestoes = signal<Sugestao[]>([]);
-  readonly abaSelecionada = signal<'stats' | 'servicos' | 'usuarios' | 'financeiro' | 'sugestoes'>('stats');
+  readonly categorias = signal<CategoriaAdmin[]>([]);
+  readonly abaSelecionada = signal<'stats' | 'servicos' | 'usuarios' | 'financeiro' | 'sugestoes' | 'categorias'>('stats');
+
+  // ── Formulário de categoria (incluir/editar) ────────────────────────────────
+  readonly catFormAberto = signal(false);
+  readonly catEditandoId = signal<string | null>(null);
+  readonly catSalvando = signal(false);
+  readonly catEnviandoImagem = signal(false);
+  readonly catErro = signal<string | null>(null);
+  catNome = '';
+  catDescricao = '';
+  catImagem = '';
+  catAtiva = true;
   readonly carregando = signal(false);
 
   /** id da linha com o menu de ações "..." aberto (ou null). */
@@ -99,10 +114,84 @@ export class AdminComponent implements OnInit {
     this.carregarUsuarios();
     this.carregarCobrancas();
     this.carregarSugestoes();
+    this.carregarCategorias();
   }
 
   carregarSugestoes(): void {
     this.sugestoesService.listarAdmin().subscribe(res => this.sugestoes.set(res.sugestoes));
+  }
+
+  // ── Catálogo de categorias ──────────────────────────────────────────────────
+  carregarCategorias(): void {
+    this.categoriasService.listar().subscribe(res => this.categorias.set(res.categorias));
+  }
+
+  abrirNovaCategoria(): void {
+    this.catEditandoId.set(null);
+    this.catNome = ''; this.catDescricao = ''; this.catImagem = ''; this.catAtiva = true;
+    this.catErro.set(null);
+    this.catFormAberto.set(true);
+  }
+
+  abrirEdicaoCategoria(c: CategoriaAdmin): void {
+    this.catEditandoId.set(c.id);
+    this.catNome = c.nome; this.catDescricao = c.descricao ?? '';
+    this.catImagem = c.imagem ?? ''; this.catAtiva = c.ativa;
+    this.catErro.set(null);
+    this.catFormAberto.set(true);
+  }
+
+  fecharFormCategoria(): void {
+    this.catFormAberto.set(false);
+  }
+
+  onImagemCategoriaSelecionada(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+    input.value = '';
+    if (!arquivo) return;
+    this.catEnviandoImagem.set(true);
+    this.catErro.set(null);
+    this.categoriasService.uploadImagem(arquivo).subscribe({
+      next: (res) => { this.catImagem = res.url; this.catEnviandoImagem.set(false); },
+      error: () => { this.catErro.set('Erro ao enviar a imagem.'); this.catEnviandoImagem.set(false); },
+    });
+  }
+
+  salvarCategoria(): void {
+    if (!this.catNome.trim()) { this.catErro.set('Informe o nome do serviço.'); return; }
+    this.catSalvando.set(true);
+    this.catErro.set(null);
+    const id = this.catEditandoId();
+    if (id) {
+      this.categoriasService.editar(id, {
+        nome: this.catNome.trim(),
+        descricao: this.catDescricao.trim() || null,
+        imagem: this.catImagem || null,
+        ativa: this.catAtiva,
+      }).subscribe({
+        next: () => { this.catSalvando.set(false); this.catFormAberto.set(false); this.carregarCategorias(); },
+        error: (e) => { this.catSalvando.set(false); this.catErro.set(e?.error?.error ?? 'Erro ao salvar.'); },
+      });
+    } else {
+      this.categoriasService.criar({
+        nome: this.catNome.trim(),
+        descricao: this.catDescricao.trim() || null,
+        imagem: this.catImagem || null,
+      }).subscribe({
+        next: () => { this.catSalvando.set(false); this.catFormAberto.set(false); this.carregarCategorias(); },
+        error: (e) => { this.catSalvando.set(false); this.catErro.set(e?.error?.error ?? 'Erro ao salvar.'); },
+      });
+    }
+  }
+
+  alternarAtivaCategoria(c: CategoriaAdmin): void {
+    this.categoriasService.alternarAtiva(c.id).subscribe({ next: () => this.carregarCategorias() });
+  }
+
+  excluirCategoria(c: CategoriaAdmin): void {
+    if (!confirm(`Excluir o serviço "${c.nome}"? Esta ação não pode ser desfeita.`)) return;
+    this.categoriasService.excluir(c.id).subscribe({ next: () => this.carregarCategorias() });
   }
 
   carregarEstatisticas(): void {

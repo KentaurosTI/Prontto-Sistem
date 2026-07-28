@@ -10,6 +10,12 @@ public class Categoria
     public string Nome { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
 
+    /// <summary>Descrição curta exibida no admin e nos cards do site.</summary>
+    public string? Descricao { get; set; }
+
+    /// <summary>URL/relativa da imagem da categoria (upload local ou /img/...).</summary>
+    public string? Imagem { get; set; }
+
     /// <summary>Categorias inativas não aparecem na busca ou no cadastro de prestadores.</summary>
     public bool Ativa { get; set; } = true;
 

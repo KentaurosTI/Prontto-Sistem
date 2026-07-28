@@ -44,7 +44,7 @@
   <div class="catbar" (mouseleave)="fecharMega()" (click)="$event.stopPropagation()">
     <div class="wrap">
       <div class="catbar__row">
-        @for (cat of categorias; track cat.key; let i = $index) {
+        @for (cat of categorias(); track cat.key; let i = $index) {
           <a
             class="catbar__item"
             [class.active]="megaIdx() === i"
@@ -63,11 +63,11 @@
       <div class="wrap">
         <div class="mega__in">
           @if (megaIdx() !== null) {
-            @for (grupo of categorias[megaIdx()!].grupos; track grupo.titulo) {
+            @for (grupo of categorias()[megaIdx()!].grupos; track grupo.titulo) {
               <div class="mega__col">
-                <h5><a [routerLink]="rota(categorias[megaIdx()!].key)" style="color:inherit" (click)="fecharMegaImediato()">{{ grupo.titulo }}</a></h5>
+                <h5><a [routerLink]="rota(categorias()[megaIdx()!].key)" style="color:inherit" (click)="fecharMegaImediato()">{{ grupo.titulo }}</a></h5>
                 @for (item of grupo.itens; track item) {
-                  <a [routerLink]="rota(categorias[megaIdx()!].key, item)" (click)="fecharMegaImediato()">{{ item }}</a>
+                  <a [routerLink]="rota(categorias()[megaIdx()!].key, item)" (click)="fecharMegaImediato()">{{ item }}</a>
                 }
               </div>
             }
@@ -94,7 +94,7 @@
         <div class="ft__col ft__col--serv">
           <h4>Serviços</h4>
           <div class="ft__cols2">
-            @for (cat of categorias; track cat.key) {
+            @for (cat of categorias(); track cat.key) {
               <a [routerLink]="rota(cat.key)">{{ cat.label }}</a>
             }
           </div>

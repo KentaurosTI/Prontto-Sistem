@@ -509,3 +509,11 @@
 .btn-modal--ghost { background: var(--cor-fundo); color: var(--cor-texto); border: 1px solid var(--cor-borda); }
 .btn-modal--primario { background: var(--cor-primaria); color: #fff; }
 .btn-modal--primario:hover { background: var(--cor-primaria-hover); }
+
+/* ── Catálogo de serviços (categorias) ─────────────────────── */
+.admin-secao__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.admin-secao__dica { color: var(--cor-texto-suave, #64748b); font-size: 0.88rem; margin: 4px 0 14px; }
+.admin-modal__campo--inline { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+.admin-modal__campo--inline input { width: auto; }
+.admin-modal__erro { color: #dc2626; font-size: 0.85rem; margin: 6px 0 0; }
+.btn-acao--perigo { color: #dc2626; }

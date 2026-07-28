@@ -20,4 +20,29 @@ public class RepositorioCategoria(ContextoBancoDados db) : IRepositorioCategoria
         => db.Categorias
             .Where(c => ids.Contains(c.Id))
             .ToListAsync();
+
+    public Task<List<Categoria>> ListarTodasAsync()
+        => db.Categorias.OrderBy(c => c.Ordem).ThenBy(c => c.Nome).ToListAsync();
+
+    public Task<Categoria?> ObterPorIdAsync(Guid id)
+        => db.Categorias.FirstOrDefaultAsync(c => c.Id == id);
+
+    public async Task<Categoria> AdicionarAsync(Categoria categoria)
+    {
+        db.Categorias.Add(categoria);
+        await db.SaveChangesAsync();
+        return categoria;
+    }
+
+    public async Task AtualizarAsync(Categoria categoria)
+    {
+        db.Categorias.Update(categoria);
+        await db.SaveChangesAsync();
+    }
+
+    public async Task RemoverAsync(Categoria categoria)
+    {
+        db.Categorias.Remove(categoria);
+        await db.SaveChangesAsync();
+    }
 }

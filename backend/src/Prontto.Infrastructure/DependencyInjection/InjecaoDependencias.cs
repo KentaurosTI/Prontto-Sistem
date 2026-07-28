@@ -57,6 +57,7 @@ public static class InjecaoDependencias
         servicos.AddScoped<IServicoAutenticacao, ServicoAutenticacao>();
         servicos.AddScoped<IServicoAdmin, ServicoAdmin>();
         servicos.AddScoped<IServicoPerfilPrestador, ServicoPerfilPrestador>();
+        servicos.AddScoped<IServicoCategoriaAdmin, ServicoCategoriaAdmin>();
         servicos.AddScoped<IServicoServico, ServicoServico>();
         servicos.AddScoped<IServicoNegociacao, ServicoNegociacao>();
         servicos.AddScoped<IServicoDisputa, ServicoDisputa>();

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Prontto.Application.Admin;
+using Prontto.Application.Perfil;
 using Prontto.Application.Servicos;
 using Prontto.Domain.Enums;
 using Prontto.Domain.Interfaces;
@@ -14,7 +15,9 @@ namespace Prontto.Api.Controllers;
 public class ControladorAdmin(
     IServicoAdmin admin,
     IServicoDisputa servicoDisputa,
-    IRepositorioSugestao repositorioSugestoes) : ControllerBase
+    IRepositorioSugestao repositorioSugestoes,
+    IServicoCategoriaAdmin servicoCategorias,
+    IArmazenamentoArquivo armazenamentoArquivo) : ControllerBase
 {
     private Guid IdAdmin => User.GetRequiredUserId();
 
@@ -26,6 +29,52 @@ public class ControladorAdmin(
     {
         var sugestoes = await repositorioSugestoes.ListarAsync();
         return Ok(new { sugestoes });
+    }
+
+    // ── Catálogo de categorias (RF — "Incluir novo serviço") ────────────────────
+
+    [HttpGet("categorias")]
+    public async Task<IActionResult> ListarCategorias()
+        => Ok(new { categorias = await servicoCategorias.ListarTodasAsync() });
+
+    [HttpPost("categorias")]
+    public async Task<IActionResult> CriarCategoria([FromBody] ComandoCriarCategoria cmd)
+        => StatusCode(201, new { categoria = await servicoCategorias.CriarAsync(cmd) });
+
+    [HttpPut("categorias/{id:guid}")]
+    public async Task<IActionResult> EditarCategoria(Guid id, [FromBody] ComandoEditarCategoria cmd)
+        => Ok(new { categoria = await servicoCategorias.EditarAsync(id, cmd) });
+
+    [HttpPatch("categorias/{id:guid}/alternar-ativa")]
+    public async Task<IActionResult> AlternarCategoria(Guid id)
+        => Ok(new { categoria = await servicoCategorias.AlternarAtivaAsync(id) });
+
+    [HttpDelete("categorias/{id:guid}")]
+    public async Task<IActionResult> ExcluirCategoria(Guid id)
+    {
+        await servicoCategorias.ExcluirAsync(id);
+        return NoContent();
+    }
+
+    [HttpPost("categorias/imagem/upload")]
+    [RequestSizeLimit(5_242_880)] // 5 MB
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadImagemCategoria([FromForm] IFormFile? arquivo)
+    {
+        if (arquivo is null || arquivo.Length == 0)
+            return BadRequest(new { error = "Nenhum arquivo enviado" });
+        if (arquivo.Length > 5_242_880)
+            return BadRequest(new { error = "Arquivo maior que 5 MB" });
+
+        var extensoesPermitidas = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            { ".jpg", ".jpeg", ".png", ".webp" };
+        var extensao = Path.GetExtension(arquivo.FileName);
+        if (string.IsNullOrWhiteSpace(extensao) || !extensoesPermitidas.Contains(extensao))
+            return BadRequest(new { error = "Tipo não permitido. Use jpg, png ou webp" });
+
+        var url = await armazenamentoArquivo.SalvarAsync(
+            arquivo.OpenReadStream(), arquivo.FileName, arquivo.ContentType);
+        return StatusCode(201, new { url });
     }
 
     // ── Usuários ──────────────────────────────────────────────────────────────

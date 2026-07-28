@@ -91,7 +91,7 @@ public class ServicoPerfilPrestador(
         if (!cache.TryGetValue(ChaveCacheCategorias, out List<DtoCategoriaPublica>? categorias) || categorias is null)
         {
             var entidades = await repositorioCategorias.ListarAtivasAsync();
-            categorias = entidades.Select(c => new DtoCategoriaPublica(c.Id, c.Nome, c.Slug)).ToList();
+            categorias = entidades.Select(c => new DtoCategoriaPublica(c.Id, c.Nome, c.Slug, c.Descricao, c.Imagem)).ToList();
             cache.Set(ChaveCacheCategorias, categorias, TtlCategorias);
         }
 

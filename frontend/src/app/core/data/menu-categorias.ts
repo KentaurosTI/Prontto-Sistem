@@ -190,6 +190,34 @@ export const CATEGORIAS_MENU: CategoriaMenu[] = [
   },
 ];
 
+/** Categoria vinda do backend (GET /api/categorias). */
+export interface CategoriaBanco {
+  id: string;
+  nome: string;
+  slug: string;
+  descricao?: string | null;
+  imagem?: string | null;
+}
+
+/**
+ * Monta a lista de categorias do menu a partir do banco, preservando os
+ * submenus/ícones ricos das categorias já conhecidas (casadas por slug) e
+ * incluindo as novas cadastradas no admin como itens simples (sem submenu).
+ */
+export function mesclarCategorias(db: CategoriaBanco[]): CategoriaMenu[] {
+  return db.map((c) => {
+    const estatica = CATEGORIAS_MENU.find((m) => m.key === c.slug);
+    if (estatica) return { ...estatica, label: c.nome };
+    return {
+      key: c.slug,
+      label: c.nome,
+      emoji: '🔧',
+      icone: ICONE_CATEGORIA[c.slug] ?? 'ri-price-tag-3-line',
+      grupos: [],
+    };
+  });
+}
+
 export function slugificar(str: string): string {
   return str
     .toLowerCase()

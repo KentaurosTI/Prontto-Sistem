@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 import { AuthService } from './core/auth/auth.service';
-import { CATEGORIAS_MENU, rotaCategoria } from './core/data/menu-categorias';
+import { CATEGORIAS_MENU, rotaCategoria, mesclarCategorias, CategoriaMenu } from './core/data/menu-categorias';
+import { CatalogoService } from './core/api/catalogo.service';
 import { CookieConsentComponent } from './core/lgpd/cookie-consent.component';
 import { NotificacoesComponent } from './shared/notificacoes/notificacoes.component';
 
@@ -21,8 +22,18 @@ const ROTAS_SEM_MARKETING = ['/entrar', '/cadastrar', '/minha-area', '/admin'];
 export class App {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly catalogo = inject(CatalogoService);
 
-  readonly categorias = CATEGORIAS_MENU;
+  /** Menu de categorias: começa com o estático e é substituído pelo catálogo do banco. */
+  readonly categorias = signal<CategoriaMenu[]>(CATEGORIAS_MENU);
+
+  constructor() {
+    // Menu do site vem do banco (categorias cadastradas no admin). Fallback: estático.
+    this.catalogo.listarCategorias().subscribe({
+      next: (db) => { if (db?.length) this.categorias.set(mesclarCategorias(db)); },
+      error: () => { /* mantém o menu estático */ },
+    });
+  }
 
   readonly menuAberto = signal(false);
   readonly scrollado = signal(false);
@@ -73,6 +84,8 @@ export class App {
     // o mega aqui, o onClickCatbarItem veria megaIdx já == idx e fecharia na sequência.
     // Por isso, abaixo de 920px a abertura é feita SÓ pelo clique (SCRUM-6 re-fix / PR #14).
     if (typeof window !== 'undefined' && window.innerWidth < 920) return;
+    // Categorias novas (do banco, sem submenu) não abrem mega — são link direto.
+    if (!this.categorias()[idx]?.grupos?.length) { this.megaIdx.set(null); return; }
     if (this.timerMega) clearTimeout(this.timerMega);
     this.megaIdx.set(idx);
   }

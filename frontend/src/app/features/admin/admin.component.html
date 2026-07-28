@@ -53,6 +53,15 @@
         <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-lightbulb-flash-line"></i></span>
         <span class="admin-nav-item__label">Sugestões</span>
       </button>
+      <button
+        class="admin-nav-item"
+        [class.ativo]="abaSelecionada() === 'categorias'"
+        (click)="abaSelecionada.set('categorias')"
+        aria-label="Serviços (catálogo)"
+      >
+        <span class="admin-nav-item__icone" aria-hidden="true"><i class="ri-apps-2-line"></i></span>
+        <span class="admin-nav-item__label">Serviços (catálogo)</span>
+      </button>
     </nav>
   </aside>
 
@@ -75,6 +84,9 @@
       </button>
       <button role="tab" [attr.aria-selected]="abaSelecionada() === 'sugestoes'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'sugestoes'" (click)="abaSelecionada.set('sugestoes')">
         <span aria-hidden="true"><i class="ri-lightbulb-flash-line"></i></span>
+      </button>
+      <button role="tab" [attr.aria-selected]="abaSelecionada() === 'categorias'" class="admin-aba-mobile" [class.ativo]="abaSelecionada() === 'categorias'" (click)="abaSelecionada.set('categorias')">
+        <span aria-hidden="true"><i class="ri-apps-2-line"></i></span>
       </button>
     </div>
 
@@ -335,8 +347,105 @@
       </div>
     }
 
+    @if (abaSelecionada() === 'categorias') {
+      <div class="admin-secao">
+        <div class="admin-secao__topo">
+          <h1 class="admin-titulo">Serviços (catálogo)</h1>
+          <button type="button" class="btn-modal btn-modal--primario" (click)="abrirNovaCategoria()">
+            <i class="ri-add-line" aria-hidden="true"></i> Incluir novo serviço
+          </button>
+        </div>
+        <p class="admin-secao__dica">
+          Os serviços cadastrados aqui alimentam o menu do site automaticamente. Inative para esconder sem apagar.
+        </p>
+
+        <div class="tabela-wrapper">
+          <table class="tabela" aria-label="Catálogo de serviços">
+            <thead>
+              <tr>
+                <th>Imagem</th>
+                <th>Serviço</th>
+                <th>Descrição</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (categorias().length === 0) {
+                <tr><td colspan="5" class="tabela__vazio">Nenhum serviço no catálogo.</td></tr>
+              }
+              @for (c of categorias(); track c.id) {
+                <tr>
+                  <td>
+                    @if (c.imagem) {
+                      <img [src]="c.imagem" alt="" style="width:52px;height:38px;object-fit:cover;border-radius:6px" />
+                    } @else { <span class="tabela__taxa">—</span> }
+                  </td>
+                  <td class="tabela__titulo">{{ c.nome }}</td>
+                  <td>{{ c.descricao || '—' }}</td>
+                  <td>
+                    <span class="badge" [class.badge-concluido]="c.ativa" [class.badge-cancelado]="!c.ativa">
+                      {{ c.ativa ? 'Ativo' : 'Inativo' }}
+                    </span>
+                  </td>
+                  <td class="tabela__acoes-col">
+                    <button type="button" class="btn-acao" (click)="abrirEdicaoCategoria(c)" title="Editar"><i class="ri-edit-line"></i></button>
+                    <button type="button" class="btn-acao" (click)="alternarAtivaCategoria(c)" [title]="c.ativa ? 'Inativar' : 'Ativar'">
+                      <i [class]="c.ativa ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                    </button>
+                    <button type="button" class="btn-acao btn-acao--perigo" (click)="excluirCategoria(c)" title="Excluir"><i class="ri-delete-bin-line"></i></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
   </div>
 </div>
+
+<!-- Modal: incluir/editar serviço (categoria) -->
+@if (catFormAberto()) {
+  <div class="admin-modal" (click)="fecharFormCategoria()">
+    <div class="admin-modal__box" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h3 class="admin-modal__titulo">{{ catEditandoId() ? 'Editar serviço' : 'Incluir novo serviço' }}</h3>
+
+      <label class="admin-modal__campo">
+        <span>Título do serviço *</span>
+        <input type="text" [(ngModel)]="catNome" [ngModelOptions]="{standalone:true}" placeholder="Ex.: Vidraçaria" maxlength="80" />
+      </label>
+      <label class="admin-modal__campo">
+        <span>Descrição</span>
+        <textarea [(ngModel)]="catDescricao" [ngModelOptions]="{standalone:true}" rows="3" placeholder="Breve descrição do serviço" maxlength="300"></textarea>
+      </label>
+      <label class="admin-modal__campo">
+        <span>Imagem</span>
+        <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImagemCategoriaSelecionada($event)" [disabled]="catEnviandoImagem()" />
+      </label>
+      @if (catEnviandoImagem()) { <p class="admin-secao__dica">Enviando imagem...</p> }
+      @if (catImagem) {
+        <img [src]="catImagem" alt="Prévia" style="width:120px;height:80px;object-fit:cover;border-radius:8px;margin-top:4px" />
+      }
+      @if (catEditandoId()) {
+        <label class="admin-modal__campo admin-modal__campo--inline">
+          <input type="checkbox" [(ngModel)]="catAtiva" [ngModelOptions]="{standalone:true}" />
+          <span>Ativo (aparece no site)</span>
+        </label>
+      }
+
+      @if (catErro()) { <p class="admin-modal__erro" role="alert">{{ catErro() }}</p> }
+
+      <div class="admin-modal__acoes">
+        <button type="button" class="btn-modal btn-modal--ghost" (click)="fecharFormCategoria()">Cancelar</button>
+        <button type="button" class="btn-modal btn-modal--primario" (click)="salvarCategoria()" [disabled]="catSalvando() || catEnviandoImagem()">
+          {{ catSalvando() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- ── Modal de edição ─────────────────────────────────────── -->
 @if (edicao(); as e) {
