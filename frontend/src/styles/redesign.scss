@@ -263,6 +263,8 @@ button{font-family:inherit;cursor:pointer}
 
 /* footer (claro) */
 .ft{background:var(--fundo);color:var(--texto);padding:64px 0 28px;border-top:1px solid var(--borda)}
+.ft__logo{display:inline-flex;align-items:center}
+.ft__logo img{height:44px;width:auto;display:block}
 .ft__grid{display:grid;grid-template-columns:1fr;gap:40px;padding-bottom:48px}
 @media(min-width:880px){.ft__grid{grid-template-columns:1.6fr 1fr 1fr;gap:48px}}
 .ft h4{font-size:1.05rem;font-weight:800;color:var(--navy-medio);margin-bottom:18px}

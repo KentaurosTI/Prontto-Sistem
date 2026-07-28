@@ -1,0 +1,8 @@
+<svg viewBox="0 0 340 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Prontto">
+  <!-- Marca: "P" com check -->
+  <path fill="#f97316" d="M20 12h32c19.5 0 31.5 12.4 31.5 30.5S71.5 73 52 73H38v35H20z"/>
+  <path fill="#ffffff" d="M38 29.5v26.5h13c10 0 15.8-5.2 15.8-13.2S61 29.5 51 29.5z"/>
+  <path fill="none" stroke="#f97316" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" d="M40.5 42.5l6.5 6.8L60 35.5"/>
+  <!-- Wordmark -->
+  <text x="96" y="79" font-family="'Segoe UI', Arial, Helvetica, sans-serif" font-size="56" font-weight="800" letter-spacing="-1" fill="#1e293b">Prontto</text>
+</svg>
