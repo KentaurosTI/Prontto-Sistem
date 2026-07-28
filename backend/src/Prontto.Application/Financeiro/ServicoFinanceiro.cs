@@ -22,6 +22,22 @@ public class ServicoFinanceiro(
     ILogger<ServicoFinanceiro> logger) : IServicoFinanceiro
 {
     private const int MaxRetries = 3;
+    // Teto do backoff por tentativa (SCRUM-51): evita que aumentar MaxRetries gere esperas enormes.
+    private const int MaxDelaySegundos = 30;
+
+    /// <summary>
+    /// Delay do retry com backoff exponencial LIMITADO por MaxDelaySegundos + jitter aleatório (até 1s).
+    /// O jitter distribui as tentativas no tempo, evitando thundering herd sob falha do gateway (SCRUM-51).
+    /// Retorna o delay real aplicado, para log.
+    /// </summary>
+    private static async Task<double> AguardarBackoffAsync(int tentativa)
+    {
+        var expo = Math.Min(Math.Pow(2, tentativa), MaxDelaySegundos);
+        var jitter = Random.Shared.NextDouble(); // 0..1s
+        var segundos = expo + jitter;
+        await Task.Delay(TimeSpan.FromSeconds(segundos));
+        return segundos;
+    }
 
     // Tipos de evento suportados pelo Pagar.me que indicam pagamento confirmado
     private static readonly HashSet<string> EventosPagamentoConfirmado =
@@ -138,7 +154,7 @@ public class ServicoFinanceiro(
                 Acao = "pagamento.confirmado",
                 Entidade = "Cobranca",
                 EntidadeId = cobranca.Id.ToString(),
-                Detalhes = $"{{\"pagarmeOrderId\":\"{orderId}\",\"valor\":{cobranca.ValorTotal}}}"
+                Detalhes = JsonSerializer.Serialize(new { pagarmeOrderId = orderId, valor = cobranca.ValorTotal })
             });
 
             var agendamentoTexto = MontarTextoAgendamento(servico);
@@ -200,7 +216,7 @@ public class ServicoFinanceiro(
                     Acao = "pagamento.liberado",
                     Entidade = "Cobranca",
                     EntidadeId = cobranca.Id.ToString(),
-                    Detalhes = $"{{\"servicoId\":\"{servicoId}\",\"valorPrestador\":{cobranca.ValorPrestador},\"tentativa\":{tentativa}}}"
+                    Detalhes = JsonSerializer.Serialize(new { servicoId, valorPrestador = cobranca.ValorPrestador, tentativa })
                 });
 
                 if (servico.PrestadorId.HasValue)
@@ -219,7 +235,10 @@ public class ServicoFinanceiro(
             {
                 logger.LogError(ex, "Falha na liberação de pagamento para servico {ServicoId}, tentativa {Tentativa}", servicoId, tentativa);
                 if (tentativa < MaxRetries)
-                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, tentativa)));
+                {
+                    var delay = await AguardarBackoffAsync(tentativa);
+                    logger.LogWarning("Retry de liberação: servico {ServicoId}, próxima tentativa após {Delay:F1}s", servicoId, delay);
+                }
             }
         }
 
@@ -237,34 +256,87 @@ public class ServicoFinanceiro(
         if (string.IsNullOrWhiteSpace(cobranca.PagarmeOrderId))
             return;
 
-        await processadorPagamento.ReembolsarAsync(
-            pagarmeOrderId: cobranca.PagarmeOrderId,
-            valor: cobranca.ValorTotal,
-            referencia: servicoId.ToString());
+        // referencia = servicoId serve como idempotency key no gateway, evitando duplo
+        // reembolso caso uma tentativa seja reexecutada após falha transitória (SCRUM-52).
+        var referencia = servicoId.ToString();
 
-        cobranca.Status = StatusCobranca.Reembolsado;
+        for (int tentativa = 1; tentativa <= MaxRetries; tentativa++)
+        {
+            try
+            {
+                await processadorPagamento.ReembolsarAsync(
+                    pagarmeOrderId: cobranca.PagarmeOrderId,
+                    valor: cobranca.ValorTotal,
+                    referencia: referencia);
+
+                // Só persiste status + audit + notificação APÓS a confirmação do gateway,
+                // e de forma atômica (transação) — SCRUM-52.
+                await using var transacao = await repositorioCobrancas.IniciarTransacaoAsync();
+                try
+                {
+                    cobranca.Status = StatusCobranca.Reembolsado;
+                    cobranca.AtualizadoEm = DateTime.UtcNow;
+                    await repositorioCobrancas.AtualizarAsync(cobranca);
+
+                    await repositorioAuditLog.RegistrarAsync(new AuditLog
+                    {
+                        UsuarioId = null,
+                        Acao = "pagamento.reembolsado",
+                        Entidade = "Cobranca",
+                        EntidadeId = cobranca.Id.ToString(),
+                        Detalhes = JsonSerializer.Serialize(new { servicoId, valorTotal = cobranca.ValorTotal, tentativa })
+                    });
+
+                    var servico = await repositorioServicos.ObterPorIdAsync(servicoId);
+                    if (servico?.ClienteId.HasValue == true)
+                        await repositorioNotificacoes.AdicionarAsync(new Notificacao
+                        {
+                            UsuarioId = servico.ClienteId.Value,
+                            Titulo = "Reembolso processado",
+                            Mensagem = $"R$ {cobranca.ValorTotal:N2} será devolvido em até 5 dias úteis.",
+                            Tipo = "pagamento",
+                            ReferenciaId = servicoId.ToString()
+                        });
+
+                    await transacao.CommitAsync();
+                }
+                catch
+                {
+                    await transacao.RollbackAsync();
+                    throw;
+                }
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Falha no reembolso do servico {ServicoId}, tentativa {Tentativa}", servicoId, tentativa);
+                await repositorioAuditLog.RegistrarAsync(new AuditLog
+                {
+                    UsuarioId = null,
+                    Acao = "pagamento.reembolso.falha",
+                    Entidade = "Cobranca",
+                    EntidadeId = cobranca.Id.ToString(),
+                    Detalhes = JsonSerializer.Serialize(new { servicoId, tentativa, erro = ex.Message })
+                });
+
+                if (tentativa < MaxRetries)
+                {
+                    var delay = await AguardarBackoffAsync(tentativa);
+                    logger.LogWarning("Retry de reembolso: servico {ServicoId}, próxima tentativa após {Delay:F1}s", servicoId, delay);
+                }
+            }
+        }
+
+        // Todas as tentativas falharam: NÃO marca como Reembolsado. Marca ReembolsoPendente
+        // (para reprocessamento manual/job) e sinaliza o erro ao chamador — SCRUM-52.
+        cobranca.Status = StatusCobranca.ReembolsoPendente;
         cobranca.AtualizadoEm = DateTime.UtcNow;
         await repositorioCobrancas.AtualizarAsync(cobranca);
 
-        await repositorioAuditLog.RegistrarAsync(new AuditLog
-        {
-            UsuarioId = null,
-            Acao = "pagamento.reembolsado",
-            Entidade = "Cobranca",
-            EntidadeId = cobranca.Id.ToString(),
-            Detalhes = $"{{\"servicoId\":\"{servicoId}\",\"valorTotal\":{cobranca.ValorTotal}}}"
-        });
-
-        var servico = await repositorioServicos.ObterPorIdAsync(servicoId);
-        if (servico?.ClienteId.HasValue == true)
-            await repositorioNotificacoes.AdicionarAsync(new Notificacao
-            {
-                UsuarioId = servico.ClienteId.Value,
-                Titulo = "Reembolso processado",
-                Mensagem = $"R$ {cobranca.ValorTotal:N2} será devolvido em até 5 dias úteis.",
-                Tipo = "pagamento",
-                ReferenciaId = servicoId.ToString()
-            });
+        logger.LogCritical("Reembolso FALHOU após {MaxRetries} tentativas para servico {ServicoId} — status ReembolsoPendente", MaxRetries, servicoId);
+        throw new InvalidOperationException(
+            $"Reembolso não confirmado pelo gateway após {MaxRetries} tentativas. Cobrança marcada como ReembolsoPendente para reprocessamento.");
     }
 
     // ── Consulta ───────────────────────────────────────────────────────────────

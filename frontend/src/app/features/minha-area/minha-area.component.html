@@ -444,7 +444,8 @@
           </button>
         </div>
         <p class="campo__dica" style="margin-bottom:14px">
-          Solicitações abertas de clientes, sem profissional definido. Vincule-se para iniciar a negociação.
+          Inclui solicitações <strong>feitas diretamente a você</strong> (clique em "Abrir negociação")
+          e o pool aberto de clientes nas suas categorias/cidades (clique em "Vincular-me").
         </p>
 
         @if (mensagemVinculo()) {
@@ -501,23 +502,33 @@
                     </span>
                   </div>
                   <div class="ms-item__acoes">
-                    <a
-                      [routerLink]="['/servico', servico.id]"
-                      class="ms-item__link"
-                      [attr.aria-label]="'Ver detalhes do serviço ' + servico.titulo"
-                    >Ver detalhes →</a>
-                    <button
-                      class="btn-vincular"
-                      (click)="vincular(servico.id)"
-                      [disabled]="vinculandoId() === servico.id"
-                      [attr.aria-label]="'Vincular-me ao serviço ' + servico.titulo"
-                    >
-                      @if (vinculandoId() === servico.id) {
-                        <span class="spinner spinner--sm" aria-hidden="true"></span> Vinculando...
-                      } @else {
-                        <span aria-hidden="true">＋</span> Vincular-me
-                      }
-                    </button>
+                    @if (servico.prestadorId) {
+                      <!-- Solicitação direcionada a este prestador: abrir a negociação -->
+                      <span class="ms-badge ms-badge--roxo">Solicitado a você</span>
+                      <a
+                        [routerLink]="['/servico', servico.id]"
+                        class="btn-vincular"
+                        [attr.aria-label]="'Abrir negociação do serviço ' + servico.titulo"
+                      ><span aria-hidden="true">💬</span> Abrir negociação</a>
+                    } @else {
+                      <a
+                        [routerLink]="['/servico', servico.id]"
+                        class="ms-item__link"
+                        [attr.aria-label]="'Ver detalhes do serviço ' + servico.titulo"
+                      >Ver detalhes →</a>
+                      <button
+                        class="btn-vincular"
+                        (click)="vincular(servico.id)"
+                        [disabled]="vinculandoId() === servico.id"
+                        [attr.aria-label]="'Vincular-me ao serviço ' + servico.titulo"
+                      >
+                        @if (vinculandoId() === servico.id) {
+                          <span class="spinner spinner--sm" aria-hidden="true"></span> Vinculando...
+                        } @else {
+                          <span aria-hidden="true">＋</span> Vincular-me
+                        }
+                      </button>
+                    }
                   </div>
                 </div>
               </li>

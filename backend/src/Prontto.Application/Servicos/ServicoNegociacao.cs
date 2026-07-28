@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Prontto.Application.Common;
 using Prontto.Application.Financeiro;
 using Prontto.Domain.Entities;
@@ -137,7 +138,7 @@ public class ServicoNegociacao(
             Acao = "proposta.aceita",
             Entidade = "Servico",
             EntidadeId = servicoId.ToString(),
-            Detalhes = $"{{\"valorAcordado\":{servico.Preco},\"mensagemId\":\"{mensagemId}\"}}"
+            Detalhes = JsonSerializer.Serialize(new { valorAcordado = servico.Preco, mensagemId })
         });
 
         // Notifica o remetente da proposta

@@ -20,26 +20,55 @@ public class RepositorioPerfilPrestador(ContextoBancoDados db) : IRepositorioPer
         IEnumerable<Guid> categoriaIds,
         IEnumerable<Guid> cidadeIds)
     {
-        // Remove associações existentes (substitui completamente)
-        var categoriasAtuais = await db.CategoriasUsuario
-            .Where(cu => cu.UsuarioId == usuario.Id)
-            .ToListAsync();
-        db.CategoriasUsuario.RemoveRange(categoriasAtuais);
+        var catIds = categoriaIds.Distinct().ToList();
+        var cidIds = cidadeIds.Distinct().ToList();
 
-        var cidadesAtuais = await db.CidadesUsuario
-            .Where(cu => cu.UsuarioId == usuario.Id)
-            .ToListAsync();
-        db.CidadesUsuario.RemoveRange(cidadesAtuais);
+        // Valida existência antes de inserir (evita FK violation silenciosa) — SCRUM-50.
+        if (catIds.Count > 0)
+        {
+            var existentesCat = await db.Categorias.Where(c => catIds.Contains(c.Id)).Select(c => c.Id).ToListAsync();
+            var invalidas = catIds.Except(existentesCat).ToList();
+            if (invalidas.Count > 0)
+                throw new InvalidOperationException($"Categoria(s) inexistente(s): {string.Join(", ", invalidas)}");
+        }
+        if (cidIds.Count > 0)
+        {
+            var existentesCid = await db.Cidades.Where(c => cidIds.Contains(c.Id)).Select(c => c.Id).ToListAsync();
+            var invalidas = cidIds.Except(existentesCid).ToList();
+            if (invalidas.Count > 0)
+                throw new InvalidOperationException($"Cidade(s) inexistente(s): {string.Join(", ", invalidas)}");
+        }
 
-        // Adiciona novas associações
-        foreach (var catId in categoriaIds.Distinct())
-            db.CategoriasUsuario.Add(new CategoriaUsuario { UsuarioId = usuario.Id, CategoriaId = catId });
+        // Envolve Remove + Add + SaveChanges numa transação explícita para garantir
+        // atomicidade sob concorrência (evita perda de categorias/cidades) — SCRUM-50.
+        await using var transacao = await db.Database.BeginTransactionAsync();
+        try
+        {
+            var categoriasAtuais = await db.CategoriasUsuario
+                .Where(cu => cu.UsuarioId == usuario.Id)
+                .ToListAsync();
+            db.CategoriasUsuario.RemoveRange(categoriasAtuais);
 
-        foreach (var cidId in cidadeIds.Distinct())
-            db.CidadesUsuario.Add(new CidadeUsuario { UsuarioId = usuario.Id, CidadeId = cidId });
+            var cidadesAtuais = await db.CidadesUsuario
+                .Where(cu => cu.UsuarioId == usuario.Id)
+                .ToListAsync();
+            db.CidadesUsuario.RemoveRange(cidadesAtuais);
 
-        db.Usuarios.Update(usuario);
-        await db.SaveChangesAsync();
+            foreach (var catId in catIds)
+                db.CategoriasUsuario.Add(new CategoriaUsuario { UsuarioId = usuario.Id, CategoriaId = catId });
+
+            foreach (var cidId in cidIds)
+                db.CidadesUsuario.Add(new CidadeUsuario { UsuarioId = usuario.Id, CidadeId = cidId });
+
+            db.Usuarios.Update(usuario);
+            await db.SaveChangesAsync();
+            await transacao.CommitAsync();
+        }
+        catch
+        {
+            await transacao.RollbackAsync();
+            throw;
+        }
     }
 
     public Task<List<ImagemPortfolio>> ListarImagensAprovadasAsync(Guid usuarioId)

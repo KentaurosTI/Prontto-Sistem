@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Prontto.Application.Common;
 using Prontto.Application.Financeiro;
 using Prontto.Domain.Entities;
@@ -59,7 +60,7 @@ public class ServicoServico(
             Acao = "servico.criado",
             Entidade = "Servico",
             EntidadeId = criado.Id.ToString(),
-            Detalhes = $"{{\"titulo\":\"{criado.Titulo}\",\"categoriaId\":\"{criado.CategoriaId}\"}}"
+            Detalhes = JsonSerializer.Serialize(new { titulo = criado.Titulo, categoriaId = criado.CategoriaId })
         });
 
         // Notifica o prestador se foi criado vinculado a um específico

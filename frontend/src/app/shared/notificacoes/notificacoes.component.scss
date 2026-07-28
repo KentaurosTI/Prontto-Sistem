@@ -133,3 +133,23 @@
   color: var(--cor-texto-suave, #64748b);
   font-size: 0.85rem;
 }
+
+/* Mobile (SCRUM-30): dentro do menu hambúrguer o painel absoluto era cortado/saía
+   da tela. Fixa o painel abaixo do header, ocupando quase toda a largura, sempre visível. */
+@media (max-width: 920px) {
+  .notif { position: static; }
+
+  .notif__painel {
+    position: fixed;
+    top: 68px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+    max-width: none;
+    max-height: 72vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .notif__lista { max-height: none; flex: 1; }
+}

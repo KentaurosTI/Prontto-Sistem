@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Prontto.Domain.Entities;
 using Prontto.Domain.Enums;
 using Prontto.Domain.Interfaces;
@@ -8,6 +9,17 @@ namespace Prontto.Infrastructure.Persistence.Repositories;
 
 public class RepositorioCobranca(ContextoBancoDados db) : IRepositorioCobranca
 {
+    public async Task<ITransacaoBanco> IniciarTransacaoAsync()
+        => new TransacaoBancoEf(await db.Database.BeginTransactionAsync());
+
+    /// <summary>Adapta a transação do EF Core para a abstração de Domain (ITransacaoBanco).</summary>
+    private sealed class TransacaoBancoEf(IDbContextTransaction tx) : ITransacaoBanco
+    {
+        public Task CommitAsync() => tx.CommitAsync();
+        public Task RollbackAsync() => tx.RollbackAsync();
+        public ValueTask DisposeAsync() => tx.DisposeAsync();
+    }
+
     public async Task<IReadOnlyList<Cobranca>> ListarTodosAsync()
         => await db.Cobrancas
             .Include(cobranca => cobranca.Servico)

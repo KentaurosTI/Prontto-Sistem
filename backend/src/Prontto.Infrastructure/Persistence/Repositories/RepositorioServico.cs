@@ -57,8 +57,11 @@ public class RepositorioServico(ContextoBancoDados db) : IRepositorioServico
             .ToListAsync();
 
     /// <summary>
-    /// Lista serviços em EmNegociacao sem prestador vinculado, cujas categoria e cidade
-    /// correspondam a pelo menos uma das categorias/cidades do prestador.
+    /// Lista, para o prestador, os serviços em EmNegociacao que ele pode assumir:
+    /// (a) solicitações direcionadas a ELE (PrestadorId == prestador) — sempre aparecem,
+    ///     independentemente de categoria/cidade, pois o cliente o escolheu; e
+    /// (b) o "pool aberto" (sem prestador) cujas categoria/cidade casam com o perfil dele.
+    /// (SCRUM-43/SCRUM-37: solicitações direcionadas não apareciam para o prestador.)
     /// </summary>
     public async Task<List<Servico>> ListarDisponiveisParaPrestadorAsync(Guid prestadorId)
     {
@@ -73,22 +76,25 @@ public class RepositorioServico(ContextoBancoDados db) : IRepositorioServico
             .Select(cu => cu.CidadeId)
             .ToListAsync();
 
+        var temCidades = cidadesPrestador.Count > 0;
+
         var query = db.Servicos
             .Include(s => s.Categoria)
             .Include(s => s.Cidade)
             .Include(s => s.Cliente)
             .Where(s =>
                 s.Status == StatusServico.EmNegociacao &&
-                s.PrestadorId == null &&
-                categoriasPrestador.Contains(s.CategoriaId));
-
-        // Filtra por cidade do prestador se o prestador tem cidades cadastradas
-        if (cidadesPrestador.Count > 0)
-        {
-            query = query.Where(s =>
-                s.CidadeId == null ||
-                cidadesPrestador.Contains(s.CidadeId!.Value));
-        }
+                (
+                    // (a) direcionadas ao próprio prestador — sempre visíveis
+                    s.PrestadorId == prestadorId
+                    ||
+                    // (b) pool aberto compatível com categoria (e cidade, se houver)
+                    (
+                        s.PrestadorId == null &&
+                        categoriasPrestador.Contains(s.CategoriaId) &&
+                        (!temCidades || s.CidadeId == null || cidadesPrestador.Contains(s.CidadeId!.Value))
+                    )
+                ));
 
         return await query
             .OrderByDescending(s => s.CriadoEm)

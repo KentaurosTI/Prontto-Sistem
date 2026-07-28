@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Prontto.Application.Common;
 using Prontto.Application.Financeiro;
 using Prontto.Domain.Entities;
@@ -58,7 +59,7 @@ public class ServicoDisputa(
             Acao = "disputa.aberta",
             Entidade = "Disputa",
             EntidadeId = disputa.Id.ToString(),
-            Detalhes = $"{{\"servicoId\":\"{servicoId}\",\"motivo\":\"{motivo}\"}}"
+            Detalhes = JsonSerializer.Serialize(new { servicoId, motivo })
         });
 
         // Notifica o prestador
@@ -120,7 +121,7 @@ public class ServicoDisputa(
             Acao = "disputa.resolvida",
             Entidade = "Disputa",
             EntidadeId = disputaId.ToString(),
-            Detalhes = $"{{\"servicoId\":\"{servico.Id}\",\"favorPrestador\":{favorPrestador.ToString().ToLower()},\"decisao\":\"{decisaoAdmin}\"}}"
+            Detalhes = JsonSerializer.Serialize(new { servicoId = servico.Id, favorPrestador, decisao = decisaoAdmin })
         });
 
         // Notifica ambas as partes

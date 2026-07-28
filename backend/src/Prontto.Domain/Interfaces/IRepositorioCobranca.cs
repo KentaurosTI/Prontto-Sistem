@@ -15,4 +15,7 @@ public interface IRepositorioCobranca
     Task<Cobranca?> ObterPorServicoIdAsync(Guid servicoId);
     Task<Cobranca?> ObterPorPagarmeOrderIdAsync(string pagarmeOrderId);
     Task<List<Cobranca>> ListarPendentesExpiradosAsync();
+
+    /// <summary>Inicia uma transação de banco (cobre os SaveChanges dos repositórios no mesmo escopo).</summary>
+    Task<ITransacaoBanco> IniciarTransacaoAsync();
 }
