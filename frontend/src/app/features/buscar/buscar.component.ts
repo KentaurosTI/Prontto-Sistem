@@ -2,8 +2,9 @@ import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SeoService } from '../../core/seo/seo.service';
-import { sugestoesBusca, buscarServico, CATEGORIAS_MENU } from '../../core/data/menu-categorias';
+import { sugestoesBusca, buscarServico, CATEGORIAS_MENU, mesclarCategorias, CategoriaMenu } from '../../core/data/menu-categorias';
 import { SugestoesService } from '../../core/api/sugestoes.service';
+import { CatalogoService } from '../../core/api/catalogo.service';
 
 @Component({
   selector: 'app-buscar',
@@ -17,6 +18,7 @@ export class BuscarComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly seo = inject(SeoService);
   private readonly sugestoesService = inject(SugestoesService);
+  private readonly catalogo = inject(CatalogoService);
 
   readonly termo = signal('');
   readonly focado = signal(false);
@@ -79,8 +81,8 @@ export class BuscarComponent implements OnInit {
     return this.todas.filter((s) => s.toLowerCase().includes(t)).slice(0, 8);
   });
 
-  /** Categorias populares para atalho quando o campo está vazio. */
-  readonly categorias = CATEGORIAS_MENU;
+  /** Categorias para os atalhos — do banco (com fallback estático), igual ao menu do site. */
+  readonly categorias = signal<CategoriaMenu[]>(CATEGORIAS_MENU);
 
   ngOnInit(): void {
     this.seo.atualizarSeo({
@@ -88,6 +90,11 @@ export class BuscarComponent implements OnInit {
       descricao: 'Pesquise o serviço que precisa e veja os profissionais disponíveis na sua região.',
       url: 'https://prontto.org/buscar',
     });
+    this.catalogo.listarCategorias().subscribe({
+      next: (db) => { if (db?.length) this.categorias.set(mesclarCategorias(db)); },
+      error: () => { /* mantém o estático */ },
+    });
+
     const q = this.route.snapshot.queryParamMap.get('q');
     if (q) {
       this.termo.set(q);

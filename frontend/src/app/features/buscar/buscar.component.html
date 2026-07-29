@@ -33,6 +33,12 @@
       }
     </div>
 
+    <div class="buscar-trust" aria-hidden="false">
+      <span><i class="ri-shield-check-line"></i> Profissionais verificados</span>
+      <span><i class="ri-price-tag-3-line"></i> Orçamento grátis</span>
+      <span><i class="ri-timer-flash-line"></i> Sem compromisso</span>
+    </div>
+
     @if (semResultado()) {
       <div class="buscar-nada" role="status">
         <p>Não encontramos esse serviço. Tente outro termo, escolha uma categoria abaixo — ou nos sugira esse serviço.</p>
@@ -100,10 +106,11 @@
   <section class="buscar-cats" aria-label="Categorias populares">
     <h2 class="buscar-cats__titulo">Ou escolha uma categoria</h2>
     <div class="buscar-cats__grid">
-      @for (cat of categorias; track cat.key) {
+      @for (cat of categorias(); track cat.key) {
         <button type="button" class="cat-chip" (click)="irParaCategoria(cat.key)">
-          <span class="cat-chip__emoji" aria-hidden="true">{{ cat.emoji }}</span>
+          <span class="cat-chip__ic" aria-hidden="true"><i [class]="cat.icone"></i></span>
           <span class="cat-chip__label">{{ cat.label }}</span>
+          <i class="ri-arrow-right-s-line cat-chip__seta" aria-hidden="true"></i>
         </button>
       }
     </div>
