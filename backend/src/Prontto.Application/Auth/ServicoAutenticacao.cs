@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Configuration;
 using Prontto.Domain.Entities;
+using Prontto.Domain.Enums;
 using Prontto.Domain.Interfaces;
 using Prontto.Application.Common;
 
@@ -10,7 +12,9 @@ public class ServicoAutenticacao(
     IRepositorioAuditLog repositorioAuditLog,
     IRepositorioCidade repositorioCidades,
     IServicoJwt jwt,
-    IHashSenha hashSenha) : IServicoAutenticacao
+    IHashSenha hashSenha,
+    IServicoEmail servicoEmail,
+    IConfiguration configuracao) : IServicoAutenticacao
 {
     private const int ExpiracaoRefreshTokenDias = 30;
 
@@ -46,6 +50,13 @@ public class ServicoAutenticacao(
         var tokenBruto = jwt.GerarRefreshToken();
         var refreshToken = CriarRefreshToken(usuarioCriado.Id, tokenBruto, comando.Ip, comando.UserAgent);
         await repositorioRefreshTokens.AdicionarAsync(refreshToken);
+
+        // E-mail de boas-vindas (estilizado, cliente x prestador) — fire-and-forget, não bloqueia o cadastro.
+        var appUrl = (configuracao["APP_URL"] ?? "https://prontto.org").TrimEnd('/');
+        var corpo = usuarioCriado.TipoConta == TipoConta.Prestador
+            ? ModelosEmail.BoasVindasPrestador(usuarioCriado.Nome, appUrl)
+            : ModelosEmail.BoasVindasCliente(usuarioCriado.Nome, appUrl);
+        _ = servicoEmail.EnviarAsync(usuarioCriado.Email, usuarioCriado.Nome, "Bem-vindo(a) à Prontto!", corpo);
 
         return new ResultadoAutenticacao(jwt.GerarToken(usuarioCriado), tokenBruto, usuarioCriado);
     }

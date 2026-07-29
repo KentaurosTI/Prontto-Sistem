@@ -16,6 +16,10 @@ public class TestesServicoNegociacao
     private readonly Mock<IRepositorioCobranca> _repositorioCobrancas = new();
     private readonly Mock<IRepositorioNotificacao> _repositorioNotificacoes = new();
     private readonly Mock<IRepositorioAuditLog> _repositorioAuditLog = new();
+    private readonly Mock<IRepositorioUsuario> _repositorioUsuarios = new();
+    private readonly Mock<IServicoEmail> _servicoEmail = new();
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _configuracao =
+        new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
     private readonly Mock<IServicoFinanceiro> _servicoFinanceiro = new();
     private readonly ServicoNegociacao _sut;
 
@@ -27,6 +31,9 @@ public class TestesServicoNegociacao
             _repositorioCobrancas.Object,
             _repositorioNotificacoes.Object,
             _repositorioAuditLog.Object,
+            _repositorioUsuarios.Object,
+            _servicoEmail.Object,
+            _configuracao,
             _servicoFinanceiro.Object);
     }
 

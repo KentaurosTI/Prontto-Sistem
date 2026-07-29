@@ -16,6 +16,9 @@ public class TestesServicoAutenticacao
     private readonly Mock<IRepositorioCidade> _repositorioCidades = new();
     private readonly Mock<IServicoJwt> _jwt = new();
     private readonly Mock<IHashSenha> _hashSenha = new();
+    private readonly Mock<IServicoEmail> _servicoEmail = new();
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _configuracao =
+        new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build();
     private readonly ServicoAutenticacao _sut;
 
     public TestesServicoAutenticacao()
@@ -33,7 +36,9 @@ public class TestesServicoAutenticacao
             _repositorioAuditLog.Object,
             _repositorioCidades.Object,
             _jwt.Object,
-            _hashSenha.Object);
+            _hashSenha.Object,
+            _servicoEmail.Object,
+            _configuracao);
     }
 
     // ── CadastrarAsync ─────────────────────────────────────────────────────────

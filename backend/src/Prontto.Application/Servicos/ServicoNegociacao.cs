@@ -13,8 +13,38 @@ public class ServicoNegociacao(
     IRepositorioCobranca repositorioCobrancas,
     IRepositorioNotificacao repositorioNotificacoes,
     IRepositorioAuditLog repositorioAuditLog,
+    IRepositorioUsuario repositorioUsuarios,
+    IServicoEmail servicoEmail,
+    Microsoft.Extensions.Configuration.IConfiguration configuracao,
     IServicoFinanceiro servicoFinanceiro) : IServicoNegociacao
 {
+    /// <summary>
+    /// Dispara o e-mail estilizado ao destinatário de uma mensagem/proposta.
+    /// Se o remetente é o Prestador, o destinatário é o Cliente → "retorno da solicitação";
+    /// caso contrário, é o Prestador → "nova mensagem/proposta". Fire-and-forget (nunca bloqueia).
+    /// </summary>
+    private async Task NotificarEmailNegociacaoAsync(
+        Guid destinatarioId, PapelRemetente papelRemetente, Prontto.Domain.Entities.Servico servico,
+        bool ehProposta, decimal? valor)
+    {
+        var destinatario = await repositorioUsuarios.ObterPorIdAsync(destinatarioId);
+        if (destinatario is null || string.IsNullOrWhiteSpace(destinatario.Email)) return;
+
+        var appUrl = (configuracao["APP_URL"] ?? "https://prontto.org").TrimEnd('/');
+        var url = $"{appUrl}/servico/{servico.Id}";
+
+        // Destinatário é o Cliente quando quem enviou foi o Prestador.
+        var corpo = papelRemetente == PapelRemetente.Prestador
+            ? ModelosEmail.RetornoSolicitacao(destinatario.Nome, servico.Titulo, ehProposta, valor, url)
+            : ModelosEmail.NovaMensagemPrestador(destinatario.Nome, servico.Titulo, ehProposta, valor, url);
+
+        var assunto = ehProposta
+            ? $"Prontto — proposta em \"{servico.Titulo}\""
+            : $"Prontto — nova mensagem em \"{servico.Titulo}\"";
+
+        _ = servicoEmail.EnviarAsync(destinatario.Email, destinatario.Nome, assunto, corpo);
+    }
+
     // ── Envio de proposta ──────────────────────────────────────────────────────
 
     public async Task<DtoMensagemServico> EnviarPropostaAsync(
@@ -71,6 +101,8 @@ public class ServicoNegociacao(
                 Tipo = "proposta",
                 ReferenciaId = servicoId.ToString()
             });
+
+            await NotificarEmailNegociacaoAsync(destinatarioId.Value, papel, servico, ehProposta: true, valor: valor);
         }
 
         return MapearMensagemDto(mensagem);
@@ -203,6 +235,8 @@ public class ServicoNegociacao(
                 Tipo = "mensagem",
                 ReferenciaId = servicoId.ToString(),
             });
+
+            await NotificarEmailNegociacaoAsync(destinatarioId.Value, papel, servico, ehProposta: false, valor: null);
         }
 
         return MapearMensagemDto(mensagem);

@@ -13,20 +13,28 @@ namespace Prontto.Infrastructure.Services;
 /// </summary>
 public class ServicoEmailSmtp(IConfiguration configuracao, ILogger<ServicoEmailSmtp> logger) : IServicoEmail
 {
-    public async Task<bool> EnviarParaAdminAsync(string assunto, string corpoHtml, string? responderPara = null)
+    public Task<bool> EnviarParaAdminAsync(string assunto, string corpoHtml, string? responderPara = null)
+    {
+        var admin = configuracao["ADMIN_EMAIL"] ?? configuracao["SMTP_USER"];
+        return EnviarInternoAsync(admin, "Administração Prontto", assunto, corpoHtml, responderPara);
+    }
+
+    public Task<bool> EnviarAsync(string destinatario, string? nomeDestinatario, string assunto, string corpoHtml)
+        => EnviarInternoAsync(destinatario, nomeDestinatario, assunto, corpoHtml, null);
+
+    private async Task<bool> EnviarInternoAsync(string? destinatario, string? nomeDestinatario, string assunto, string corpoHtml, string? responderPara)
     {
         var host = configuracao["SMTP_HOST"];
         var portaTxt = configuracao["SMTP_PORT"];
         var usuario = configuracao["SMTP_USER"];
         var senha = configuracao["SMTP_PASS"];
         var de = configuracao["SMTP_FROM"] ?? usuario;
-        var admin = configuracao["ADMIN_EMAIL"] ?? usuario;
 
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(usuario)
             || string.IsNullOrWhiteSpace(senha) || string.IsNullOrWhiteSpace(de)
-            || string.IsNullOrWhiteSpace(admin))
+            || string.IsNullOrWhiteSpace(destinatario))
         {
-            logger.LogWarning("SMTP não configurado — e-mail '{Assunto}' não enviado (a sugestão foi salva no painel).", assunto);
+            logger.LogWarning("SMTP não configurado (ou destinatário vazio) — e-mail '{Assunto}' não enviado.", assunto);
             return false;
         }
 
@@ -41,7 +49,9 @@ public class ServicoEmailSmtp(IConfiguration configuracao, ILogger<ServicoEmailS
                 Body = corpoHtml,
                 IsBodyHtml = true,
             };
-            mensagem.To.Add(admin);
+            mensagem.To.Add(string.IsNullOrWhiteSpace(nomeDestinatario)
+                ? new MailAddress(destinatario)
+                : new MailAddress(destinatario, nomeDestinatario));
             if (!string.IsNullOrWhiteSpace(responderPara))
                 mensagem.ReplyToList.Add(new MailAddress(responderPara));
 
@@ -53,7 +63,7 @@ public class ServicoEmailSmtp(IConfiguration configuracao, ILogger<ServicoEmailS
             };
 
             await cliente.SendMailAsync(mensagem);
-            logger.LogInformation("E-mail '{Assunto}' enviado ao admin ({Admin}).", assunto, admin);
+            logger.LogInformation("E-mail '{Assunto}' enviado para {Destinatario}.", assunto, destinatario);
             return true;
         }
         catch (Exception ex)
