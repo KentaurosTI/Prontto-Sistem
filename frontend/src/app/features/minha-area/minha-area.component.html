@@ -326,6 +326,24 @@
           <p class="secao-card__desc">Seus dados para receber pagamentos via Pix.</p>
         </div>
 
+        <!-- Recebimento via Stripe (Connect) -->
+        <div class="stripe-connect">
+          <div class="stripe-connect__info">
+            <strong><i class="ri-bank-card-line" aria-hidden="true"></i> Recebimento por cartão</strong>
+            <span>Configure sua conta de recebimento no Stripe para receber os repasses dos serviços pagos com cartão.</span>
+          </div>
+          <button type="button" class="btn-salvar" (click)="configurarRecebimento()" [disabled]="onboardingCarregando()">
+            @if (onboardingCarregando()) {
+              <span class="spinner" aria-hidden="true"></span> Abrindo...
+            } @else {
+              Configurar recebimento
+            }
+          </button>
+          @if (erroOnboarding()) {
+            <p class="msg-erro" role="alert" style="margin-top:8px">{{ erroOnboarding() }}</p>
+          }
+        </div>
+
         @if (mensagem()) {
           <div class="msg-sucesso" role="status" aria-live="polite">
             <span aria-hidden="true">✓</span> {{ mensagem() }}

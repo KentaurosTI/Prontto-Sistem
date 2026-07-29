@@ -6,6 +6,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { BankingService } from '../../core/api/banking.service';
 import { PerfilPrestadorService } from '../../core/api/perfil-prestador.service';
 import { ServicosService } from '../../core/api/servicos.service';
+import { PagamentosService } from '../../core/api/pagamentos.service';
 import { AvaliacoesService } from '../../core/api/avaliacoes.service';
 import { DadosBancarios, Categoria, Cidade, Servico, StatusServico, ImagemPortfolio } from '../../core/models/usuario.model';
 import { resolverUrlImagem } from '../../core/util/url-imagem';
@@ -29,6 +30,7 @@ export class MinhaAreaComponent implements OnInit {
   private readonly bankingService = inject(BankingService);
   private readonly perfilService = inject(PerfilPrestadorService);
   private readonly servicosService = inject(ServicosService);
+  private readonly pagamentosService = inject(PagamentosService);
   private readonly avaliacoesService = inject(AvaliacoesService);
 
   readonly usuario = this.auth.usuario;
@@ -335,6 +337,22 @@ export class MinhaAreaComponent implements OnInit {
       cancelado: { texto: 'Cancelado', cor: 'cinza' },
     };
     return mapa[status] ?? { texto: status, cor: 'cinza' };
+  }
+
+  // ── Stripe Connect: configurar recebimento (prestador) ──────────────────────
+  readonly onboardingCarregando = signal(false);
+  readonly erroOnboarding = signal<string | null>(null);
+
+  configurarRecebimento(): void {
+    this.onboardingCarregando.set(true);
+    this.erroOnboarding.set(null);
+    this.pagamentosService.criarOnboardingConnect().subscribe({
+      next: (res) => { window.location.href = res.url; },
+      error: (err) => {
+        this.onboardingCarregando.set(false);
+        this.erroOnboarding.set(err?.error?.error ?? 'Não foi possível abrir a configuração de recebimento. Tente novamente.');
+      },
+    });
   }
 
   salvarBanking(): void {

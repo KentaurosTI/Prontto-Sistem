@@ -26,6 +26,8 @@ public class Usuario
     public string? FotoPerfilUrl { get; set; }
     public string? Slug { get; set; }
     public string? Descricao { get; set; }
+    /// <summary>Id da conta conectada no Stripe (Connect) para receber repasses. Ex.: "acct_...".</summary>
+    public string? StripeAccountId { get; set; }
     public decimal MediaAvaliacoes { get; set; } = 0m;
     public int TotalAvaliacoes { get; set; } = 0;
 

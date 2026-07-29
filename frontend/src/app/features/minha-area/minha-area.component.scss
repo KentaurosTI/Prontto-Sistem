@@ -1545,3 +1545,19 @@
   text-align: center;
   padding: 2rem 0;
 }
+
+/* ── Recebimento via Stripe (Connect) ──────────────────────── */
+.stripe-connect {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  margin-bottom: 18px;
+  border: 1px solid var(--cor-borda, #e5e7eb);
+  border-radius: 12px;
+  background: #fff7ed;
+}
+.stripe-connect__info { display: flex; flex-direction: column; gap: 4px; }
+.stripe-connect__info strong { color: var(--cor-navy-medio, #0f172a); display: inline-flex; align-items: center; gap: 6px; }
+.stripe-connect__info span { color: var(--cor-texto-suave, #64748b); font-size: 0.88rem; }
+.stripe-connect .btn-salvar { align-self: flex-start; }

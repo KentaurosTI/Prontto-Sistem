@@ -51,6 +51,9 @@ public static class InjecaoDependencias
         // ── E-mail (SMTP) ─────────────────────────────────────────────────────
         servicos.AddScoped<IServicoEmail, ServicoEmailSmtp>();
 
+        // ── Stripe Connect (onboarding do prestador) ──────────────────────────
+        servicos.AddScoped<IServicoConnect, ServicoConnectStripe>();
+
         // ── Serviços de Aplicação ─────────────────────────────────────────────
         servicos.AddScoped<IHashSenha, HashSenhaBcrypt>();
         servicos.AddScoped<IServicoJwt, ServicoJwt>();
