@@ -293,7 +293,7 @@ const SUBIMG_SLUGS = new Set([
   'camara-fria', 'cameras-cftv', 'carpetes-e-tapetes', 'carreto', 'celular', 'cerca-eletrica',
   'chuveiro-eletrico', 'coifas', 'comercial', 'computador-e-notebook', 'condominios',
   'controle-de-acesso', 'corte-de-grama', 'cortinas-de-ar', 'dedetizacao', 'diarista',
-  'efeitos-decorativos', 'eletrica-automotiva', 'entregas', 'escritorios', 'estantes',
+  'desentupimento', 'efeitos-decorativos', 'eletrica-automotiva', 'entregas', 'escritorios', 'estantes',
   'estofados-e-sofas', 'estruturas-metalicas', 'exaustores', 'fachadas', 'faxina',
   'fechaduras-digitais', 'fogao-e-cooktop', 'forro-de-gesso', 'freezer', 'frete', 'funilaria-e-pintura',
   'galpoes', 'geladeira', 'grades-e-corrimaos', 'grafiato', 'guarda-moveis', 'guarda-roupa', 'guincho',
