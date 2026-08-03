@@ -42,11 +42,17 @@ export class EntrarComponent implements OnInit {
     this.erro.set(null);
 
     this.auth.entrar(email!, senha!).subscribe({
-      next: () => this.roteador.navigate([this.auth.ehAdmin() ? '/admin' : '/minha-area']),
+      next: () => this.roteador.navigate([this.destinoPosLogin()]),
       error: (resposta) => {
         this.erro.set(resposta.error?.error ?? 'Erro ao entrar');
         this.carregando.set(false);
       },
     });
+  }
+
+  /** Destino após o login: admin → /admin; contratante → /buscar; prestador → /minha-area. */
+  private destinoPosLogin(): string {
+    if (this.auth.ehAdmin()) return '/admin';
+    return this.auth.usuario()?.tipoConta === 'cliente' ? '/buscar' : '/minha-area';
   }
 }

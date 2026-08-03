@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { PerfilPrestadorService } from '../../core/api/perfil-prestador.service';
@@ -19,7 +19,7 @@ export class PrestadoresComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly perfilService = inject(PerfilPrestadorService);
   private readonly seo = inject(SeoService);
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
 
   readonly prestadores = signal<PrestadorBusca[]>([]);
   readonly cidades = signal<Cidade[]>([]);
@@ -27,6 +27,31 @@ export class PrestadoresComponent implements OnInit {
   readonly categoriaSlug = signal('');
   readonly categoriaNome = signal('');
   readonly cidadeSlug = signal<string>('');
+
+  // ── Ordenação e filtro (funções novas — SCRUM-59) ──────────────────────────
+  readonly ordenacao = signal<'avaliacao' | 'popularidade' | 'nome'>('avaliacao');
+  readonly avaliacaoMinima = signal<number>(0);
+
+  /** Lista exibida: aplica filtro de avaliação mínima + ordenação escolhida. */
+  readonly prestadoresExibidos = computed(() => {
+    const min = this.avaliacaoMinima();
+    const lista = this.prestadores().filter((p) => p.mediaAvaliacoes >= min);
+    const ord = this.ordenacao();
+    return [...lista].sort((a, b) => {
+      if (ord === 'nome') return a.nome.localeCompare(b.nome, 'pt-BR');
+      if (ord === 'popularidade') return b.totalAvaliacoes - a.totalAvaliacoes;
+      // avaliação (desc), desempate por nº de avaliações
+      return b.mediaAvaliacoes - a.mediaAvaliacoes || b.totalAvaliacoes - a.totalAvaliacoes;
+    });
+  });
+
+  definirOrdenacao(valor: string): void {
+    this.ordenacao.set(valor as 'avaliacao' | 'popularidade' | 'nome');
+  }
+
+  definirAvaliacaoMinima(valor: number): void {
+    this.avaliacaoMinima.set(this.avaliacaoMinima() === valor ? 0 : valor);
+  }
 
   urlImagem(url: string | null | undefined): string {
     return resolverUrlImagem(url);

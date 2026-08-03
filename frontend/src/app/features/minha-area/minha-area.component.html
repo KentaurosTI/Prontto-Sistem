@@ -601,7 +601,7 @@
           </div>
         }
 
-        <!-- Estado: vazio -->
+        <!-- Estado: vazio (nenhum pedido) -->
         @if (!carregandoServicos() && !erroServicos() && servicos().length === 0) {
           <div class="estado-vazio">
             <div class="estado-vazio__icone" aria-hidden="true"><i class="ri-file-list-3-line"></i></div>
@@ -620,10 +620,35 @@
           </div>
         }
 
-        <!-- Lista de serviços -->
+        <!-- Controles: ordenação + filtro de status (funções novas) -->
         @if (!carregandoServicos() && !erroServicos() && servicos().length > 0) {
+          <div class="ms-controles">
+            <div class="ms-filtros" role="group" aria-label="Filtrar pedidos por status">
+              <button type="button" class="ms-chip" [class.ativo]="filtroStatusPedidos() === 'todos'" (click)="definirFiltroStatus('todos')">Todos</button>
+              <button type="button" class="ms-chip" [class.ativo]="filtroStatusPedidos() === 'ativos'" (click)="definirFiltroStatus('ativos')">Em andamento</button>
+              <button type="button" class="ms-chip" [class.ativo]="filtroStatusPedidos() === 'concluido'" (click)="definirFiltroStatus('concluido')">Concluídos</button>
+              <button type="button" class="ms-chip" [class.ativo]="filtroStatusPedidos() === 'cancelado'" (click)="definirFiltroStatus('cancelado')">Cancelados</button>
+            </div>
+            <label class="ms-ordenar">
+              <span>Ordenar por</span>
+              <select (change)="definirOrdenacaoPedidos($any($event.target).value)">
+                <option value="recentes">Mais recentes</option>
+                <option value="antigos">Mais antigos</option>
+                <option value="valor">Maior valor</option>
+              </select>
+            </label>
+          </div>
+        }
+
+        <!-- Estado: sem resultado para o filtro -->
+        @if (!carregandoServicos() && !erroServicos() && servicos().length > 0 && servicosExibidos().length === 0) {
+          <p class="ms-sem-filtro">Nenhum pedido com esse filtro.</p>
+        }
+
+        <!-- Lista de serviços -->
+        @if (!carregandoServicos() && !erroServicos() && servicosExibidos().length > 0) {
           <ul class="ms-lista" role="list" aria-label="Lista de serviços">
-            @for (servico of servicos(); track servico.id) {
+            @for (servico of servicosExibidos(); track servico.id) {
               <li role="listitem">
                 <div class="ms-item">
                   <div>

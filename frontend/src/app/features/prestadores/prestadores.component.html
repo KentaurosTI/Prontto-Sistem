@@ -1,16 +1,47 @@
 <div class="prest-pagina">
   <header class="prest-header">
-    <h1 class="prest-titulo">Profissionais de {{ categoriaNome() }}</h1>
-    <p class="prest-sub">Escolha um profissional e envie sua solicitação de serviço.</p>
+    <div class="prest-header__topo">
+      <div>
+        <h1 class="prest-titulo">Profissionais de {{ categoriaNome() }}</h1>
+        <p class="prest-sub">Escolha um profissional e envie sua solicitação de serviço.</p>
+      </div>
+      @if (auth.estaAutenticado() && auth.usuario()?.tipoConta === 'cliente') {
+        <a routerLink="/minha-area" class="prest-meus-pedidos">
+          <i class="ri-file-list-3-line" aria-hidden="true"></i> Meus Pedidos
+        </a>
+      }
+    </div>
 
-    <div class="prest-filtro">
-      <label for="cidade">Cidade</label>
-      <select id="cidade" (change)="aoTrocarCidade($any($event.target).value)">
-        <option value="" [selected]="cidadeSlug() === ''">Todas as cidades de SP</option>
-        @for (c of cidades(); track c.id) {
-          <option [value]="c.slug" [selected]="c.slug === cidadeSlug()">{{ c.nome }}/{{ c.estado }}</option>
-        }
-      </select>
+    <!-- Controles: cidade, ordenação e filtro de avaliação (funções novas) -->
+    <div class="prest-controles">
+      <div class="prest-filtro">
+        <label for="cidade">Cidade</label>
+        <select id="cidade" (change)="aoTrocarCidade($any($event.target).value)">
+          <option value="" [selected]="cidadeSlug() === ''">Todas as cidades de SP</option>
+          @for (c of cidades(); track c.id) {
+            <option [value]="c.slug" [selected]="c.slug === cidadeSlug()">{{ c.nome }}/{{ c.estado }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="prest-filtro">
+        <label for="ordenar">Ordenar por</label>
+        <select id="ordenar" (change)="definirOrdenacao($any($event.target).value)">
+          <option value="avaliacao">Melhor avaliação</option>
+          <option value="popularidade">Mais avaliados</option>
+          <option value="nome">Nome (A–Z)</option>
+        </select>
+      </div>
+
+      <div class="prest-aval-filtro" role="group" aria-label="Filtrar por avaliação mínima">
+        <span class="prest-aval-filtro__label">Avaliação:</span>
+        <button type="button" class="prest-chip" [class.ativo]="avaliacaoMinima() === 4" (click)="definirAvaliacaoMinima(4)">
+          <i class="ri-star-fill" aria-hidden="true"></i> 4+
+        </button>
+        <button type="button" class="prest-chip" [class.ativo]="avaliacaoMinima() === 4.5" (click)="definirAvaliacaoMinima(4.5)">
+          <i class="ri-star-fill" aria-hidden="true"></i> 4,5+
+        </button>
+      </div>
     </div>
   </header>
 
@@ -20,15 +51,16 @@
         <div class="prest-card prest-card--skeleton"></div>
       }
     </div>
-  } @else if (prestadores().length === 0) {
+  } @else if (prestadoresExibidos().length === 0) {
     <div class="prest-vazio">
       <div class="prest-vazio__icone" aria-hidden="true">🔍</div>
       <h2>Nenhum profissional encontrado</h2>
-      <p>Ainda não há profissionais de {{ categoriaNome() }} nesta região. Tente outra cidade.</p>
+      <p>Nenhum profissional de {{ categoriaNome() }} com esse filtro. Tente outra cidade ou reduza a avaliação mínima.</p>
     </div>
   } @else {
+    <p class="prest-contador">{{ prestadoresExibidos().length }} profissional(is) encontrado(s)</p>
     <div class="prest-grid" role="list">
-      @for (p of prestadores(); track p.id) {
+      @for (p of prestadoresExibidos(); track p.id) {
         <a class="prest-card" role="listitem" [routerLink]="['/prestador', p.slug]">
           <div class="prest-card__avatar">
             @if (p.fotoPerfilUrl) {
@@ -36,6 +68,9 @@
             } @else {
               {{ p.nome.charAt(0).toUpperCase() }}
             }
+            <span class="prest-card__selo" title="Profissional verificado" aria-label="Profissional verificado">
+              <i class="ri-checkbox-circle-fill" aria-hidden="true"></i>
+            </span>
           </div>
           <div class="prest-card__corpo">
             <strong class="prest-card__nome">{{ p.nome }}</strong>

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -71,6 +71,34 @@ export class MinhaAreaComponent implements OnInit {
   readonly servicos = signal<Servico[]>([]);
   readonly carregandoServicos = signal(false);
   readonly erroServicos = signal<string | null>(null);
+
+  // ── Ordenação e filtro de "Meus Pedidos" (funções novas — SCRUM-59) ─────────
+  readonly ordenacaoPedidos = signal<'recentes' | 'antigos' | 'valor'>('recentes');
+  readonly filtroStatusPedidos = signal<'todos' | 'ativos' | 'concluido' | 'cancelado'>('todos');
+
+  /** Lista exibida em Meus Pedidos: aplica filtro de status + ordenação. */
+  readonly servicosExibidos = computed(() => {
+    let lista = this.servicos();
+    switch (this.filtroStatusPedidos()) {
+      case 'concluido': lista = lista.filter((s) => s.status === 'concluido'); break;
+      case 'cancelado': lista = lista.filter((s) => s.status === 'cancelado'); break;
+      case 'ativos': lista = lista.filter((s) => s.status !== 'concluido' && s.status !== 'cancelado'); break;
+    }
+    const ord = this.ordenacaoPedidos();
+    return [...lista].sort((a, b) => {
+      if (ord === 'valor') return (b.preco || 0) - (a.preco || 0);
+      const da = new Date(a.criadoEm).getTime();
+      const db = new Date(b.criadoEm).getTime();
+      return ord === 'antigos' ? da - db : db - da;
+    });
+  });
+
+  definirOrdenacaoPedidos(valor: string): void {
+    this.ordenacaoPedidos.set(valor as 'recentes' | 'antigos' | 'valor');
+  }
+  definirFiltroStatus(valor: 'todos' | 'ativos' | 'concluido' | 'cancelado'): void {
+    this.filtroStatusPedidos.set(valor);
+  }
 
   // ── Avaliações (RF-08) ───────────────────────────────────────────────────────
   /** servicoId que está com o formulário de avaliação aberto (null = nenhum) */

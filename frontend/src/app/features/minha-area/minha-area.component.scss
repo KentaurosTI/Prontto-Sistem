@@ -1575,3 +1575,45 @@
 .estado-erro__icone i { font-size: 2.4rem; line-height: 1; }
 .alerta-perfil__icone i { font-size: 1.25rem; }
 .msg-sucesso i, .msg-erro i { font-size: 1.05rem; }
+
+/* ── Meus Pedidos: controles de ordenação/filtro (SCRUM-59) ── */
+.ms-controles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.ms-filtros { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.ms-chip {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--cor-borda);
+  background: #fff;
+  border-radius: 9999px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--cor-texto);
+  cursor: pointer;
+  transition: 0.15s;
+  &:hover { border-color: var(--cor-primaria); }
+  &.ativo { background: var(--cor-primaria); color: #fff; border-color: var(--cor-primaria); }
+}
+.ms-ordenar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.83rem;
+  color: var(--cor-texto-suave);
+  font-weight: 600;
+  select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    color: var(--cor-navy-medio);
+    background: #fff;
+  }
+}
+.ms-sem-filtro { color: var(--cor-texto-suave); font-size: 0.9rem; padding: 0.5rem 0; }
