@@ -89,11 +89,11 @@ export class MinhaAreaComponent implements OnInit {
   readonly erroAvaliacao = signal<string | null>(null);
 
   readonly tiposPix: TipoPix[] = [
-    { valor: 'cpf', label: 'CPF', icone: '🪪' },
-    { valor: 'cnpj', label: 'CNPJ', icone: '🏢' },
-    { valor: 'email', label: 'E-mail', icone: '✉️' },
-    { valor: 'telefone', label: 'Telefone', icone: '📱' },
-    { valor: 'aleatoria', label: 'Aleatória', icone: '🔑' },
+    { valor: 'cpf', label: 'CPF', icone: 'ri-user-line' },
+    { valor: 'cnpj', label: 'CNPJ', icone: 'ri-building-line' },
+    { valor: 'email', label: 'E-mail', icone: 'ri-mail-line' },
+    { valor: 'telefone', label: 'Telefone', icone: 'ri-smartphone-line' },
+    { valor: 'aleatoria', label: 'Aleatória', icone: 'ri-key-2-line' },
   ];
 
   /** Ao trocar o tipo de chave, limpa a chave digitada para o novo formato (SCRUM-29). */

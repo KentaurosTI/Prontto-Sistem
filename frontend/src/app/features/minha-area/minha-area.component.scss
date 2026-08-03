@@ -1561,3 +1561,17 @@
 .stripe-connect__info strong { color: var(--cor-navy-medio, #0f172a); display: inline-flex; align-items: center; gap: 6px; }
 .stripe-connect__info span { color: var(--cor-texto-suave, #64748b); font-size: 0.88rem; }
 .stripe-connect .btn-salvar { align-self: flex-start; }
+
+/* ── Padronização de ícones (Remix) — Minha Área ───────────── */
+.sidebar__nav-item > i {
+  font-size: 1.2rem;
+  width: 1.35rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+.sidebar__badge i { font-size: 0.95rem; }
+.sidebar__btn-sair > i { font-size: 1.15rem; }
+.estado-vazio__icone i,
+.estado-erro__icone i { font-size: 2.4rem; line-height: 1; }
+.alerta-perfil__icone i { font-size: 1.25rem; }
+.msg-sucesso i, .msg-erro i { font-size: 1.05rem; }

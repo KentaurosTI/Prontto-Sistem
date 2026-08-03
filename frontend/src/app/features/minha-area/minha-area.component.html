@@ -13,7 +13,11 @@
       <strong class="sidebar__nome">{{ usuario()?.nome }}</strong>
       <span class="sidebar__email">{{ usuario()?.email }}</span>
       <span class="sidebar__badge" [class.sidebar__badge--prestador]="usuario()?.tipoConta === 'prestador'">
-        {{ usuario()?.tipoConta === 'prestador' ? '👷 Prestador' : '👤 Cliente' }}
+        @if (usuario()?.tipoConta === 'prestador') {
+          <i class="ri-briefcase-4-line" aria-hidden="true"></i> Prestador
+        } @else {
+          <i class="ri-user-line" aria-hidden="true"></i> Cliente
+        }
       </span>
     </div>
 
@@ -30,7 +34,7 @@
           [class.ativo]="abaAtiva() === 'cadastro'"
           (click)="mudarAba('cadastro')"
         >
-          <span aria-hidden="true">👤</span> Meu Perfil
+          <i class="ri-user-line" aria-hidden="true"></i> Meu Perfil
         </button>
       }
       @if (usuario()?.tipoConta === 'prestador') {
@@ -39,28 +43,28 @@
           [class.ativo]="abaAtiva() === 'perfil'"
           (click)="mudarAba('perfil')"
         >
-          <span aria-hidden="true">👤</span> Perfil Público
+          <i class="ri-user-line" aria-hidden="true"></i> Perfil Público
         </button>
         <button
           class="sidebar__nav-item"
           [class.ativo]="abaAtiva() === 'banking'"
           (click)="mudarAba('banking')"
         >
-          <span aria-hidden="true">💳</span> Dados Bancários
+          <i class="ri-bank-card-line" aria-hidden="true"></i> Dados Bancários
         </button>
         <button
           class="sidebar__nav-item"
           [class.ativo]="abaAtiva() === 'portfolio'"
           (click)="mudarAba('portfolio')"
         >
-          <span aria-hidden="true">🖼️</span> Portfólio
+          <i class="ri-image-line" aria-hidden="true"></i> Portfólio
         </button>
         <button
           class="sidebar__nav-item"
           [class.ativo]="abaAtiva() === 'disponiveis'"
           (click)="mudarAba('disponiveis')"
         >
-          <span aria-hidden="true">🔎</span> Serviços disponíveis
+          <i class="ri-search-eye-line" aria-hidden="true"></i> Serviços disponíveis
         </button>
       }
       <button
@@ -68,13 +72,13 @@
         [class.ativo]="abaAtiva() === 'servicos'"
         (click)="mudarAba('servicos')"
       >
-        <span aria-hidden="true">📋</span>
+        <i class="ri-file-list-3-line" aria-hidden="true"></i>
         {{ usuario()?.tipoConta === 'prestador' ? 'Meus Serviços' : 'Meus Pedidos' }}
       </button>
     </nav>
 
     <button class="sidebar__btn-sair" (click)="sair()">
-      <span aria-hidden="true">↩</span> Sair da conta
+      <i class="ri-logout-box-r-line" aria-hidden="true"></i> Sair da conta
     </button>
   </aside>
 
@@ -84,7 +88,7 @@
     <!-- Banner de alerta: completar perfil -->
     @if (precisaCompletarPerfil) {
       <div class="alerta-perfil" role="status">
-        <span class="alerta-perfil__icone" aria-hidden="true">💡</span>
+        <span class="alerta-perfil__icone" aria-hidden="true"><i class="ri-lightbulb-flash-line"></i></span>
         <div>
           <strong>Complete seu perfil público</strong>
           <p>Clientes não conseguem te encontrar sem um perfil completo.</p>
@@ -152,7 +156,7 @@
 
         @if (mensagemCadastro()) {
           <div class="msg-sucesso" role="status" aria-live="polite">
-            <span aria-hidden="true">✓</span> {{ mensagemCadastro() }}
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> {{ mensagemCadastro() }}
           </div>
         }
 
@@ -211,7 +215,7 @@
 
         @if (mensagemPerfil()) {
           <div class="msg-sucesso" role="status" aria-live="polite">
-            <span aria-hidden="true">✓</span> {{ mensagemPerfil() }}
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> {{ mensagemPerfil() }}
           </div>
         }
 
@@ -346,12 +350,12 @@
 
         @if (mensagem()) {
           <div class="msg-sucesso" role="status" aria-live="polite">
-            <span aria-hidden="true">✓</span> {{ mensagem() }}
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> {{ mensagem() }}
           </div>
         }
         @if (erroBanking()) {
           <div class="msg-erro" role="alert" aria-live="assertive">
-            <span aria-hidden="true">✕</span> {{ erroBanking() }}
+            <i class="ri-close-circle-line" aria-hidden="true"></i> {{ erroBanking() }}
           </div>
         }
 
@@ -366,7 +370,7 @@
                   [class.ativo]="formularioBanking.get('tipoChavePix')?.value === tipo.valor"
                   (click)="selecionarTipoPix(tipo.valor)"
                 >
-                  <span aria-hidden="true">{{ tipo.icone }}</span>
+                  <i [class]="tipo.icone" aria-hidden="true"></i>
                   {{ tipo.label }}
                 </button>
               }
@@ -458,7 +462,7 @@
         <div class="secao-card__header secao-card__header--com-acao">
           <h2 class="secao-card__titulo" id="titulo-disponiveis">Serviços disponíveis</h2>
           <button class="btn-retentar" (click)="carregarDisponiveis()" [disabled]="carregandoDisponiveis()">
-            <span aria-hidden="true">↻</span> Atualizar
+            <i class="ri-refresh-line" aria-hidden="true"></i> Atualizar
           </button>
         </div>
         <p class="campo__dica" style="margin-bottom:14px">
@@ -468,7 +472,7 @@
 
         @if (mensagemVinculo()) {
           <div class="msg-sucesso" role="status" aria-live="polite">
-            <span aria-hidden="true">✓</span> {{ mensagemVinculo() }}
+            <i class="ri-checkbox-circle-line" aria-hidden="true"></i> {{ mensagemVinculo() }}
           </div>
         }
 
@@ -488,7 +492,7 @@
         <!-- Estado: erro -->
         @if (!carregandoDisponiveis() && erroDisponiveis()) {
           <div class="estado-erro" role="alert">
-            <div class="estado-erro__icone" aria-hidden="true">😕</div>
+            <div class="estado-erro__icone" aria-hidden="true"><i class="ri-emotion-sad-line"></i></div>
             <p class="estado-erro__texto">{{ erroDisponiveis() }}</p>
             <button class="btn-retentar" (click)="carregarDisponiveis()">Tentar novamente</button>
           </div>
@@ -497,7 +501,7 @@
         <!-- Estado: vazio -->
         @if (!carregandoDisponiveis() && !erroDisponiveis() && servicosDisponiveis().length === 0) {
           <div class="estado-vazio">
-            <div class="estado-vazio__icone" aria-hidden="true">🔎</div>
+            <div class="estado-vazio__icone" aria-hidden="true"><i class="ri-search-eye-line"></i></div>
             <p class="estado-vazio__texto">
               Nenhuma solicitação disponível no momento nas suas categorias e cidades de atuação.
             </p>
@@ -527,7 +531,7 @@
                         [routerLink]="['/servico', servico.id]"
                         class="btn-vincular"
                         [attr.aria-label]="'Abrir negociação do serviço ' + servico.titulo"
-                      ><span aria-hidden="true">💬</span> Abrir negociação</a>
+                      ><i class="ri-chat-3-line" aria-hidden="true"></i> Abrir negociação</a>
                     } @else {
                       <a
                         [routerLink]="['/servico', servico.id]"
@@ -543,7 +547,7 @@
                         @if (vinculandoId() === servico.id) {
                           <span class="spinner spinner--sm" aria-hidden="true"></span> Vinculando...
                         } @else {
-                          <span aria-hidden="true">＋</span> Vincular-me
+                          <i class="ri-add-line" aria-hidden="true"></i> Vincular-me
                         }
                       </button>
                     }
@@ -566,10 +570,10 @@
           @if (usuario()?.tipoConta === 'cliente') {
             <div class="ms-header-acoes">
               <a routerLink="/buscar" class="btn-novo-servico">
-                <span aria-hidden="true">🔍</span> Buscar profissional
+                <i class="ri-search-line" aria-hidden="true"></i> Buscar profissional
               </a>
               <a routerLink="/servicos/novo" class="btn-novo-servico btn-novo-servico--secundario">
-                <span aria-hidden="true">＋</span> Solicitar serviço manualmente
+                <i class="ri-add-line" aria-hidden="true"></i> Solicitar serviço manualmente
               </a>
             </div>
           }
@@ -591,7 +595,7 @@
         <!-- Estado: erro -->
         @if (!carregandoServicos() && erroServicos()) {
           <div class="estado-erro" role="alert">
-            <div class="estado-erro__icone" aria-hidden="true">😕</div>
+            <div class="estado-erro__icone" aria-hidden="true"><i class="ri-emotion-sad-line"></i></div>
             <p class="estado-erro__texto">{{ erroServicos() }}</p>
             <button class="btn-retentar" (click)="carregarServicos()">Tentar novamente</button>
           </div>
@@ -600,7 +604,7 @@
         <!-- Estado: vazio -->
         @if (!carregandoServicos() && !erroServicos() && servicos().length === 0) {
           <div class="estado-vazio">
-            <div class="estado-vazio__icone" aria-hidden="true">📋</div>
+            <div class="estado-vazio__icone" aria-hidden="true"><i class="ri-file-list-3-line"></i></div>
             <p class="estado-vazio__texto">
               @if (usuario()?.tipoConta === 'prestador') {
                 Nenhum serviço ainda. Aguarde que clientes entrem em contato.
@@ -654,7 +658,7 @@
                   <div class="ms-item__avaliar">
                     @if (jaAvaliou(servico.id)) {
                       <span class="avaliacao-enviada" aria-label="Avaliação enviada">
-                        <span aria-hidden="true">★</span> Avaliado
+                        <i class="ri-star-fill" aria-hidden="true"></i> Avaliado
                       </span>
                     } @else {
                       <button
@@ -663,7 +667,7 @@
                         [attr.aria-label]="'Avaliar serviço ' + servico.titulo"
                         [attr.aria-expanded]="avaliacaoAberta() === servico.id"
                       >
-                        <span aria-hidden="true">★</span> Avaliar
+                        <i class="ri-star-line" aria-hidden="true"></i> Avaliar
                       </button>
                     }
                   </div>
@@ -718,7 +722,7 @@
                     <!-- Erro -->
                     @if (erroAvaliacao()) {
                       <div class="avaliacao-erro" role="alert" aria-live="assertive">
-                        <span aria-hidden="true">⚠</span> {{ erroAvaliacao() }}
+                        <i class="ri-error-warning-line" aria-hidden="true"></i> {{ erroAvaliacao() }}
                       </div>
                     }
 
