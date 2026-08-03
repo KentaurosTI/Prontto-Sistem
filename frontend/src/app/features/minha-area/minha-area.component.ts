@@ -256,7 +256,9 @@ export class MinhaAreaComponent implements OnInit {
       telefone: v.telefone ?? undefined,
       cidadeId: v.cidadeId || null,
       endereco: v.endereco ?? undefined,
-      fotoPerfilUrl: v.fotoPerfilUrl || null,
+      // Envia string vazia ao remover (o backend trata '' como "remover a foto").
+      // Com `|| null` a remoção virava null e o backend ignorava (SCRUM-73).
+      fotoPerfilUrl: v.fotoPerfilUrl ?? '',
     }).subscribe({
       next: (res) => {
         this.auth.aplicarPatchUsuario({
