@@ -132,7 +132,7 @@ export class PerfilPrestadorService {
 
   /** Atualiza o cadastro do próprio usuário (aba "Meu Perfil" do cliente). */
   atualizarMeuCadastro(dados: {
-    nome?: string; telefone?: string; cidadeId?: string | null; endereco?: string;
+    nome?: string; telefone?: string; cidadeId?: string | null; endereco?: string; fotoPerfilUrl?: string | null;
   }): Observable<{ user: any }> {
     return this.http.put<{ user: any }>(`${this.baseAuth}/meu-cadastro`, dados);
   }

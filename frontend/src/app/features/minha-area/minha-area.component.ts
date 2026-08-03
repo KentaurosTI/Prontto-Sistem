@@ -170,9 +170,13 @@ export class MinhaAreaComponent implements OnInit {
     telefone: [''],
     cidadeId: [''],
     endereco: [''],
+    fotoPerfilUrl: [''],
   });
   readonly salvandoCadastro = signal(false);
   readonly mensagemCadastro = signal<string | null>(null);
+  // Foto de perfil do contratante
+  readonly enviandoFotoCadastro = signal(false);
+  readonly erroFotoCadastro = signal<string | null>(null);
 
   // IDs selecionados (multiselect via checkboxes)
   readonly categoriasSelecionadas = signal<Set<string>>(new Set());
@@ -225,6 +229,7 @@ export class MinhaAreaComponent implements OnInit {
         telefone: u?.telefone ?? '',
         cidadeId: u?.cidadeId ?? '',
         endereco: u?.endereco ?? '',
+        fotoPerfilUrl: u?.fotoPerfilUrl ?? '',
       });
       this.perfilService.obterMeuCadastro().subscribe({
         next: (res) => this.formularioCadastro.patchValue({
@@ -232,6 +237,7 @@ export class MinhaAreaComponent implements OnInit {
           telefone: res.user?.telefone ?? '',
           cidadeId: res.user?.cidadeId ?? '',
           endereco: res.user?.endereco ?? '',
+          fotoPerfilUrl: res.user?.fotoPerfilUrl ?? '',
         }),
       });
       this.carregarServicos();
@@ -250,6 +256,7 @@ export class MinhaAreaComponent implements OnInit {
       telefone: v.telefone ?? undefined,
       cidadeId: v.cidadeId || null,
       endereco: v.endereco ?? undefined,
+      fotoPerfilUrl: v.fotoPerfilUrl || null,
     }).subscribe({
       next: (res) => {
         this.auth.aplicarPatchUsuario({
@@ -257,6 +264,7 @@ export class MinhaAreaComponent implements OnInit {
           telefone: res.user?.telefone ?? null,
           cidadeId: res.user?.cidadeId ?? null,
           endereco: res.user?.endereco ?? null,
+          fotoPerfilUrl: res.user?.fotoPerfilUrl ?? null,
         });
         this.mensagemCadastro.set('Cadastro atualizado com sucesso!');
         this.salvandoCadastro.set(false);
@@ -266,6 +274,41 @@ export class MinhaAreaComponent implements OnInit {
         this.salvandoCadastro.set(false);
       },
     });
+  }
+
+  /** Upload da foto de perfil do contratante (reaproveita o mesmo endpoint do prestador). */
+  onFotoCadastroSelecionada(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+    input.value = '';
+    if (!arquivo) return;
+
+    const tiposPermitidos = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!tiposPermitidos.includes(arquivo.type)) {
+      this.erroFotoCadastro.set('Tipo de arquivo não permitido. Use JPG, PNG ou WebP.');
+      return;
+    }
+    if (arquivo.size > 5 * 1024 * 1024) {
+      this.erroFotoCadastro.set('Arquivo muito grande. O limite é 5 MB.');
+      return;
+    }
+
+    this.erroFotoCadastro.set(null);
+    this.enviandoFotoCadastro.set(true);
+    this.perfilService.uploadFotoPerfil(arquivo).subscribe({
+      next: (res) => {
+        this.formularioCadastro.patchValue({ fotoPerfilUrl: res.url });
+        this.enviandoFotoCadastro.set(false);
+      },
+      error: () => {
+        this.erroFotoCadastro.set('Erro ao enviar a foto. Tente novamente.');
+        this.enviandoFotoCadastro.set(false);
+      },
+    });
+  }
+
+  removerFotoCadastro(): void {
+    this.formularioCadastro.patchValue({ fotoPerfilUrl: '' });
   }
 
   /** Carrega o perfil completo (descrição, categorias, cidades, foto) do backend. */

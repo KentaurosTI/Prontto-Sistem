@@ -162,6 +162,38 @@
 
         <form [formGroup]="formularioCadastro" (ngSubmit)="salvarCadastro()">
           <div class="campo">
+            <span class="campo__label">Foto de perfil</span>
+            <div class="foto-upload">
+              <div class="foto-upload__preview" aria-hidden="true">
+                @if (formularioCadastro.get('fotoPerfilUrl')?.value) {
+                  <img [src]="urlImagem(formularioCadastro.get('fotoPerfilUrl')?.value)" alt="Foto de perfil" />
+                } @else {
+                  <i class="ri-user-smile-line"></i>
+                }
+              </div>
+              <div class="foto-upload__acoes">
+                <label class="btn-upload" for="fotoCadastroArquivo">
+                  <i class="ri-upload-2-line"></i>
+                  {{ enviandoFotoCadastro() ? 'Enviando...' : 'Enviar foto' }}
+                </label>
+                <input id="fotoCadastroArquivo" type="file" accept="image/jpeg,image/png,image/webp"
+                  (change)="onFotoCadastroSelecionada($event)" hidden [disabled]="enviandoFotoCadastro()" />
+                @if (formularioCadastro.get('fotoPerfilUrl')?.value) {
+                  <button type="button" class="btn-remover-foto" (click)="removerFotoCadastro()">
+                    <i class="ri-delete-bin-line"></i> Remover
+                  </button>
+                }
+              </div>
+            </div>
+            @if (erroFotoCadastro()) {
+              <span class="campo__erro" role="alert">{{ erroFotoCadastro() }}</span>
+            }
+            <span class="campo__dica">
+              Uma foto real aproxima você do profissional e passa mais confiança na negociação. JPG, PNG ou WebP, até 5 MB.
+            </span>
+          </div>
+
+          <div class="campo">
             <label class="campo__label" for="cad-nome">Nome completo</label>
             <input id="cad-nome" type="text" class="campo__input" formControlName="nome"
               placeholder="Seu nome completo" autocomplete="name" />

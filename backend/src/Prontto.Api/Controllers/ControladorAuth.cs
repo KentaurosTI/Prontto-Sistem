@@ -124,6 +124,9 @@ public class ControladorAuth(
         usuario.Telefone = string.IsNullOrWhiteSpace(req.Telefone) ? null : req.Telefone.Trim();
         usuario.CidadeId = req.CidadeId;
         usuario.Endereco = string.IsNullOrWhiteSpace(req.Endereco) ? null : req.Endereco.Trim();
+        // Foto de perfil do contratante (só atualiza se veio no payload).
+        if (req.FotoPerfilUrl is not null)
+            usuario.FotoPerfilUrl = string.IsNullOrWhiteSpace(req.FotoPerfilUrl) ? null : req.FotoPerfilUrl.Trim();
         usuario.AtualizadoEm = DateTime.UtcNow;
 
         var atualizado = await repositorioUsuario.AtualizarAsync(usuario);
@@ -473,4 +476,5 @@ public record RequisicaoMeuCadastro(
     string? Nome = null,
     string? Telefone = null,
     Guid? CidadeId = null,
-    string? Endereco = null);
+    string? Endereco = null,
+    string? FotoPerfilUrl = null);
