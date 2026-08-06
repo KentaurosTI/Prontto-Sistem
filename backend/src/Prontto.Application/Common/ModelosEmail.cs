@@ -55,6 +55,10 @@ public static class ModelosEmail
 <li>Selecione suas categorias e cidades de atuação</li>
 <li>Adicione fotos do seu portfólio</li></ul>
 {Botao("Completar meu perfil", appUrl + "/minha-area")}
+<div style=""background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 16px;margin:14px 0;"">
+<b style=""color:#9a3412;"">Como funcionam os pagamentos e a taxa</b>
+<p style=""margin:6px 0 0;font-size:14px;color:#7c2d12;line-height:1.55;"">Os pagamentos são feitos com segurança pela Prontto. A cada serviço pago, você recebe <b>80% do valor</b> direto na sua conta, e a Prontto retém <b>20%</b> como taxa de intermediação da plataforma. O valor combinado com o cliente é o valor total; o repasse dos seus 80% é <b>automático</b> após a confirmação do pagamento. Para receber, configure sua conta de recebimento em <b>Minha Área → Dados Bancários → Configurar recebimento</b>.</p>
+</div>
 <p style=""margin:0;color:#64748b;font-size:13px;"">Quanto mais completo o perfil, maiores as chances de ser contratado.</p>");
 
     // ── 2) Prestador recebeu mensagem/proposta ─────────────────────────────────

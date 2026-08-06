@@ -4,5 +4,5 @@ export const environment = {
   // Ajuste se usar outro domínio/subdomínio para o backend.
   apiUrl: 'https://api.prontto.org',
   // Chave publicável do Stripe (pública por design). Trocar por pk_live_... na produção real.
-  stripePublishableKey: 'pk_test_51TrfueQ8qrGEcAtI58b34fTroq9WRCSOWjU4RlcTRMHq4Brv2nDC0NPdJaFOT3fARCQRR24kW4JPBRu9uKbkchNO00ySRxo2IO',
+  stripePublishableKey: 'pk_live_51U1AtxCKOOz0tzucFcDTebyIa6mmnne2P7KfDImEI4keIMENbqVfXCdd3rabBxfyAlVsyZh4WKJBHnIFdmSWYy8700FZywyuod',
 };
