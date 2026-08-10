@@ -15,11 +15,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ServicosService } from '../../core/api/servicos.service';
 import { CobrancaService } from '../../core/api/cobranca.service';
 import { Servico, MensagemServico, Cobranca } from '../../core/models/usuario.model';
+import { CheckoutCartaoComponent } from './checkout-cartao.component';
 
 @Component({
   selector: 'app-servico-detalhe',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, CheckoutCartaoComponent],
   templateUrl: './servico-detalhe.component.html',
   styleUrl: './servico-detalhe.component.scss',
 })
@@ -55,7 +56,7 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
   readonly mostrarFormDisputa = signal(false);
   readonly mostrarFormCancelamento = signal(false);
 
-  private servicoId = '';
+  servicoId = '';
   private pollingSubscription?: Subscription;
 
   // ── Computeds ─────────────────────────────────────────────────────────────
@@ -165,6 +166,11 @@ export class ServicoDetalheComponent implements OnInit, OnDestroy {
   }
 
   // ── Carregamento ───────────────────────────────────────────────────────────
+
+  /** Após o pagamento no cartão: recarrega o serviço (o webhook confirma em segundos). */
+  onPago(): void {
+    setTimeout(() => this.carregarServico(), 2500);
+  }
 
   private carregarServico(): void {
     this.carregando.set(true);

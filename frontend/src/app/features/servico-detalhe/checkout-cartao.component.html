@@ -1,0 +1,30 @@
+<div class="ckt">
+  <h3 class="ckt__titulo"><i class="ri-bank-card-line" aria-hidden="true"></i> Pagamento com cartão</h3>
+  <p class="ckt__valor">Valor a pagar: <strong>{{ valor | currency:'BRL' }}</strong></p>
+
+  @if (sucesso()) {
+    <div class="ckt__sucesso" role="status">
+      <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
+      Pagamento confirmado! Seu serviço foi agendado e o profissional foi notificado.
+    </div>
+  } @else {
+    @if (!mostrarForm()) {
+      <button type="button" class="ckt__btn" (click)="iniciarPagamento()" [disabled]="carregando()">
+        @if (carregando()) { Carregando... } @else { Pagar com cartão }
+      </button>
+      <p class="ckt__nota">Pagamento seguro processado pela Stripe. Parcelamento disponível no cartão de crédito.</p>
+    }
+
+    <div #paymentElement class="ckt__element" [style.display]="mostrarForm() ? 'block' : 'none'"></div>
+
+    @if (mostrarForm()) {
+      <button type="button" class="ckt__btn" (click)="pagar()" [disabled]="processando()">
+        @if (processando()) { Processando... } @else { Pagar {{ valor | currency:'BRL' }} }
+      </button>
+    }
+
+    @if (erro()) {
+      <p class="ckt__erro" role="alert"><i class="ri-error-warning-line" aria-hidden="true"></i> {{ erro() }}</p>
+    }
+  }
+</div>

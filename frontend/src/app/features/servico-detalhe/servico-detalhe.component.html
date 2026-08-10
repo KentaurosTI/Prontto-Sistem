@@ -83,8 +83,17 @@
       </div>
     </div>
 
-    <!-- Seção PIX (aguardando_pagamento) -->
-    <div *ngIf="servico()!.status === 'aguardando_pagamento' && cobranca()" class="pix-container">
+    <!-- Checkout de cartão (Stripe) — contratante, aguardando pagamento -->
+    @if (servico()!.status === 'aguardando_pagamento' && ehClienteDoServico()) {
+      <app-checkout-cartao
+        [servicoId]="servicoId"
+        [valor]="servico()!.preco"
+        (pago)="onPago()"
+      />
+    }
+
+    <!-- Seção PIX legada (Pagar.me) — só aparece se a cobrança tiver QR PIX -->
+    <div *ngIf="servico()!.status === 'aguardando_pagamento' && cobranca()?.pixQrCode" class="pix-container">
       <h3>Pagamento via PIX</h3>
       <p class="pix-valor">Valor: <strong>{{ cobranca()!.valorTotal | currency:'BRL' }}</strong></p>
       <p class="pix-expira" *ngIf="cobranca()!.pixExpiracaoEm">
