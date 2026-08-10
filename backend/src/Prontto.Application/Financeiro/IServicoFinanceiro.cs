@@ -1,7 +1,15 @@
+using Prontto.Domain.Entities;
+
 namespace Prontto.Application.Financeiro;
 
 public interface IServicoFinanceiro
 {
+    /// <summary>Confirma o pagamento (idempotente): Retido → EmAndamento → notificações + e-mails.</summary>
+    Task ConfirmarPagamentoAsync(Cobranca cobranca, string? gatewayPagamentoId);
+
+    /// <summary>Localiza a cobrança pelo id do gateway (order/PaymentIntent) e confirma.</summary>
+    Task ConfirmarPagamentoPorGatewayAsync(string gatewayOrderId, string? chargeId);
+
     /// <summary>Gera PIX para uma cobrança existente (chamado após acordo de preço).</summary>
     Task<DtoCobranca> GerarPixAsync(Guid cobrancaId);
 

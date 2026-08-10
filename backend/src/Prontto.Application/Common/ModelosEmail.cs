@@ -70,6 +70,25 @@ public static class ModelosEmail
 {Botao(ehProposta ? "Acessar a proposta" : "Ver a mensagem", url)}
 <p style=""margin:0;color:#64748b;font-size:13px;"">Acesse para responder, negociar ou aceitar.</p>");
 
+    // ── 4) Pagamento confirmado ────────────────────────────────────────────────
+
+    public static string PagamentoConfirmadoCliente(string nome, string servicoTitulo, decimal valorTotal, string agendamentoHtml, string url) => Layout($@"
+<h1 style=""margin:0 0 12px;font-size:20px;color:#0f172a;"">Pagamento confirmado — serviço agendado! ✅</h1>
+<p style=""margin:0 0 10px;"">Olá {Esc(nome)}, recebemos o pagamento de <b>{Esc(servicoTitulo)}</b> no valor de <b>R$ {valorTotal:N2}</b>.</p>
+{agendamentoHtml}
+<p style=""margin:0 0 10px;"">O profissional foi notificado e já recebeu o endereço do serviço.</p>
+{Botao("Ver o serviço", url)}
+<p style=""margin:0;color:#64748b;font-size:13px;"">O pagamento fica protegido pela Prontto até a conclusão do serviço.</p>");
+
+    public static string PagamentoConfirmadoPrestador(string nome, string servicoTitulo, decimal valorPrestador, string enderecoHtml, string agendamentoHtml, string url) => Layout($@"
+<h1 style=""margin:0 0 12px;font-size:20px;color:#0f172a;"">Pagamento recebido — serviço agendado! 🎉</h1>
+<p style=""margin:0 0 10px;"">Olá {Esc(nome)}, o pagamento de <b>{Esc(servicoTitulo)}</b> foi confirmado. Você já pode se organizar para realizar o serviço.</p>
+<p style=""margin:0 0 10px;font-size:16px;"">Seu recebimento (80%): <b>R$ {valorPrestador:N2}</b></p>
+{enderecoHtml}
+{agendamentoHtml}
+{Botao("Ver detalhes do serviço", url)}
+<p style=""margin:0;color:#64748b;font-size:13px;"">Bom trabalho! O repasse dos 80% é feito conforme as regras da plataforma.</p>");
+
     // ── 3) Contratante recebeu retorno da solicitação ──────────────────────────
 
     public static string RetornoSolicitacao(string nome, string servicoTitulo, bool ehProposta, decimal? valor, string url) => Layout($@"

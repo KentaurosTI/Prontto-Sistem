@@ -15,8 +15,18 @@ public class ControladorServicos(
     IServicoServico servicoServico,
     IServicoNegociacao servicoNegociacao,
     IServicoDisputa servicoDisputa,
-    IServicoFinanceiro servicoFinanceiro) : ControllerBase
+    IServicoFinanceiro servicoFinanceiro,
+    IServicoCheckoutStripe checkoutStripe) : ControllerBase
 {
+    /// <summary>Cria o PaymentIntent (cartão) do serviço e retorna o client_secret para o Stripe Elements.</summary>
+    [HttpPost("{id:guid}/checkout/stripe")]
+    public async Task<IActionResult> CheckoutStripe(Guid id)
+    {
+        var userId = ObterUsuarioId();
+        var clientSecret = await checkoutStripe.CriarPaymentIntentAsync(id, userId);
+        return Ok(new { clientSecret });
+    }
+
     // ── Criação (apenas Cliente) ───────────────────────────────────────────────
 
     [HttpPost]

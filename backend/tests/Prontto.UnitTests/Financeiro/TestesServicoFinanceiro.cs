@@ -19,6 +19,8 @@ public class TestesServicoFinanceiro
     private readonly Mock<IRepositorioBanking> _repositorioBanking = new();
     private readonly Mock<IRepositorioAuditLog> _repositorioAuditLog = new();
     private readonly Mock<IRepositorioNotificacao> _repositorioNotificacoes = new();
+    private readonly Mock<IRepositorioUsuario> _repositorioUsuarios = new();
+    private readonly Mock<IServicoEmail> _servicoEmail = new();
     private readonly Mock<IProcessadorPagamento> _processadorPagamento = new();
     private readonly Mock<IConfiguration> _configuracao = new();
     private readonly ServicoFinanceiro _sut;
@@ -45,6 +47,8 @@ public class TestesServicoFinanceiro
             _repositorioBanking.Object,
             _repositorioAuditLog.Object,
             _repositorioNotificacoes.Object,
+            _repositorioUsuarios.Object,
+            _servicoEmail.Object,
             _processadorPagamento.Object,
             _configuracao.Object,
             NullLogger<ServicoFinanceiro>.Instance);

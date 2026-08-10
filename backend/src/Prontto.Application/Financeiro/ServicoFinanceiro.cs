@@ -17,6 +17,8 @@ public class ServicoFinanceiro(
     IRepositorioBanking repositorioBanking,
     IRepositorioAuditLog repositorioAuditLog,
     IRepositorioNotificacao repositorioNotificacoes,
+    IRepositorioUsuario repositorioUsuarios,
+    IServicoEmail servicoEmail,
     IProcessadorPagamento processadorPagamento,
     IConfiguration configuracao,
     ILogger<ServicoFinanceiro> logger) : IServicoFinanceiro
@@ -118,66 +120,110 @@ public class ServicoFinanceiro(
             throw new ExcecaoValidacao("Payload do webhook inválido: campo 'data.id' ausente");
         }
 
-        // RN-08: idempotência
-        var cobranca = await repositorioCobrancas.ObterPorPagarmeOrderIdAsync(orderId);
+        // Confirmação idempotente + notificações + e-mails (compartilhado com o Stripe).
+        await ConfirmarPagamentoPorGatewayAsync(orderId, chargeId);
+    }
+
+    /// <summary>Localiza a cobrança pelo id do gateway (order/PaymentIntent) e confirma o pagamento.</summary>
+    public async Task ConfirmarPagamentoPorGatewayAsync(string gatewayOrderId, string? chargeId)
+    {
+        var cobranca = await repositorioCobrancas.ObterPorPagarmeOrderIdAsync(gatewayOrderId);
         if (cobranca == null)
         {
-            logger.LogWarning("Cobrança não encontrada para PagarmeOrderId {OrderId}", orderId);
+            logger.LogWarning("Cobrança não encontrada para gateway id {OrderId}", gatewayOrderId);
             return;
         }
+        await ConfirmarPagamentoAsync(cobranca, chargeId);
+    }
 
+    /// <summary>
+    /// Confirma o pagamento (idempotente): Retido → serviço EmAndamento (revela endereço) →
+    /// auditoria → notificações + e-mails às duas partes. Usado por Pagar.me e Stripe.
+    /// </summary>
+    public async Task ConfirmarPagamentoAsync(Cobranca cobranca, string? gatewayPagamentoId)
+    {
         if (cobranca.Status != StatusCobranca.Pendente)
         {
-            logger.LogInformation("Webhook duplicado ignorado para OrderId {OrderId}", orderId);
+            logger.LogInformation("Confirmação duplicada ignorada para cobrança {Id}", cobranca.Id);
             return;
         }
 
-        // Pendente → Pago → Retido (imediato)
         cobranca.Status = StatusCobranca.Retido;
-        cobranca.PagarmePagamentoId = chargeId ?? orderId;
+        cobranca.PagarmePagamentoId = gatewayPagamentoId ?? cobranca.PagarmeOrderId;
         cobranca.PagadoEm = DateTime.UtcNow;
         cobranca.RetidoEm = DateTime.UtcNow;
         cobranca.AtualizadoEm = DateTime.UtcNow;
         await repositorioCobrancas.AtualizarAsync(cobranca);
 
-        // Serviço: AguardandoPagamento → Pago → EmAndamento
         var servico = await repositorioServicos.ObterPorIdAsync(cobranca.ServicoId);
-        if (servico != null && servico.Status == StatusServico.AguardandoPagamento)
-        {
-            servico.Status = StatusServico.EmAndamento;
-            servico.AtualizadoEm = DateTime.UtcNow;
-            await repositorioServicos.AtualizarAsync(servico);
+        if (servico == null || servico.Status != StatusServico.AguardandoPagamento) return;
 
-            await repositorioAuditLog.RegistrarAsync(new AuditLog
+        servico.Status = StatusServico.EmAndamento;
+        servico.AtualizadoEm = DateTime.UtcNow;
+        await repositorioServicos.AtualizarAsync(servico);
+
+        await repositorioAuditLog.RegistrarAsync(new AuditLog
+        {
+            UsuarioId = null,
+            Acao = "pagamento.confirmado",
+            Entidade = "Cobranca",
+            EntidadeId = cobranca.Id.ToString(),
+            Detalhes = JsonSerializer.Serialize(new { gatewayId = cobranca.PagarmeOrderId, valor = cobranca.ValorTotal })
+        });
+
+        var agendamentoTexto = MontarTextoAgendamento(servico);
+
+        if (servico.ClienteId.HasValue)
+            await repositorioNotificacoes.AdicionarAsync(new Notificacao
             {
-                UsuarioId = null,
-                Acao = "pagamento.confirmado",
-                Entidade = "Cobranca",
-                EntidadeId = cobranca.Id.ToString(),
-                Detalhes = JsonSerializer.Serialize(new { pagarmeOrderId = orderId, valor = cobranca.ValorTotal })
+                UsuarioId = servico.ClienteId.Value,
+                Titulo = "Serviço agendado!",
+                Mensagem = $"Pagamento confirmado para '{servico.Titulo}'.{agendamentoTexto} O prestador foi notificado e recebeu o endereço.",
+                Tipo = "pagamento",
+                ReferenciaId = servico.Id.ToString()
             });
 
-            var agendamentoTexto = MontarTextoAgendamento(servico);
+        if (servico.PrestadorId.HasValue)
+            await repositorioNotificacoes.AdicionarAsync(new Notificacao
+            {
+                UsuarioId = servico.PrestadorId.Value,
+                Titulo = "Serviço agendado — pagamento recebido!",
+                Mensagem = $"O pagamento de '{servico.Titulo}' foi confirmado.{agendamentoTexto} O endereço completo já está disponível na tela do serviço.",
+                Tipo = "pagamento",
+                ReferenciaId = servico.Id.ToString()
+            });
 
-            if (servico.ClienteId.HasValue)
-                await repositorioNotificacoes.AdicionarAsync(new Notificacao
-                {
-                    UsuarioId = servico.ClienteId.Value,
-                    Titulo = "Serviço agendado!",
-                    Mensagem = $"Pagamento confirmado para '{servico.Titulo}'.{agendamentoTexto} O prestador foi notificado e recebeu o endereço.",
-                    Tipo = "pagamento",
-                    ReferenciaId = servico.Id.ToString()
-                });
+        await EnviarEmailsPagamentoAsync(servico, cobranca, agendamentoTexto);
+    }
 
-            if (servico.PrestadorId.HasValue)
-                await repositorioNotificacoes.AdicionarAsync(new Notificacao
-                {
-                    UsuarioId = servico.PrestadorId.Value,
-                    Titulo = "Serviço agendado — pagamento recebido!",
-                    Mensagem = $"O pagamento de '{servico.Titulo}' foi confirmado.{agendamentoTexto} O endereço completo já está disponível na tela do serviço.",
-                    Tipo = "pagamento",
-                    ReferenciaId = servico.Id.ToString()
-                });
+    /// <summary>E-mails estilizados de pagamento confirmado (cliente + prestador com endereço/horário).</summary>
+    private async Task EnviarEmailsPagamentoAsync(Servico servico, Cobranca cobranca, string agendamentoTexto)
+    {
+        var appUrl = (configuracao["APP_URL"] ?? "https://prontto.org").TrimEnd('/');
+        var url = $"{appUrl}/servico/{servico.Id}";
+        var agendamentoHtml = string.IsNullOrWhiteSpace(agendamentoTexto)
+            ? string.Empty
+            : $@"<p style=""margin:0 0 10px;""><b>Quando:</b>{agendamentoTexto}</p>";
+
+        if (servico.ClienteId.HasValue)
+        {
+            var cliente = await repositorioUsuarios.ObterPorIdAsync(servico.ClienteId.Value);
+            if (!string.IsNullOrWhiteSpace(cliente?.Email))
+                _ = servicoEmail.EnviarAsync(cliente!.Email, cliente.Nome, "Pagamento confirmado — Prontto",
+                    ModelosEmail.PagamentoConfirmadoCliente(cliente.Nome, servico.Titulo, cobranca.ValorTotal, agendamentoHtml, url));
+        }
+
+        if (servico.PrestadorId.HasValue)
+        {
+            var prestador = await repositorioUsuarios.ObterPorIdAsync(servico.PrestadorId.Value);
+            if (!string.IsNullOrWhiteSpace(prestador?.Email))
+            {
+                var enderecoHtml = string.IsNullOrWhiteSpace(servico.Endereco)
+                    ? string.Empty
+                    : $@"<p style=""margin:0 0 10px;""><b>Endereço:</b> {System.Net.WebUtility.HtmlEncode(servico.Endereco)}</p>";
+                _ = servicoEmail.EnviarAsync(prestador!.Email, prestador.Nome, "Pagamento recebido — Prontto",
+                    ModelosEmail.PagamentoConfirmadoPrestador(prestador.Nome, servico.Titulo, cobranca.ValorPrestador, enderecoHtml, agendamentoHtml, url));
+            }
         }
     }
 

@@ -54,6 +54,9 @@ public static class InjecaoDependencias
         // ── Stripe Connect (onboarding do prestador) ──────────────────────────
         servicos.AddScoped<IServicoConnect, ServicoConnectStripe>();
 
+        // ── Stripe checkout (cartão + split) ──────────────────────────────────
+        servicos.AddScoped<IServicoCheckoutStripe, ServicoCheckoutStripe>();
+
         // ── Serviços de Aplicação ─────────────────────────────────────────────
         servicos.AddScoped<IHashSenha, HashSenhaBcrypt>();
         servicos.AddScoped<IServicoJwt, ServicoJwt>();
