@@ -43,8 +43,9 @@ public class ServicoConnectStripe(
                 Email = usuario.Email,
                 Capabilities = new AccountCapabilitiesOptions
                 {
+                    // Modelo Marketplace: o prestador é BENEFICIÁRIO (recebe o repasse dos 80%).
+                    // Quem cobra o cliente é a plataforma (destination charge), então basta transfers.
                     Transfers = new AccountCapabilitiesTransfersOptions { Requested = true },
-                    CardPayments = new AccountCapabilitiesCardPaymentsOptions { Requested = true },
                 },
                 BusinessType = "individual",
             });
