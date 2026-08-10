@@ -150,9 +150,10 @@ public class ServicoNegociacao(
 
         await repositorioServicos.AtualizarAsync(servico);
 
-        // Cria cobrança e gera PIX (RF-05)
+        // Cria a cobrança pendente. O PaymentIntent (Stripe) é criado depois, no checkout
+        // (POST /servicos/{id}/checkout/stripe) — não geramos mais PIX via Pagar.me aqui.
         var taxaAdmin = Math.Round(servico.Preco * servico.TaxaAdminRate, 2);
-        var cobranca = await repositorioCobrancas.AdicionarAsync(new Cobranca
+        _ = await repositorioCobrancas.AdicionarAsync(new Cobranca
         {
             ServicoId = servicoId,
             ValorTotal = servico.Preco,
@@ -160,9 +161,6 @@ public class ServicoNegociacao(
             ValorPrestador = servico.Preco - taxaAdmin,
             Status = StatusCobranca.Pendente,
         });
-
-        // Gera PIX via gateway (usando o Id da cobrança como ServicoId é o link)
-        await servicoFinanceiro.GerarPixAsync(cobranca.ServicoId);
 
         await repositorioAuditLog.RegistrarAsync(new AuditLog
         {
