@@ -222,7 +222,7 @@ public class ServicoFinanceiro(
                     ? string.Empty
                     : $@"<p style=""margin:0 0 10px;""><b>Endereço:</b> {System.Net.WebUtility.HtmlEncode(servico.Endereco)}</p>";
                 _ = servicoEmail.EnviarAsync(prestador!.Email, prestador.Nome, "Pagamento recebido — Prontto",
-                    ModelosEmail.PagamentoConfirmadoPrestador(prestador.Nome, servico.Titulo, cobranca.ValorPrestador, enderecoHtml, agendamentoHtml, url));
+                    ModelosEmail.PagamentoConfirmadoPrestador(prestador.Nome, servico.Titulo, cobranca.ValorTotal, cobranca.TaxaAdmin, cobranca.ValorPrestador, enderecoHtml, agendamentoHtml, url));
             }
         }
     }

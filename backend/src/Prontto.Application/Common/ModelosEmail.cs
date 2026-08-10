@@ -80,14 +80,18 @@ public static class ModelosEmail
 {Botao("Ver o serviço", url)}
 <p style=""margin:0;color:#64748b;font-size:13px;"">O pagamento fica protegido pela Prontto até a conclusão do serviço.</p>");
 
-    public static string PagamentoConfirmadoPrestador(string nome, string servicoTitulo, decimal valorPrestador, string enderecoHtml, string agendamentoHtml, string url) => Layout($@"
+    public static string PagamentoConfirmadoPrestador(string nome, string servicoTitulo, decimal valorTotal, decimal taxaServico, decimal valorPrestador, string enderecoHtml, string agendamentoHtml, string url) => Layout($@"
 <h1 style=""margin:0 0 12px;font-size:20px;color:#0f172a;"">Pagamento recebido — serviço agendado! 🎉</h1>
-<p style=""margin:0 0 10px;"">Olá {Esc(nome)}, o pagamento de <b>{Esc(servicoTitulo)}</b> foi confirmado. Você já pode se organizar para realizar o serviço.</p>
-<p style=""margin:0 0 10px;font-size:16px;"">Seu recebimento (80%): <b>R$ {valorPrestador:N2}</b></p>
+<p style=""margin:0 0 12px;"">Olá {Esc(nome)}, o pagamento de <b>{Esc(servicoTitulo)}</b> foi confirmado. Você já pode se organizar para realizar o serviço.</p>
+<table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""margin:0 0 12px;border:1px solid #eef0f3;border-radius:10px;"">
+  <tr><td style=""padding:10px 14px;color:#334155;font-size:14px;"">Valor pago pelo cliente</td><td align=""right"" style=""padding:10px 14px;font-size:14px;"">R$ {valorTotal:N2}</td></tr>
+  <tr><td style=""padding:0 14px 8px;color:#64748b;font-size:14px;"">Taxa de serviço da Prontto</td><td align=""right"" style=""padding:0 14px 8px;color:#64748b;font-size:14px;"">− R$ {taxaServico:N2}</td></tr>
+  <tr><td style=""padding:10px 14px;border-top:1px solid #eef0f3;font-weight:800;"">Você recebe</td><td align=""right"" style=""padding:10px 14px;border-top:1px solid #eef0f3;font-weight:800;font-size:16px;color:#16a34a;"">R$ {valorPrestador:N2}</td></tr>
+</table>
 {enderecoHtml}
 {agendamentoHtml}
 {Botao("Ver detalhes do serviço", url)}
-<p style=""margin:0;color:#64748b;font-size:13px;"">Bom trabalho! O repasse dos 80% é feito conforme as regras da plataforma.</p>");
+<p style=""margin:0;color:#64748b;font-size:13px;"">Bom trabalho! O repasse é feito conforme as regras da plataforma.</p>");
 
     // ── 3) Contratante recebeu retorno da solicitação ──────────────────────────
 
