@@ -57,6 +57,21 @@
   i { font-size: 1.25rem; }
 }
 
+.ckt__aguardando {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  i { font-size: 1.25rem; flex-shrink: 0; }
+}
+
 .ckt__erro {
   display: flex;
   align-items: center;

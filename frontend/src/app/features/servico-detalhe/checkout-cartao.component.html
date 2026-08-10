@@ -7,6 +7,16 @@
       <i class="ri-checkbox-circle-line" aria-hidden="true"></i>
       Pagamento confirmado! Seu serviço foi agendado e o profissional foi notificado.
     </div>
+  } @else if (aguardando()) {
+    <div class="ckt__aguardando" role="status">
+      <i class="ri-time-line" aria-hidden="true"></i>
+      <span>{{ aguardando() }}</span>
+    </div>
+    @if (boletoUrl()) {
+      <a [href]="boletoUrl()" target="_blank" rel="noopener noreferrer" class="ckt__btn">
+        <i class="ri-barcode-line" aria-hidden="true"></i> Ver / imprimir boleto
+      </a>
+    }
   } @else {
     @if (!mostrarForm()) {
       <button type="button" class="ckt__btn" (click)="iniciarPagamento()" [disabled]="carregando()">
